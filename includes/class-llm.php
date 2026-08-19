@@ -85,12 +85,12 @@ class Bokeauto_LLM {
 			return $resp;
 		}
 
-		if ( 'anthropic' === $this->protocol ) {
-			return $this->claude_stream( $messages, $tools, $on_delta, $on_reasoning );
-		}
-
 		if ( '' === $settings['api_key'] ) {
 			return new WP_Error( 'bokeauto_no_key', '尚未配置模型 API Key，请在「波克wpAI → 模型设置」中完成配置' );
+		}
+
+		if ( 'anthropic' === $this->protocol ) {
+			return $this->claude_stream( $messages, $tools, $on_delta, $on_reasoning );
 		}
 
 		if ( 'openai-responses' === $this->protocol ) {
@@ -560,7 +560,7 @@ class Bokeauto_LLM {
 	 * 因此即使某些增量事件未被识别，最终结果依然完整。
 	 */
 	private function responses_stream( $messages, $tools, $on_delta, $on_reasoning ) {
-		$body = $this->responses_body( $messages, $tools, null, true );
+		$body = $this->responses_body( $messages, $tools, $this->settings['temperature'], true );
 
 		$content     = '';
 		$fn_items    = array(); // output_index => array{id,name,args}
@@ -885,6 +885,7 @@ class Bokeauto_LLM {
 			'model'      => $this->settings['model'],
 			'messages'   => $conv,
 			'max_tokens' => $this->max_tokens(),
+			'temperature' => (float) $this->settings['temperature'],
 			'stream'     => true,
 		);
 		if ( $system ) {

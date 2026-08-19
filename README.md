@@ -6,7 +6,7 @@
 
 用中文聊天的方式，完成全站管理、内容创作、网页采集、代码开发与系统维护
 
-[![Version](https://img.shields.io/badge/version-2.1.2-blue)](https://github.com/zhikanyeye/wp-auto-Master/releases)
+[![Version](https://img.shields.io/badge/version-2.1.3-blue)](https://github.com/zhikanyeye/wp-auto-Master/releases)
 [![License](https://img.shields.io/badge/license-GPL--2.0--or--later-green)](LICENSE)
 [![WordPress](https://img.shields.io/badge/WordPress-6.0%2B-orange)](https://wordpress.org/)
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-blueviolet)](https://www.php.net/)
@@ -132,7 +132,7 @@
 bash scripts/package-plugin.sh
 ```
 
-脚本会从 `bokeauto.php` 读取插件版本，默认生成 `boke-wpai-automation-v2.1.2.zip` 这类带版本号的文件。推送 `v*` 标签后，GitHub Actions 会自动生成带插件名和版本号的构建标题，附加构建摘要，并根据提交记录生成分类 Release Notes，再将同名 zip 附加到 GitHub Release。手动运行工作流时会生成同样的带版本号 zip 和构建摘要，并上传 Artifact。
+脚本会从 `bokeauto.php` 读取插件版本，默认生成 `boke-wpai-automation-v2.1.3.zip` 这类带版本号的文件。推送 `v*` 标签后，GitHub Actions 会自动生成带插件名和版本号的构建标题，附加构建摘要，并根据提交记录生成分类 Release Notes，再将同名 zip 附加到 GitHub Release。手动运行工作流时会生成同样的带版本号 zip 和构建摘要，并上传 Artifact。
 
 **环境要求**
 

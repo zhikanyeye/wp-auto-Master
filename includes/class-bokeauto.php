@@ -973,13 +973,17 @@ class Bokeauto_Core {
 		$model    = sanitize_text_field( (string) $request->get_param( 'model' ) );
 		$protocol = sanitize_text_field( (string) $request->get_param( 'protocol' ) );
 
-		// 掩码/空 Key → 用当前已保存的 Key 测试（设置页打码回显后也能正常测试连接）
+		// 掩码/空 Key → 读取目标服务商已保存配置，避免跨服务商串用凭据。
 		if ( '' === $api_key || false !== strpos( $api_key, '•' ) ) {
 			$saved = Bokeauto_Settings::get();
-			$api_key = $saved['api_key'];
-			if ( '' === $base_url ) { $base_url = $saved['base_url']; }
-			if ( '' === $model ) { $model = $saved['model']; }
 			if ( '' === $provider ) { $provider = $saved['provider']; }
+			$target = $provider === $saved['provider']
+				? $saved
+				: ( isset( $saved['providers'][ $provider ] ) ? $saved['providers'][ $provider ] : array() );
+			$api_key = isset( $target['api_key'] ) ? $target['api_key'] : '';
+			if ( '' === $base_url && isset( $target['base_url'] ) ) { $base_url = $target['base_url']; }
+			if ( '' === $model && isset( $target['model'] ) ) { $model = $target['model']; }
+			if ( '' === $protocol && isset( $target['protocol'] ) ) { $protocol = $target['protocol']; }
 		}
 
 		$llm   = new Bokeauto_LLM();
@@ -1024,8 +1028,17 @@ class Bokeauto_Core {
 				? $saved['api_key']
 				: ( isset( $saved['providers'][ $provider ]['api_key'] ) ? $saved['providers'][ $provider ]['api_key'] : '' );
 		}
-		if ( '' === $base_url ) { $base_url = $saved['base_url']; }
 		if ( '' === $provider ) { $provider = $saved['provider']; }
+		if ( '' === $base_url ) {
+			$base_url = $provider === $saved['provider']
+				? $saved['base_url']
+				: ( isset( $saved['providers'][ $provider ]['base_url'] ) ? $saved['providers'][ $provider ]['base_url'] : '' );
+		}
+		if ( '' === $protocol ) {
+			$protocol = $provider === $saved['provider']
+				? $saved['protocol']
+				: ( isset( $saved['providers'][ $provider ]['protocol'] ) ? $saved['providers'][ $provider ]['protocol'] : '' );
+		}
 
 		$models = Bokeauto_LLM::fetch_models( $provider, $base_url, $api_key, $protocol );
 		if ( is_wp_error( $models ) ) {
@@ -1265,17 +1278,7 @@ class Bokeauto_Core {
 		if ( 'GET' === $request->get_method() ) {
 			$s = Bokeauto_Settings::get();
 			return rest_ensure_response( array(
-				'settings' => array(
-					'provider'      => $s['provider'],
-					'base_url'      => $s['base_url'],
-					'model'         => $s['model'],
-					'has_key'       => '' !== $s['api_key'],
-					'key_masked'    => '' === $s['api_key'] ? '' : substr( $s['api_key'], 0, 4 ) . '••••' . substr( $s['api_key'], -4 ),
-					'embedding_model' => $s['embedding_model'],
-					'embedding_ready' => '' !== $s['embedding_api_key'],
-					'confirm_mode'  => $s['confirm_mode'],
-					'mock_mode'     => $s['mock_mode'],
-				),
+				'settings' => $this->settings_response( $s ),
 				'presets' => Bokeauto_Settings::presets(),
 			) );
 		}
@@ -1288,13 +1291,37 @@ class Bokeauto_Core {
 		$saved = Bokeauto_Settings::update( $data );
 		return rest_ensure_response( array(
 			'ok'       => true,
-			'settings' => array(
-				'provider'   => $saved['provider'],
-				'model'      => $saved['model'],
-				'has_key'    => '' !== $saved['api_key'],
-				'key_masked' => '' === $saved['api_key'] ? '' : substr( $saved['api_key'], 0, 4 ) . '••••' . substr( $saved['api_key'], -4 ),
-			),
+			'settings' => $this->settings_response( $saved ),
 		) );
+	}
+
+	/** 聊天页可安全读取的模型设置，不返回任何明文 Key。 */
+	private function settings_response( $settings ) {
+		$providers = array();
+		foreach ( (array) $settings['providers'] as $provider => $config ) {
+			$config = is_array( $config ) ? $config : array();
+			$providers[ $provider ] = array(
+				'base_url' => isset( $config['base_url'] ) ? $config['base_url'] : '',
+				'model'    => isset( $config['model'] ) ? $config['model'] : '',
+				'protocol' => isset( $config['protocol'] ) ? $config['protocol'] : '',
+				'has_key'  => ! empty( $config['api_key'] ),
+			);
+		}
+
+		return array(
+			'provider'        => $settings['provider'],
+			'base_url'        => $settings['base_url'],
+			'model'           => $settings['model'],
+			'protocol'        => isset( $settings['protocol'] ) ? $settings['protocol'] : '',
+			'has_key'         => '' !== $settings['api_key'],
+			'key_masked'      => '' === $settings['api_key'] ? '' : substr( $settings['api_key'], 0, 4 ) . '••••' . substr( $settings['api_key'], -4 ),
+			'providers'       => $providers,
+			'fetched_models'  => isset( $settings['fetched_models'] ) ? $settings['fetched_models'] : array(),
+			'embedding_model' => $settings['embedding_model'],
+			'embedding_ready' => '' !== $settings['embedding_api_key'],
+			'confirm_mode'    => $settings['confirm_mode'],
+			'mock_mode'       => $settings['mock_mode'],
+		);
 	}
 
 	/* ---------- 定时任务 ---------- */

@@ -129,9 +129,9 @@ class Bokeauto_Settings {
 			$clean['protocol'] = in_array( $p, self::PROTOCOLS, true ) ? $p : '';
 		}
 		if ( isset( $data['api_key'] ) ) {
-			// 掩码（含 •）不覆盖真实 Key；空串表示清空；其余正常更新
+			// 掩码保留原值；空串显式清空；其余值替换。
 			if ( false !== strpos( (string) $data['api_key'], '•' ) ) {
-				// 保留原值
+				// 保留原值。
 			} elseif ( '' === trim( (string) $data['api_key'] ) ) {
 				$clean['api_key'] = '';
 			} else {
@@ -158,9 +158,9 @@ class Bokeauto_Settings {
 			$clean['embedding_base_url'] = '' === $u ? self::EMBEDDING_BASE_URL : $u;
 		}
 		if ( isset( $data['embedding_api_key'] ) ) {
-			// 与主 Key 同规则：掩码不覆盖真实值，空串表示清空（清空即回到关键词检索）
+			// 与主 Key 同规则：掩码保留，空串清空，其余值替换。
 			if ( false !== strpos( (string) $data['embedding_api_key'], '•' ) ) {
-				// 保留原值
+				// 保留原值。
 			} elseif ( '' === trim( (string) $data['embedding_api_key'] ) ) {
 				$clean['embedding_api_key'] = '';
 			} else {
@@ -191,14 +191,14 @@ class Bokeauto_Settings {
 		if ( $switching ) {
 			if ( isset( $providers[ $new_provider ] ) && is_array( $providers[ $new_provider ] ) ) {
 				$saved = $providers[ $new_provider ];
-				if ( ! isset( $data['base_url'] ) && ! empty( $saved['base_url'] ) ) {
-					$clean['base_url'] = $saved['base_url'];
+				if ( ! isset( $data['base_url'] ) ) {
+					$clean['base_url'] = isset( $saved['base_url'] ) ? $saved['base_url'] : '';
 				}
-				if ( ! isset( $data['model'] ) && ! empty( $saved['model'] ) ) {
-					$clean['model'] = $saved['model'];
+				if ( ! isset( $data['model'] ) ) {
+					$clean['model'] = isset( $saved['model'] ) ? $saved['model'] : '';
 				}
-				if ( ! isset( $data['api_key'] ) && ! empty( $saved['api_key'] ) ) {
-					$clean['api_key'] = $saved['api_key'];
+				if ( ! isset( $data['api_key'] ) ) {
+					$clean['api_key'] = isset( $saved['api_key'] ) ? $saved['api_key'] : '';
 				}
 				if ( ! isset( $data['protocol'] ) ) {
 					$clean['protocol'] = isset( $saved['protocol'] ) ? $saved['protocol'] : '';

@@ -799,7 +799,13 @@
 
 	function fillBarModels( providerKey, selectedModel ) {
 		var p = presetsData[ providerKey ] || {};
-		var models = p.models || [];
+		var fetched = barSettings.fetched_models && barSettings.fetched_models[ providerKey ] || [];
+		var models = [];
+		[ p.models || [], fetched ].forEach( function ( list ) {
+			list.forEach( function ( modelName ) {
+				if ( modelName && models.indexOf( modelName ) < 0 ) { models.push( modelName ); }
+			} );
+		} );
 		var html = '';
 		models.forEach( function ( m ) {
 			html += '<option value="' + esc( m ) + '"' + ( m === selectedModel ? ' selected' : '' ) + '>' + esc( m ) + '</option>';
@@ -820,12 +826,15 @@
 
 	barProvider.addEventListener( 'change', function () {
 		var p = presetsData[ barProvider.value ] || {};
-		fillBarModels( barProvider.value, p.model || '' );
+		var saved = barSettings.providers && barSettings.providers[ barProvider.value ] || {};
+		fillBarModels( barProvider.value, saved.model || p.model || '' );
 	} );
 
 	barSwitch.addEventListener( 'click', function () {
 		var p = presetsData[ barProvider.value ] || {};
-		if ( ! p.base_url ) {
+		var saved = barSettings.providers && barSettings.providers[ barProvider.value ] || {};
+		var hasSaved = Object.keys( saved ).length > 0;
+		if ( ! ( hasSaved ? saved.base_url : p.base_url ) ) {
 			alert( '该服务商无预设 API 地址，请到「模型设置」中配置' );
 			return;
 		}

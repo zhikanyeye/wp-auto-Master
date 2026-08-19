@@ -4,7 +4,7 @@ Tags: ai, agent, assistant, automation, collect
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.2
+Stable tag: 2.1.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -92,6 +92,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 请只采集你拥有版权或已获授权转载的内容，并遵守目标站点的 robots 协议与服务条款。插件提供工具，合规使用责任在使用者。
 
 == Changelog ==
+
+= 2.1.3 =
+* 修复对话页切换服务商时覆盖或串用已保存模型配置的问题
+* 修复测试连接与模型列表跨服务商复用 API Key、地址或协议的问题
+* 对话页模型下拉合并预设模型与服务商动态模型缓存
+* 设置页空密钥输入保留已有 Key，同时保留程序化显式清空能力
+* Responses 与 Anthropic 流式请求应用已配置的温度参数，并提前校验 API Key
 
 = 2.1.2 =
 * 修复自动构建摘要生成失败导致 Release 附件未上传的问题

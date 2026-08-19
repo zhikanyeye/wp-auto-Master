@@ -16,7 +16,15 @@
 	$protos   = Bokeauto_Settings::protocol_labels();
 
 	if ( isset( $_POST['bokeauto_save_settings'] ) && check_admin_referer( 'bokeauto_settings' ) ) {
-		$saved = Bokeauto_Settings::update( $_POST );
+		$form_data = $_POST;
+		// 密钥输入框留空表示保留；底层 update() 仍支持显式空串清空，供 REST/程序调用。
+		if ( isset( $form_data['api_key'] ) && '' === trim( (string) $form_data['api_key'] ) ) {
+			unset( $form_data['api_key'] );
+		}
+		if ( isset( $form_data['embedding_api_key'] ) && '' === trim( (string) $form_data['embedding_api_key'] ) ) {
+			unset( $form_data['embedding_api_key'] );
+		}
+		$saved = Bokeauto_Settings::update( $form_data );
 		echo '<div class="notice notice-success is-dismissible"><p>设置已保存。</p></div>';
 		$settings = $saved;
 	}
@@ -317,9 +325,9 @@
 			var saved = providerConfigs[ sel.value ];
 			if ( saved ) {
 				// 该服务商保存过配置 → 动态加载（切换过来自动恢复自己保存的值）
-				if ( saved.base_url ) { base.value = saved.base_url; }
-				if ( saved.model ) { model.value = saved.model; }
-				if ( saved.api_key ) { keyInput.value = saved.api_key; }
+				base.value = saved.base_url || '';
+				model.value = saved.model || '';
+				keyInput.value = saved.api_key || '';
 				protoSel.value = saved.protocol || '';
 			} else {
 				// 从未保存过 → 填充该服务商预设，Key 与协议清空（避免残留上一个服务商的值）

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: 波克wpAI自动化插件
  * Description: 内置 AI 智能体助手：连接外部大模型 API 与内置向量记忆库，用自然语言完成 WordPress 全站管理、开发与维护任务。自学习，越用越聪明。
- * Version:     2.1.2
+ * Version:     2.1.3
  * Author:      zhikanyeye
  * License:     GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'BOKEAUTO_VERSION', '2.1.2' );
+define( 'BOKEAUTO_VERSION', '2.1.3' );
 define( 'BOKEAUTO_PATH', plugin_dir_path( __FILE__ ) );
 define( 'BOKEAUTO_URL', plugin_dir_url( __FILE__ ) );
 define( 'BOKEAUTO_DB_VERSION', '1.6.0' );
