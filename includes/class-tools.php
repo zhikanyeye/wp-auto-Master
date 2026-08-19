@@ -25,6 +25,7 @@ class Bokeauto_Tools {
 		require_once BOKEAUTO_PATH . 'includes/class-tools-system.php';
 		require_once BOKEAUTO_PATH . 'includes/class-tools-agent.php';
 		require_once BOKEAUTO_PATH . 'includes/class-tools-bokeauto.php';
+		require_once BOKEAUTO_PATH . 'includes/class-tools-collect.php';
 
 		$t = array();
 
@@ -118,6 +119,17 @@ class Bokeauto_Tools {
 		$t['list_tools'] = array( 'description' => '查看 AI 自建的自定义工具列表', 'risk' => 'low', 'params' => array(), 'required' => array(), 'cb' => array( 'Bokeauto_Tools_Bokeauto', 'list_tools' ) );
 		$t['delete_tool'] = array( 'description' => '删除一个 AI 自建的自定义工具（高危）', 'risk' => 'high', 'params' => array( 'name' => array( 'type' => 'string' ) ), 'required' => array( 'name' ), 'cb' => array( 'Bokeauto_Tools_Bokeauto', 'delete_tool' ) );
 
+		/* ---------------- 网页采集 ---------------- */
+		$t['collect_inspect'] = array( 'description' => '探测目标网页结构，返回页面标题与候选容器（含选择器、文本长度、链接数、文本预览），用于编写采集选择器。也可传 selector 验证某个选择器匹配到多少节点。写采集规则前先用它', 'risk' => 'low', 'params' => array( 'url' => array( 'type' => 'string', 'description' => '要探测的网页地址' ), 'selector' => array( 'type' => 'string', 'description' => '可选，验证指定 CSS 选择器的匹配结果' ), 'cookie' => array( 'type' => 'string', 'description' => '可选，需要登录态才能访问时传入 Cookie' ) ), 'required' => array( 'url' ), 'cb' => array( 'Bokeauto_Tools_Collect', 'collect_inspect' ) );
+		$t['collect_links'] = array( 'description' => '从列表页提取文章链接（自动补全相对地址、去重、标注是否已采集）。用于确认列表选择器是否正确', 'risk' => 'low', 'params' => array( 'url' => array( 'type' => 'string', 'description' => '列表页地址' ), 'link_selector' => array( 'type' => 'string', 'description' => 'CSS 选择器，指向文章链接或其容器，如 .post-list h2 a' ), 'limit' => array( 'type' => 'integer', 'description' => '最多返回条数，默认 30' ), 'cookie' => array( 'type' => 'string', 'description' => '可选 Cookie' ) ), 'required' => array( 'url' ), 'cb' => array( 'Bokeauto_Tools_Collect', 'collect_links' ) );
+		$t['collect_article'] = array( 'description' => '按选择器规则提取详情页字段但不入库，用于验证规则是否正确。rules 形如 {"title":{"selector":"h1.title"},"content":{"selector":".article-body","attr":"html","remove":".ad, .share"}}；可选字段 date、author', 'risk' => 'low', 'params' => array( 'url' => array( 'type' => 'string', 'description' => '详情页地址' ), 'rules' => array( 'type' => 'object', 'description' => '字段规则对象：字段名 => {selector, attr(text/html/attr:href), remove(要删除的噪音选择器)}' ), 'cookie' => array( 'type' => 'string', 'description' => '可选 Cookie' ) ), 'required' => array( 'url', 'rules' ), 'cb' => array( 'Bokeauto_Tools_Collect', 'collect_article' ) );
+		$t['collect_to_post'] = array( 'description' => '采集一个详情页并创建文章：按 rules 提取标题正文、清洗 HTML、下载图片到媒体库、首图设为特色图片、按来源地址自动去重。默认存草稿', 'risk' => 'low', 'params' => array( 'url' => array( 'type' => 'string', 'description' => '要采集的文章地址' ), 'rules' => array( 'type' => 'object', 'description' => '字段规则，同 collect_article' ), 'post_status' => array( 'type' => 'string', 'description' => 'draft（默认）或 publish', 'enum' => array( 'draft', 'publish' ) ), 'category_id' => array( 'type' => 'integer', 'description' => '归入的分类 ID' ), 'tags' => array( 'type' => 'string', 'description' => '标签，逗号分隔' ), 'image_mode' => array( 'type' => 'string', 'description' => 'local 下载图片入媒体库（默认）/ remote 保留原站外链', 'enum' => array( 'local', 'remote' ) ), 'set_thumbnail' => array( 'type' => 'boolean', 'description' => '是否把正文首图设为特色图片，默认 true' ), 'cookie' => array( 'type' => 'string', 'description' => '可选 Cookie' ), 'allow_duplicate' => array( 'type' => 'boolean', 'description' => '来源已采集过时是否仍然重复采集，默认 false' ) ), 'required' => array( 'url', 'rules' ), 'cb' => array( 'Bokeauto_Tools_Collect', 'collect_to_post' ) );
+		$t['collect_localize_images'] = array( 'description' => '把某篇已有文章正文中的远程图片下载进媒体库并替换为本站地址，可同时设置特色图片', 'risk' => 'low', 'params' => array( 'post_id' => array( 'type' => 'integer', 'description' => '文章 ID' ), 'limit' => array( 'type' => 'integer', 'description' => '最多处理张数，默认 20' ), 'set_thumbnail' => array( 'type' => 'boolean', 'description' => '是否把首图设为特色图片' ) ), 'required' => array( 'post_id' ), 'cb' => array( 'Bokeauto_Tools_Collect', 'collect_localize_images' ) );
+		$t['collect_rule_save'] = array( 'description' => '保存采集规则（列表页地址 + 链接选择器 + 字段规则 + 发布选项），保存后可用 collect_run_rule 反复执行，或配合 schedule_create 做定时采集。传 rule_id 表示更新已有规则。list_url 中可用 {page} 占位符表示分页', 'risk' => 'low', 'params' => array( 'name' => array( 'type' => 'string', 'description' => '规则名称，如「某站科技频道」' ), 'list_url' => array( 'type' => 'string', 'description' => '列表页地址，分页可写 {page} 占位符' ), 'link_selector' => array( 'type' => 'string', 'description' => '列表页文章链接选择器' ), 'rules' => array( 'type' => 'object', 'description' => '详情页字段规则，同 collect_article' ), 'post_status' => array( 'type' => 'string', 'enum' => array( 'draft', 'publish' ) ), 'category_id' => array( 'type' => 'integer' ), 'tags' => array( 'type' => 'string' ), 'image_mode' => array( 'type' => 'string', 'enum' => array( 'local', 'remote' ) ), 'set_thumbnail' => array( 'type' => 'boolean' ), 'cookie' => array( 'type' => 'string' ), 'replace' => array( 'type' => 'object', 'description' => '正文关键词替换表，如 {"原站名":"本站名"}' ), 'rule_id' => array( 'type' => 'integer', 'description' => '更新已有规则时传入' ) ), 'required' => array( 'name', 'rules' ), 'cb' => array( 'Bokeauto_Tools_Collect', 'collect_rule_save' ) );
+		$t['collect_rule_list'] = array( 'description' => '列出已保存的采集规则（ID、名称、列表页、字段、已采集数量、上次执行时间）', 'risk' => 'low', 'params' => array(), 'required' => array(), 'cb' => array( 'Bokeauto_Tools_Collect', 'collect_rule_list' ) );
+		$t['collect_rule_delete'] = array( 'description' => '删除采集规则（高危，已采集的文章不受影响）', 'risk' => 'high', 'params' => array( 'rule_id' => array( 'type' => 'integer', 'description' => '规则 ID' ) ), 'required' => array( 'rule_id' ), 'cb' => array( 'Bokeauto_Tools_Collect', 'collect_rule_delete' ) );
+		$t['collect_run_rule'] = array( 'description' => '按已保存的规则执行一轮采集：抓列表页 → 逐条抓详情 → 去重 → 建文章。单次最多 20 篇，默认 5 篇；page 参数配合 list_url 中的 {page} 采集指定分页', 'risk' => 'low', 'params' => array( 'rule_id' => array( 'type' => 'integer', 'description' => '规则 ID，可用 collect_rule_list 查看' ), 'limit' => array( 'type' => 'integer', 'description' => '本轮最多采集篇数，默认 5，最大 20' ), 'page' => array( 'type' => 'integer', 'description' => '列表页页码，替换 list_url 中的 {page}' ), 'list_url' => array( 'type' => 'string', 'description' => '临时覆盖规则中的列表页地址' ) ), 'required' => array( 'rule_id' ), 'cb' => array( 'Bokeauto_Tools_Collect', 'collect_run_rule' ) );
+
 		/* ---------------- AI 自建自定义工具（能力自我进化） ---------------- */
 		self::load_custom_tools( $t );
 
@@ -205,6 +217,7 @@ class Bokeauto_Tools {
 			'list_options', 'get_option', 'read_only_db_query',
 			'llm_info', 'memory_list', 'audit_log', 'usage_stats', 'schedule_list',
 			'worklog_read', 'fetch_webpage',
+			'collect_inspect', 'collect_links', 'collect_article', 'collect_rule_list',
 		);
 		return in_array( $name, $read, true );
 	}
@@ -363,6 +376,10 @@ class Bokeauto_Tools {
 				'label' => '插件自管理',
 				'tools' => array( 'memory_list', 'memory_clear', 'audit_log', 'usage_stats', 'llm_switch', 'delete_skill', 'create_tool', 'list_tools', 'delete_tool', 'worklog_update', 'worklog_delete' ),
 			),
+			'collect' => array(
+				'label' => '网页采集',
+				'tools' => array( 'collect_inspect', 'collect_links', 'collect_article', 'collect_to_post', 'collect_localize_images', 'collect_rule_save', 'collect_rule_list', 'collect_rule_delete', 'collect_run_rule' ),
+			),
 		);
 	}
 
@@ -386,11 +403,11 @@ class Bokeauto_Tools {
 			'type' => 'function',
 			'function' => array(
 				'name'        => 'use_tool_group',
-				'description' => '加载专业工具组，加载后即可使用该组内的专业工具。可选组：content（内容管理：创建/编辑/删除文章页面、上传媒体等）、file（文件与代码：写入/删除/重命名文件、PHP语法检查等）、plugin（主题与插件：启用/停用/删除/安装、创建骨架等）、system（系统与维护：改设置、建用户、备份、清缓存、SQL查询等）、agent（角色技能与协作：创建角色/技能、多角色协作、创建定时任务等）、bokeauto（插件自管理：查看/清空记忆库、审计日志、Token用量、切换模型、删除技能、重写/删除工作日志等）。',
+				'description' => '加载专业工具组，加载后即可使用该组内的专业工具。可选组：content（内容管理：创建/编辑/删除文章页面、上传媒体等）、file（文件与代码：写入/删除/重命名文件、PHP语法检查等）、plugin（主题与插件：启用/停用/删除/安装、创建骨架等）、system（系统与维护：改设置、建用户、备份、清缓存、SQL查询等）、agent（角色技能与协作：创建角色/技能、多角色协作、创建定时任务等）、collect（网页采集：探测页面结构、提取列表链接、按规则采集文章入库、图片本地化、保存与执行采集规则）、bokeauto（插件自管理：查看/清空记忆库、审计日志、Token用量、切换模型、删除技能、重写/删除工作日志等）。',
 				'parameters'  => array(
 					'type'       => 'object',
 					'properties' => array(
-						'group' => array( 'type' => 'string', 'enum' => array( 'content', 'file', 'plugin', 'system', 'agent' ), 'description' => '要加载的工具组' ),
+						'group' => array( 'type' => 'string', 'enum' => array( 'content', 'file', 'plugin', 'system', 'agent', 'collect', 'bokeauto' ), 'description' => '要加载的工具组' ),
 					),
 					'required'   => array( 'group' ),
 				),

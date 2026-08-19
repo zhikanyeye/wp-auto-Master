@@ -24,6 +24,7 @@ class Bokeauto_Core {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 2 );
 
 		// 定时任务：wp-cron 回调 + 启动时同步调度
 		add_action( 'bokeauto_schedule_run', array( 'Bokeauto_Schedule', 'cron_hook' ), 10, 1 );
@@ -220,6 +221,22 @@ class Bokeauto_Core {
 			UNIQUE KEY log_date (log_date)
 		) $charset;";
 
+		$tables[] = "CREATE TABLE {$prefix}bokeauto_collect_rules (
+			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			name VARCHAR(120) NOT NULL,
+			list_url VARCHAR(500) NOT NULL DEFAULT '',
+			link_selector VARCHAR(255) NOT NULL DEFAULT 'a',
+			article_rules LONGTEXT NULL,
+			options LONGTEXT NULL,
+			status VARCHAR(10) NOT NULL DEFAULT 'active',
+			collected_count BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
+			last_run_at DATETIME NULL,
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY  (id),
+			KEY status (status)
+		) $charset;";
+
 		foreach ( $tables as $sql ) {
 			dbDelta( $sql );
 		}
@@ -328,19 +345,39 @@ class Bokeauto_Core {
 	}
 
 	public function render_chat_page() {
-		include BOKEAUTO_PATH . 'admin/templates/page-chat.php';
+		$this->render_page( 'page-chat' );
 	}
 
 	public function render_settings_page() {
-		include BOKEAUTO_PATH . 'admin/templates/page-settings.php';
+		$this->render_page( 'page-settings' );
 	}
 
 	public function render_roles_page() {
-		include BOKEAUTO_PATH . 'admin/templates/page-roles.php';
+		$this->render_page( 'page-roles' );
 	}
 
 	public function render_schedules_page() {
-		include BOKEAUTO_PATH . 'admin/templates/page-schedules.php';
+		$this->render_page( 'page-schedules' );
+	}
+
+	/** 统一渲染后台页面：模板 + 底部推广位 */
+	private function render_page( $template ) {
+		$file = BOKEAUTO_PATH . 'admin/templates/' . $template . '.php';
+		if ( is_readable( $file ) ) {
+			include $file;
+		}
+		include BOKEAUTO_PATH . 'admin/templates/partial-promo.php';
+	}
+
+	/** 插件列表页补充项目主页链接 */
+	public function plugin_row_meta( $links, $file ) {
+		if ( plugin_basename( BOKEAUTO_PATH . 'bokeauto.php' ) !== $file || ! defined( 'BOKEAUTO_HOMEPAGE' ) ) {
+			return $links;
+		}
+		$home     = trailingslashit( BOKEAUTO_HOMEPAGE );
+		$links[] = '<a href="' . esc_url( BOKEAUTO_HOMEPAGE ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( '项目主页', 'bokeauto' ) . '</a>';
+		$links[] = '<a href="' . esc_url( $home . 'issues' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( '问题反馈', 'bokeauto' ) . '</a>';
+		return $links;
 	}
 
 	/* ---------------------------------------------------------------------

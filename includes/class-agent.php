@@ -459,7 +459,7 @@ class Bokeauto_Agent {
 		$errors = array();
 		foreach ( $groups as $group ) {
 			if ( ! Bokeauto_Tools::valid_group( $group ) ) {
-				$errors[] = '未知工具组：' . $group . '（可选：content/file/plugin/system/agent）';
+				$errors[] = '未知工具组：' . $group . '（可选：content/file/plugin/system/agent/collect/bokeauto）';
 				continue;
 			}
 			if ( in_array( $group, $active_groups, true ) ) {
@@ -1070,7 +1070,7 @@ class Bokeauto_Agent {
 		$prompt .= "9. 当用户让你『记住某个流程/方法/技能』时，使用 create_skill 工具将其固化到技能库。\n";
 		$prompt .= "10. 当用户让你『新建/创建一个角色』时，使用 create_role 工具，并明确角色的名称、职责、行为风格与可用工具；需要为角色单独配置模型时，用 create_role/update_role 的 llm_provider、llm_model、llm_api_key 参数；查询任何角色信息（含模型配置）用 list_roles 即可，不要读代码文件。\n";
 		$prompt .= "11. 高效原则（重要）：只调用完成任务必需的工具；同一工具不要重复调用（除非参数有实质变化）；查询类信息（如列表）调用一次即可，不要反复查询；任务信息足够后立即停止调用工具并总结。\n";
-		$prompt .= "12. 工具按需加载：核心查询工具（列表/详情/站点信息等）可直接使用；当任务需要专业操作时（如创建/编辑文章、上传媒体、修改文件、管理插件主题、修改设置、创建角色技能、发起协作），先调用 use_tool_group 加载对应工具组（content/file/plugin/system/agent），加载后即可使用该组内工具。不要尝试直接调用尚未加载的工具。\n";
+		$prompt .= "12. 工具按需加载：核心查询工具（列表/详情/站点信息等）可直接使用；当任务需要专业操作时（如创建/编辑文章、上传媒体、修改文件、管理插件主题、修改设置、创建角色技能、发起协作、网页采集），先调用 use_tool_group 加载对应工具组（content/file/plugin/system/agent/collect/bokeauto），加载后即可使用该组内工具。不要尝试直接调用尚未加载的工具。\n";
 		$prompt .= "13. 配置插件/主题/站点设置时：用 list_options 或 get_option 查看相关选项（这些是 WordPress 的 wp_options 配置项，插件配置大多存于此）；需要修改时加载 system 组并使用 set_option（修改前会备份，执行前会请求用户确认）。\n";
 		$prompt .= "14. 定时任务（重要）：当用户要求『定时/周期/每天/每周/每小时/定期』执行某任务时（如每天备份数据库、每周一发布文章、每小时检查一次更新），先加载 agent 组，然后用 schedule_create 创建定时任务（指定周期与执行指令）。定时任务到点后会自动唤醒你执行，无需用户在线。可用 schedule_list 查看、schedule_update 修改、schedule_delete 删除、schedule_run_now 立即执行。创建时注意：危险操作默认不会被自动执行（除非 auto_high=true），请向用户说明这一点。\n";
 		$prompt .= "15. 文件路径（重要）：传文件/目录路径参数时务必逐段书写、用 / 分隔，不要粘连或省略分段。站点标准目录：wp-content/plugins/、wp-content/themes/、wp-content/uploads/、wp-admin/、wp-includes/。例如读取本插件设置类：先用 file_list 在 wp-content/plugins/ 中确认实际安装目录，再读取 includes/class-settings.php。\n";
@@ -1078,7 +1078,8 @@ class Bokeauto_Agent {
 		$prompt .= "17. 能力自我进化（重要）：当用户请求的任务超出你现有工具能力时（如调用某个外部 API、某种特殊处理），先向用户说明插件缺少这个能力，可以新增。若用户同意，加载 bokeauto 组后用 create_tool 编写实现代码动态注册新工具（php_code 为 PHP 函数体，接收 \$args 返回 array('ok'=>true,'message'=>...,'data'=>...)，可用 wp_remote_get/post、get_option 等 WordPress 函数），创建后该能力立即可用。创建高风险工具前必须获得用户明确同意。\n";
 		$prompt .= "19. 角色类型与调用方式（重要）：每个角色在创建时已声明类型，用 list_roles 查看类型与绑定工具；聊天型角色通过对话和工具完成任务，功能性角色直接执行绑定工具。\n";
 		$prompt .= "20. 工作日志（重要）：用户询问近期进展时先用 worklog_read，用户要求记录信息时用 worklog_append，需要修改既有记录时先读取再整体重写。\n";
-		$prompt .= "21. 记住用户信息（重要）：当用户主动告知称呼、偏好或重要约定时，使用 worklog_append 记录；用户询问历史信息时先用 worklog_read 回忆。\n\n";
+		$prompt .= "21. 记住用户信息（重要）：当用户主动告知称呼、偏好或重要约定时，使用 worklog_append 记录；用户询问历史信息时先用 worklog_read 回忆。\n";
+		$prompt .= "22. 网页采集（重要）：用户要求「采集/搬运/抓取某站文章、做内容聚合、批量导入文章」时，加载 collect 组，按此顺序推进：先 collect_inspect 探测目标页面结构写出选择器 → collect_links 验证列表选择器 → collect_article 验证详情字段规则（不入库）→ 规则确认无误后用 collect_to_post 采集单篇试跑 → 用 collect_rule_save 固化规则 → collect_run_rule 批量执行。需要持续采集时再用 schedule_create 创建定时任务调用该规则。采集默认存草稿并本地化图片，来源地址自动去重。务必提醒用户只采集自己有权转载的内容，并遵守目标站点的版权与 robots 协议。\n\n";
 
 		// 注入技能库与角色库
 		$skills_context = Bokeauto_Skill::context_prompt();

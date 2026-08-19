@@ -236,7 +236,7 @@ class Bokeauto_Tools_Plugin {
 		wp_mkdir_p( $dir );
 
 		$main = $slug . '.php';
-		$code = "<?php\n/**\n * Plugin Name: {$name}\n * Description: 由波克wpAI创建的插件骨架。\n * Version: 1.0.0\n * Author: Boke wpAI\n */\n\ndefined( 'ABSPATH' ) || exit;\n\nadd_action( 'init', function () {\n\t// 插件初始化代码\n} );\n";
+		$code = "<?php\n/**\n * Plugin Name: {$name}\n * Description: 由波克wpAI创建的插件骨架。\n * Version: 1.0.0\n * Author: zhikanyeye\n */\n\ndefined( 'ABSPATH' ) || exit;\n\nadd_action( 'init', function () {\n\t// 插件初始化代码\n} );\n";
 		file_put_contents( $dir . '/' . $main, $code );
 		file_put_contents( $dir . '/readme.txt', "=== {$name} ===\nTags: \nRequires at least: 6.0\nTested up to: 7.0\nStable tag: 1.0.0\n\n== Description ==\n由波克wpAI创建的插件骨架。\n" );
 
@@ -263,7 +263,7 @@ class Bokeauto_Tools_Plugin {
 		}
 		wp_mkdir_p( $dir );
 
-		file_put_contents( $dir . '/style.css', "/*\nTheme Name: {$name}\nTheme URI: \nAuthor: Boke wpAI\nDescription: 由波克wpAI创建的主题骨架。\nVersion: 1.0.0\n*/\n" );
+		file_put_contents( $dir . '/style.css', "/*\nTheme Name: {$name}\nTheme URI: \nAuthor: zhikanyeye\nDescription: 由波克wpAI创建的主题骨架。\nVersion: 1.0.0\n*/\n" );
 		file_put_contents( $dir . '/index.php', "<?php get_header(); ?>\n<main class=\"site-main\">\n\t<?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>\n\t\t<article>\n\t\t\t<h2><a href=\"<?php the_permalink(); ?>\"><?php the_title(); ?></a></h2>\n\t\t\t<div><?php the_content(); ?></div>\n\t\t</article>\n\t<?php endwhile; endif; ?>\n</main>\n<?php get_footer(); ?>\n" );
 		file_put_contents( $dir . '/functions.php', "<?php\n// {$name} 主题函数\n" );
 		file_put_contents( $dir . '/header.php', "<!DOCTYPE html>\n<html <?php language_attributes(); ?>>\n<head>\n\t<meta charset=\"<?php bloginfo( 'charset' ); ?>\">\n\t<?php wp_head(); ?>\n</head>\n<body <?php body_class(); ?>>\n\t<header class=\"site-header\"><h1><a href=\"<?php echo esc_url( home_url() ); ?>\"><?php bloginfo( 'name' ); ?></a></h1></header>\n" );

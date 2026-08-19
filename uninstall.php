@@ -14,7 +14,7 @@ $tables = array(
 	'bokeauto_tasks', 'bokeauto_memories', 'bokeauto_feedback', 'bokeauto_confirmations',
 	'bokeauto_audit', 'bokeauto_skills', 'bokeauto_roles', 'bokeauto_conversations',
 	'bokeauto_messages', 'bokeauto_usage', 'bokeauto_schedules', 'bokeauto_custom_tools',
-	'bokeauto_worklogs',
+	'bokeauto_worklogs', 'bokeauto_collect_rules',
 );
 foreach ( $tables as $table ) {
 	$wpdb->query( "DROP TABLE IF EXISTS {$prefix}{$table}" );
