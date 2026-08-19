@@ -4,7 +4,7 @@ Tags: ai, agent, assistant, automation, collect
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.1
+Stable tag: 2.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -92,6 +92,10 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 请只采集你拥有版权或已获授权转载的内容，并遵守目标站点的 robots 协议与服务条款。插件提供工具，合规使用责任在使用者。
 
 == Changelog ==
+
+= 2.1.2 =
+* 修复自动构建摘要生成失败导致 Release 附件未上传的问题
+* 包含 2.1.1 的设置页 UI 与模型下拉修复
 
 = 2.1.1 =
 * 修复模型设置页未应用新版后台 UI 样式的问题

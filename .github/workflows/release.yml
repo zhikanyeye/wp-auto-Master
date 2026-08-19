@@ -42,12 +42,12 @@ jobs:
         run: |
           {
             printf '# 波克wpAI自动化插件构建\n\n'
-            printf '- 版本：`%s`\n' "${{ steps.package.outputs.version }}"
-            printf '- 触发引用：`%s`\n' "${{ github.ref_name }}"
-            printf '- 提交：`%s`\n' "${{ github.sha }}"
-            printf '- 构建产物：`%s`\n' "$PACKAGE_NAME"
-            printf '- 白名单校验：通过\n'
-            printf '- 压缩包完整性校验：通过\n'
+            printf -- '- 版本：`%s`\n' "${{ steps.package.outputs.version }}"
+            printf -- '- 触发引用：`%s`\n' "${{ github.ref_name }}"
+            printf -- '- 提交：`%s`\n' "${{ github.sha }}"
+            printf -- '- 构建产物：`%s`\n' "$PACKAGE_NAME"
+            printf -- '- 白名单校验：通过\n'
+            printf -- '- 压缩包完整性校验：通过\n'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Generate release notes
