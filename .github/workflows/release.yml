@@ -15,15 +15,108 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Build distributable plugin zip
         run: bash scripts/package-plugin.sh
+
+      - name: Validate distributable plugin zip
+        run: |
+          unzip -t boke-wpai-automation.zip
+          test "$(unzip -Z1 boke-wpai-automation.zip | awk -F/ 'NF > 1 {print $1}' | sort -u)" = "bokeauto"
+          ! unzip -Z1 boke-wpai-automation.zip | grep -E '(^|/)(README\.md|\.github|\.monkeycode|scripts|tests?)(/|$)'
+
+      - name: Generate release notes
+        if: startsWith(github.ref, 'refs/tags/')
+        id: release_metadata
+        env:
+          CURRENT_TAG: ${{ github.ref_name }}
+          REPOSITORY: ${{ github.repository }}
+          SERVER_URL: ${{ github.server_url }}
+        run: |
+          set -euo pipefail
+
+          previous_tag=""
+          found_current="false"
+          while IFS= read -r tag; do
+            if [ "$tag" = "$CURRENT_TAG" ]; then
+              found_current="true"
+              continue
+            fi
+            if [ "$found_current" = "true" ] && git merge-base --is-ancestor "$tag" "$CURRENT_TAG"; then
+              previous_tag="$tag"
+              break
+            fi
+          done < <(git tag --sort=-v:refname)
+
+          if [ -n "$previous_tag" ]; then
+            range="$previous_tag..$CURRENT_TAG"
+            compare_url="$SERVER_URL/$REPOSITORY/compare/$previous_tag...$CURRENT_TAG"
+          else
+            range="$CURRENT_TAG"
+            compare_url="$SERVER_URL/$REPOSITORY/commits/$CURRENT_TAG"
+          fi
+
+          {
+            printf '# %s\n\n' "$CURRENT_TAG"
+            printf '## 变更概览\n\n'
+            if [ -n "$previous_tag" ]; then
+              printf '本版本基于 `%s` 生成，完整变更记录：[查看对比]('%s')。\n\n' "$previous_tag" "$compare_url"
+            else
+              printf '这是首个标签版本，完整变更记录：[查看提交历史]('%s')。\n\n' "$compare_url"
+            fi
+
+            for section in 'feat|新增功能' 'fix|问题修复' 'perf|性能改进' 'refactor|代码重构' 'docs|文档变更' 'chore|工程维护' 'other|其他变更'; do
+              type="${section%%|*}"
+              title="${section#*|}"
+              printf '## %s\n\n' "$title"
+              case "$type" in
+                feat) pattern='feat' ;;
+                fix) pattern='fix' ;;
+                perf) pattern='perf' ;;
+                refactor) pattern='refactor' ;;
+                docs) pattern='docs' ;;
+                chore) pattern='chore|ci|build|test' ;;
+                other) pattern='.' ;;
+              esac
+
+              count=0
+              while IFS=$'\t' read -r subject short_hash; do
+                [ -n "$subject" ] || continue
+                type_prefix="${subject%%:*}"
+                type_prefix="${type_prefix%!}"
+                if [ "$type" = "other" ]; then
+                  case "$type_prefix" in
+                    feat|fix|perf|refactor|docs|chore|ci|build|test) continue ;;
+                  esac
+                elif ! printf '%s' "$type_prefix" | grep -Eq "^($pattern)$"; then
+                  continue
+                fi
+                printf -- '- %s (`%s`)\n' "${subject#*: }" "$short_hash"
+                count=$((count + 1))
+              done < <(git log --format='%s%x09%h' "$range")
+
+              if [ "$count" -eq 0 ]; then
+                printf '暂无记录。\n'
+              fi
+              printf '\n'
+            done
+          } > release-notes.md
+
+          if printf '%s' "$CURRENT_TAG" | grep -Eq -- '-(alpha|beta|rc)(\.|$)'; then
+            echo 'prerelease=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'prerelease=false' >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          generate_release_notes: true
+          name: ${{ github.ref_name }}
+          body_path: release-notes.md
+          prerelease: ${{ steps.release_metadata.outputs.prerelease }}
           files: boke-wpai-automation.zip
 
       - name: Upload package artifact
