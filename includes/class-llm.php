@@ -1251,13 +1251,13 @@ class Bokeauto_LLM {
 		}
 
 		$proto = Bokeauto_Settings::resolve_protocol( $provider, $base_url, $protocol );
-		$base  = rtrim( $base_url, '/' );
+		$base  = preg_replace( '/[?#].*$/', '', rtrim( $base_url, '/' ) );
+		$out   = array();
 
 		if ( 'anthropic' === $proto ) {
-			if ( substr( $base, -3 ) === '/v1' ) {
-				$base = substr( $base, 0, -3 );
-			}
-			$url  = $base . '/v1/models?limit=100';
+			$base = preg_replace( '#/(?:v1/)?(?:messages|models)$#', '', $base );
+			$base = preg_replace( '#/v1$#', '', $base );
+			$url  = rtrim( $base, '/' ) . '/v1/models?limit=1000';
 			$args = array(
 				'timeout' => 30,
 				'headers' => array(
@@ -1265,53 +1265,103 @@ class Bokeauto_LLM {
 					'anthropic-version' => '2023-06-01',
 				),
 			);
-		} else {
-			// Chat Completions 与 Responses 共用 /models 列表接口；
-			// 地址填到具体端点时先剥掉端点段，避免拼出 /chat/completions/models
-			foreach ( array( '/chat/completions', '/responses' ) as $suffix ) {
-				if ( substr( $base, -strlen( $suffix ) ) === $suffix ) {
-					$base = substr( $base, 0, -strlen( $suffix ) );
+			// Anthropic 官方 Models API 使用 after_id 游标分页。
+			for ( $page = 0; $page < 20; $page++ ) {
+				$data = self::fetch_model_page( $url, $args );
+				if ( is_wp_error( $data ) ) {
+					return $data;
+				}
+				$out = array_merge( $out, self::model_ids_from_response( $data ) );
+				if ( empty( $data['has_more'] ) || empty( $data['last_id'] ) ) {
 					break;
 				}
+				$url = rtrim( $base, '/' ) . '/v1/models?limit=1000&after_id=' . rawurlencode( (string) $data['last_id'] );
 			}
+		} else {
+			// Chat Completions 与 Responses 共用 /models 列表接口；
+			// 地址填到具体端点时统一剥离，避免生成 /models/models。
+			$base = preg_replace( '#/(?:chat/completions|responses|models)$#', '', $base );
 			$url  = rtrim( $base, '/' ) . '/models';
 			$args = array(
 				'timeout' => 30,
 				'headers' => array( 'Authorization' => 'Bearer ' . $api_key ),
 			);
+			$data = self::fetch_model_page( $url, $args );
+			if ( is_wp_error( $data ) ) {
+				return $data;
+			}
+			$out = self::model_ids_from_response( $data );
 		}
 
+		$out = array_values( array_filter( array_unique( $out ), array( __CLASS__, 'is_conversation_model' ) ) );
+		if ( ! $out ) {
+			return new WP_Error( 'bokeauto_api', '服务商未返回可用于对话的模型，请手动填写模型名' );
+		}
+
+		sort( $out );
+		return $out;
+	}
+
+	/** 请求并校验单页模型目录。 */
+	private static function fetch_model_page( $url, $args ) {
 		$resp = wp_remote_get( $url, $args );
 		if ( is_wp_error( $resp ) ) {
 			return new WP_Error( 'bokeauto_http', $resp->get_error_message() );
 		}
 
 		$code = (int) wp_remote_retrieve_response_code( $resp );
-		$data = json_decode( wp_remote_retrieve_body( $resp ), true );
-
-		if ( $code >= 400 || ! is_array( $data ) ) {
-			$msg = isset( $data['error']['message'] ) ? $data['error']['message'] : 'HTTP ' . $code;
-			return new WP_Error( 'bokeauto_api', $msg );
+		$body = wp_remote_retrieve_body( $resp );
+		$data = json_decode( $body, true );
+		if ( ! is_array( $data ) ) {
+			return new WP_Error( 'bokeauto_api', '模型接口返回了无效 JSON（HTTP ' . $code . '）' );
 		}
+		if ( $code >= 400 ) {
+			$msg = isset( $data['error']['message'] ) ? $data['error']['message'] : ( isset( $data['message'] ) ? $data['message'] : 'HTTP ' . $code );
+			return new WP_Error( 'bokeauto_api', sanitize_text_field( (string) $msg ) );
+		}
+		return $data;
+	}
 
-		// OpenAI: {data:[{id:...}]}；Anthropic: {data:[{id:...}]}，字段一致
-		$list = isset( $data['data'] ) && is_array( $data['data'] ) ? $data['data'] : array();
-		$out  = array();
-		foreach ( $list as $item ) {
-			if ( is_array( $item ) && ! empty( $item['id'] ) ) {
-				$out[] = (string) $item['id'];
-			} elseif ( is_string( $item ) && '' !== $item ) {
-				$out[] = $item;
+	/** 兼容 OpenAI/Anthropic 及常见中转站的模型数组包裹格式。 */
+	private static function model_ids_from_response( $data ) {
+		$list = array();
+		foreach ( array( 'data', 'models', 'items', 'result' ) as $key ) {
+			if ( isset( $data[ $key ] ) && is_array( $data[ $key ] ) ) {
+				$list = $data[ $key ];
+				break;
+			}
+		}
+		// 常见中转站会再包一层 result.data 或 result.items。
+		foreach ( array( 'data', 'models', 'items' ) as $key ) {
+			if ( isset( $list[ $key ] ) && is_array( $list[ $key ] ) ) {
+				$list = $list[ $key ];
+				break;
 			}
 		}
 
-		if ( ! $out ) {
-			return new WP_Error( 'bokeauto_api', '该服务商未返回模型列表，请手动填写模型名' );
+		$out = array();
+		foreach ( $list as $item ) {
+			$id = '';
+			if ( is_array( $item ) ) {
+				$id = ! empty( $item['id'] ) ? $item['id'] : ( ! empty( $item['name'] ) ? $item['name'] : '' );
+			} elseif ( is_string( $item ) ) {
+				$id = $item;
+			}
+			$id = trim( (string) $id );
+			if ( 0 === strpos( $id, 'models/' ) ) {
+				$id = substr( $id, 7 );
+			}
+			if ( '' !== $id ) {
+				$out[] = $id;
+			}
 		}
-
-		$out = array_values( array_unique( $out ) );
-		sort( $out );
 		return $out;
+	}
+
+	/** 排除名称即可明确判断的专用模型，保留多模态对话模型。 */
+	private static function is_conversation_model( $model ) {
+		$name = strtolower( (string) $model );
+		return ! preg_match( '/(^|[\/_-])(embedding|embed|rerank(?:er)?|re-rank(?:er)?|tts|whisper|transcrib(?:e|er)|moderation|image|imagen|cogview|dall-e|sora)([\/_-]|$)/', $name );
 	}
 
 	/* ---------------------------------------------------------------------

@@ -50,7 +50,7 @@
 	}
 
 	// 已拉取缓存的模型列表（与预设模型合并展示）
-	$fetched_models = isset( $settings['fetched_models'] ) && is_array( $settings['fetched_models'] ) ? $settings['fetched_models'] : array();
+	$fetched_models = Bokeauto_Settings::available_fetched_models( $settings );
 	?>
 
 	<form method="post">
@@ -371,7 +371,12 @@
 					'X-WP-Nonce': BOKEAUTO.nonce
 				},
 				body: JSON.stringify( body )
-			} ).then( function ( r ) { return r.json(); } );
+			} ).then( function ( r ) {
+				return r.json().then( function ( data ) {
+					if ( ! r.ok ) { throw new Error( data.message || 'HTTP ' + r.status ); }
+					return data;
+				} );
+			} );
 		}
 
 		document.getElementById( 'bokeauto-test-llm' ).addEventListener( 'click', function () {
@@ -421,29 +426,36 @@
 
 			var btn = this;
 			var out = document.getElementById( 'bokeauto-models-result' );
+			var requestedProvider = sel.value;
+			var requestedBaseUrl = base.value;
+			var requestedProtocol = protoSel.value;
 
 			btn.disabled = true;
+			sel.disabled = true;
 			setResult( out, '获取中…', 'is-busy' );
 
 			apiPost( 'models', {
-				provider: sel.value,
-				base_url: base.value,
+				provider: requestedProvider,
+				base_url: requestedBaseUrl,
 				api_key: keyInput.value,
-				protocol: protoSel.value
+				protocol: requestedProtocol
 			} )
 			.then( function ( d ) {
 				setResult( out, d.message, d.ok ? 'is-ok' : 'is-err' );
 				if ( d.ok && d.models && d.models.length ) {
-					fetchedModels[ sel.value ] = d.models;
-					renderModels( sel.value );
+					fetchedModels[ requestedProvider ] = d.models;
+					renderModels( requestedProvider );
 					// 点开输入框即可看到候选，无需再次刷新页面
 					model.focus();
 				}
 			} )
-			.catch( function () {
-				setResult( out, '请求失败', 'is-err' );
+			.catch( function ( error ) {
+				setResult( out, '请求失败：' + error.message, 'is-err' );
 			} )
-			.finally( function () { btn.disabled = false; } );
+			.finally( function () {
+				btn.disabled = false;
+				sel.disabled = false;
+			} );
 		} );
 	})();
 	</script>

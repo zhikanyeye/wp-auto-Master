@@ -26,7 +26,8 @@
 
 .bokeauto-wrap,
 .bokeauto-modal,
-.bokeauto-memories-modal {
+.bokeauto-memories-modal,
+.bokeauto-promo {
 	/* 主色 */
 	--bk-primary: #2271b1;
 	--bk-primary-dark: #135e96;
@@ -64,6 +65,7 @@
 
 	/* 圆角 */
 	--bk-r-sm: 6px;
+	--bk-r-md: 8px;
 	--bk-r: 10px;
 	--bk-r-lg: 14px;
 	--bk-r-pill: 999px;
@@ -136,6 +138,68 @@
 	margin: var(--bk-sp-4) 0 var(--bk-sp-5);
 	padding-bottom: var(--bk-sp-4);
 	border-bottom: 1px solid var(--bk-border);
+}
+
+.bokeauto-workspace-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--bk-sp-4);
+	margin-bottom: var(--bk-sp-4);
+	padding: 12px 0;
+}
+
+.bokeauto-workspace-title {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-3);
+}
+
+.bokeauto-workspace-mark {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	background: #1d2327;
+	color: #fff;
+	border-radius: var(--bk-r-sm);
+}
+
+.bokeauto-workspace-title h1 {
+	margin: 0;
+	padding: 0;
+	font-size: 19px;
+	line-height: 1.25;
+	letter-spacing: 0;
+}
+
+.bokeauto-workspace-title p {
+	margin: 2px 0 0;
+	color: var(--bk-text-3);
+	font-size: 12px;
+}
+
+.bokeauto-workspace-status {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-2);
+	min-width: 0;
+	color: var(--bk-text-2);
+	font-size: 12px;
+}
+
+.bokeauto-status-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--bk-ok);
+	box-shadow: 0 0 0 3px var(--bk-ok-soft);
+}
+
+.bokeauto-workspace-status.is-warning .bokeauto-status-dot {
+	background: var(--bk-warn);
+	box-shadow: 0 0 0 3px var(--bk-warn-soft);
 }
 
 .bokeauto-wrap .bokeauto-title,
@@ -443,7 +507,7 @@
 	flex-direction: column;
 	background: var(--bk-surface);
 	border: 1px solid var(--bk-border);
-	border-radius: var(--bk-r-lg);
+	border-radius: var(--bk-r-md);
 	box-shadow: var(--bk-shadow);
 	height: calc(100vh - 250px);
 	min-height: 480px;
@@ -459,7 +523,7 @@
 	flex: 0 0 248px;
 	background: var(--bk-surface);
 	border: 1px solid var(--bk-border);
-	border-radius: var(--bk-r-lg);
+	border-radius: var(--bk-r-md);
 	box-shadow: var(--bk-shadow);
 	padding: var(--bk-sp-4);
 	display: flex;
@@ -478,9 +542,17 @@
 	border-radius: var(--bk-r-sm);
 	font-size: 13px;
 	font-weight: 500;
-	background: linear-gradient(135deg, var(--bk-primary) 0%, #2f80c8 100%);
+	background: var(--bk-primary);
 	border-color: var(--bk-primary-dark);
 	box-shadow: 0 1px 3px rgba(34, 113, 177, .25);
+}
+
+.bokeauto-btn-new .dashicons {
+	width: 16px;
+	height: 16px;
+	font-size: 16px;
+	line-height: 16px;
+	margin: 4px 5px 0 0;
 }
 
 .bokeauto-wrap .bokeauto-btn-new:hover {
@@ -598,9 +670,18 @@
 	border-radius: var(--bk-r-sm);
 	font-size: 11px;
 	color: var(--bk-text-4);
-	padding: 3px 9px;
+	width: 28px;
+	height: 28px;
+	padding: 3px;
 	cursor: pointer;
 	transition: color var(--bk-ease), border-color var(--bk-ease), background var(--bk-ease);
+}
+
+.bokeauto-btn-clear .dashicons {
+	width: 16px;
+	height: 16px;
+	font-size: 16px;
+	line-height: 16px;
 }
 
 .bokeauto-btn-clear:hover {
@@ -785,6 +866,20 @@
 	flex-wrap: wrap;
 }
 
+.bokeauto-model-icon {
+	width: 18px;
+	height: 18px;
+	font-size: 18px;
+	color: var(--bk-text-3);
+}
+
+.bokeauto-model-divider {
+	width: 1px;
+	height: 20px;
+	margin: 0 var(--bk-sp-1);
+	background: var(--bk-border);
+}
+
 .bokeauto-model-bar__opts {
 	display: flex;
 	align-items: center;
@@ -813,6 +908,14 @@
 	height: 30px;
 	line-height: 28px;
 	border-radius: var(--bk-r-sm);
+}
+
+.bokeauto-model-bar .button .dashicons {
+	width: 15px;
+	height: 15px;
+	margin: 5px 4px 0 0;
+	font-size: 15px;
+	line-height: 15px;
 }
 
 .bokeauto-model-bar .model-bar-current {
@@ -938,9 +1041,66 @@
 	display: flex;
 	flex-direction: column;
 	gap: var(--bk-sp-4);
-	background:
-		radial-gradient(circle at 1px 1px, #e9eaec 1px, transparent 0) 0 0 / 22px 22px,
-		var(--bk-surface);
+	background: var(--bk-surface-3);
+}
+
+.bokeauto-chat-empty {
+	width: min(560px, 100%);
+	margin: auto;
+	padding: 36px 20px;
+	text-align: center;
+	color: var(--bk-text-2);
+}
+
+.bokeauto-chat-empty > .dashicons {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	margin-bottom: var(--bk-sp-3);
+	border: 1px solid var(--bk-border);
+	border-radius: var(--bk-r-md);
+	background: var(--bk-surface);
+	color: var(--bk-primary);
+	font-size: 24px;
+}
+
+.bokeauto-chat-empty h2 {
+	margin: 0 0 var(--bk-sp-2);
+	font-size: 18px;
+	line-height: 1.35;
+	letter-spacing: 0;
+}
+
+.bokeauto-chat-empty p {
+	margin: 0;
+	font-size: 13px;
+}
+
+.bokeauto-starter-list {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: var(--bk-sp-2);
+	margin-top: var(--bk-sp-5);
+}
+
+.bokeauto-starter-list button {
+	min-height: 56px;
+	padding: 8px 10px;
+	border: 1px solid var(--bk-border);
+	border-radius: var(--bk-r-sm);
+	background: var(--bk-surface);
+	color: var(--bk-text-2);
+	cursor: pointer;
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+.bokeauto-starter-list button:hover {
+	border-color: var(--bk-primary);
+	color: var(--bk-primary-dark);
+	background: var(--bk-primary-soft);
 }
 
 .bokeauto-msg.user {
@@ -2403,6 +2563,17 @@
 }
 
 @media screen and (max-width: 782px) {
+	.bokeauto-workspace-head {
+		align-items: flex-start;
+		flex-direction: column;
+		gap: var(--bk-sp-3);
+	}
+
+	.bokeauto-workspace-status {
+		width: 100%;
+		flex-wrap: wrap;
+	}
+
 	.bokeauto-page-head {
 		margin-bottom: var(--bk-sp-4);
 	}
@@ -2434,7 +2605,21 @@
 	}
 
 	.bokeauto-model-bar select {
-		max-width: 160px;
+		max-width: 100%;
+		min-width: 0;
+		flex: 1 1 140px;
+	}
+
+	.bokeauto-model-divider {
+		display: none;
+	}
+
+	.bokeauto-chat-empty {
+		padding: 24px 8px;
+	}
+
+	.bokeauto-starter-list {
+		grid-template-columns: 1fr;
 	}
 
 	.bokeauto-model-bar .model-bar-current,

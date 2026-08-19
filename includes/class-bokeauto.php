@@ -1049,7 +1049,7 @@ class Bokeauto_Core {
 			) );
 		}
 
-		Bokeauto_Settings::save_fetched_models( $provider, $models );
+		Bokeauto_Settings::save_fetched_models( $provider, $models, $base_url, $protocol );
 
 		return rest_ensure_response( array(
 			'ok'      => true,
@@ -1316,7 +1316,7 @@ class Bokeauto_Core {
 			'has_key'         => '' !== $settings['api_key'],
 			'key_masked'      => '' === $settings['api_key'] ? '' : substr( $settings['api_key'], 0, 4 ) . '••••' . substr( $settings['api_key'], -4 ),
 			'providers'       => $providers,
-			'fetched_models'  => isset( $settings['fetched_models'] ) ? $settings['fetched_models'] : array(),
+			'fetched_models'  => Bokeauto_Settings::available_fetched_models( $settings ),
 			'embedding_model' => $settings['embedding_model'],
 			'embedding_ready' => '' !== $settings['embedding_api_key'],
 			'confirm_mode'    => $settings['confirm_mode'],

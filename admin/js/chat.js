@@ -8,6 +8,7 @@
 	var messagesEl = document.getElementById( 'bokeauto-messages' );
 	var inputEl = document.getElementById( 'bokeauto-input' );
 	var sendBtn = document.getElementById( 'bokeauto-send' );
+	var pageModelStatus = document.getElementById( 'bokeauto-page-model-status' );
 	var newBtn = document.getElementById( 'bokeauto-new-chat' );
 	var convListEl = document.getElementById( 'bokeauto-conv-list' );
 	var memoryCountEl = document.getElementById( 'bokeauto-memory-count' );
@@ -467,6 +468,8 @@
 			convMsgs.push( { role: 'user', content: text } );
 			inputEl.value = '';
 			inputEl.style.height = 'auto';
+			var welcome = messagesEl.querySelector( '.bokeauto-chat-empty' );
+			if ( welcome ) { welcome.remove(); }
 			addMsg( 'user', '<div class="bubble">' + textToHtml( text ) + '</div>' );
 
 			busy = true;
@@ -603,6 +606,18 @@
 			} );
 	}
 
+	function renderWelcome() {
+		messagesEl.innerHTML = '<div class="bokeauto-chat-empty">'
+			+ '<span class="dashicons dashicons-superhero"></span>'
+			+ '<h2>从一个站点任务开始</h2>'
+			+ '<p>描述目标，波克wpAI会规划步骤并调用 WordPress 工具执行。</p>'
+			+ '<div class="bokeauto-starter-list">'
+			+ '<button type="button" data-prompt="检查网站最近发布的文章并给出内容优化建议">分析近期内容</button>'
+			+ '<button type="button" data-prompt="帮我起草一篇新文章，先询问主题和目标读者">起草新文章</button>'
+			+ '<button type="button" data-prompt="检查当前 WordPress 站点的基础运行状态">检查站点状态</button>'
+			+ '</div></div>';
+	}
+
 	function deleteConv( id ) {
 		if ( ! confirm( '确定删除该会话及全部消息？' ) ) { return; }
 		fetch( apiUrl( 'conversations/' + id ), { method: 'DELETE', headers: { 'X-WP-Nonce': NONCE } } )
@@ -611,7 +626,7 @@
 				if ( String( currentConv ) === String( id ) ) {
 					currentConv = null;
 					convMsgs = [];
-					messagesEl.innerHTML = '';
+					renderWelcome();
 					localStorage.removeItem( 'bokeauto_conv_id' );
 				}
 				loadConversations();
@@ -670,7 +685,7 @@
 				currentConv = null;
 				convMsgs = [];
 				pendingConfirm = null;
-				messagesEl.innerHTML = '';
+				renderWelcome();
 				localStorage.removeItem( 'bokeauto_conv_id' );
 				loadConversations();
 				loadUsage();
@@ -822,6 +837,10 @@
 		var label = p.label || barSettings.provider;
 		var keyInfo = barSettings.has_key ? '' : '（未配置 Key）';
 		barCurrent.textContent = '当前：' + label + ' · ' + barSettings.model + keyInfo;
+		if ( pageModelStatus ) {
+			pageModelStatus.textContent = label + ' / ' + ( barSettings.model || '未选择模型' ) + keyInfo;
+			pageModelStatus.parentNode.classList.toggle( 'is-warning', ! barSettings.has_key && 'mock' !== barSettings.provider );
+		}
 	}
 
 	barProvider.addEventListener( 'change', function () {
@@ -882,6 +901,13 @@
 		inputEl.style.height = Math.min( inputEl.scrollHeight, 160 ) + 'px';
 	} );
 	sendBtn.addEventListener( 'click', send );
+	messagesEl.addEventListener( 'click', function ( e ) {
+		var starter = e.target.closest && e.target.closest( '[data-prompt]' );
+		if ( ! starter ) { return; }
+		inputEl.value = starter.dataset.prompt || '';
+		inputEl.dispatchEvent( new Event( 'input' ) );
+		inputEl.focus();
+	} );
 
 	/* ---------------- 新对话 ---------------- */
 
@@ -890,7 +916,7 @@
 		currentConv = null;
 		convMsgs = [];
 		pendingConfirm = null;
-		messagesEl.innerHTML = '';
+		renderWelcome();
 		localStorage.removeItem( 'bokeauto_conv_id' );
 		highlightConv( null );
 		inputEl.focus();

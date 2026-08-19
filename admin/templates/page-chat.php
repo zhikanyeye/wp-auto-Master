@@ -1,29 +1,28 @@
 <div class="wrap bokeauto-wrap">
-	<div class="bokeauto-page-head">
-		<h1 class="bokeauto-title">
-			<span class="dashicons dashicons-superhero"></span>
-			<span class="bokeauto-title-text">波克wpAI自动化插件</span>
-			<span class="bokeauto-ver">v<?php echo esc_html( BOKEAUTO_VERSION ); ?> · 免费开源</span>
-		</h1>
-
-		<div class="bokeauto-sub">
-			<p class="bokeauto-desc">内置 AI 智能体助手：连接外部大模型 API 与内置向量记忆库，用自然语言完成 WordPress 全站管理、开发与维护任务。自学习，越用越聪明。</p>
-			<p class="bokeauto-open-note">
-				本插件免费开源，当前版本可能存在一些问题，有能力的朋友可自行修复，也欢迎联系作者一起改进。
-				期待与你共同探讨、拓展 WP 智能体能力，让它更好用、适配更多用户需求场景。
-			</p>
+	<div class="bokeauto-page-head bokeauto-workspace-head">
+		<div class="bokeauto-workspace-title">
+			<span class="bokeauto-workspace-mark dashicons dashicons-superhero"></span>
+			<div>
+				<h1>AI 工作台</h1>
+				<p>管理站点、内容与代码任务</p>
+			</div>
+		</div>
+		<div class="bokeauto-workspace-status">
+			<span class="bokeauto-status-dot"></span>
+			<span id="bokeauto-page-model-status">正在读取模型配置</span>
+			<span class="bokeauto-ver">v<?php echo esc_html( BOKEAUTO_VERSION ); ?></span>
 		</div>
 	</div>
 
 	<div class="bokeauto-chat-layout">
 		<!-- 侧栏 -->
 		<aside class="bokeauto-sidebar">
-			<button type="button" class="button button-primary bokeauto-btn-new" id="bokeauto-new-chat">新对话</button>
+			<button type="button" class="button button-primary bokeauto-btn-new" id="bokeauto-new-chat"><span class="dashicons dashicons-plus-alt2"></span>新对话</button>
 
 			<div class="bokeauto-conv-block">
 				<div class="bokeauto-conv-head">
 					<h3>会话记录</h3>
-					<button type="button" class="bokeauto-btn-clear" id="bokeauto-btn-clear" title="清空聊天记录">清空</button>
+					<button type="button" class="bokeauto-btn-clear" id="bokeauto-btn-clear" title="清空聊天记录" aria-label="清空聊天记录"><span class="dashicons dashicons-trash"></span></button>
 				</div>
 				<ul class="bokeauto-conv-list" id="bokeauto-conv-list">
 					<li class="empty">加载中…</li>
@@ -62,12 +61,13 @@
 		<main class="bokeauto-chat-main">
 			<div class="bokeauto-model-bar">
 				<div class="bokeauto-model-bar__row">
-					<span class="model-bar-label">角色</span>
+					<span class="bokeauto-model-icon dashicons dashicons-admin-users" title="执行角色"></span>
 					<select id="bokeauto-bar-role" title="切换当前对话角色（总调度可协调所有角色协作）"><option value="0">总调度（波克wpAI）</option></select>
-					<span class="model-bar-label">模型</span>
+					<span class="bokeauto-model-divider"></span>
+					<span class="bokeauto-model-icon dashicons dashicons-cloud" title="模型服务"></span>
 					<select id="bokeauto-bar-provider" title="切换模型服务商"></select>
 					<select id="bokeauto-bar-model" title="切换模型"></select>
-					<button type="button" class="button button-small" id="bokeauto-bar-switch">切换</button>
+					<button type="button" class="button button-small" id="bokeauto-bar-switch"><span class="dashicons dashicons-update"></span>应用</button>
 					<span class="model-bar-current" id="bokeauto-bar-current"></span>
 				</div>
 				<div class="bokeauto-model-bar__opts">
@@ -82,10 +82,21 @@
 					</span>
 				</div>
 			</div>
-			<div class="bokeauto-messages" id="bokeauto-messages"></div>
+			<div class="bokeauto-messages" id="bokeauto-messages">
+				<div class="bokeauto-chat-empty">
+					<span class="dashicons dashicons-superhero"></span>
+					<h2>从一个站点任务开始</h2>
+					<p>描述目标，波克wpAI会规划步骤并调用 WordPress 工具执行。</p>
+					<div class="bokeauto-starter-list">
+						<button type="button" data-prompt="检查网站最近发布的文章并给出内容优化建议">分析近期内容</button>
+						<button type="button" data-prompt="帮我起草一篇新文章，先询问主题和目标读者">起草新文章</button>
+						<button type="button" data-prompt="检查当前 WordPress 站点的基础运行状态">检查站点状态</button>
+					</div>
+				</div>
+			</div>
 			<div class="bokeauto-composer">
 				<textarea id="bokeauto-input" rows="1" placeholder="<?php echo esc_attr( '例如：帮我发布一篇介绍网站的文章，并创建分类「新闻」…' ); ?>"></textarea>
-				<button type="button" class="button button-primary" id="bokeauto-send">发送</button>
+				<button type="button" class="button button-primary" id="bokeauto-send"><span class="dashicons dashicons-arrow-up-alt2"></span><span>发送</span></button>
 			</div>
 		</main>
 	</div>

@@ -65,6 +65,8 @@ class Bokeauto_Settings {
 			'providers'      => array(),
 			// 动态拉取到的模型列表缓存（provider => array of model id）
 			'fetched_models' => array(),
+			// 模型缓存来源（provider => base_url/protocol 指纹），防止切换代理后复用旧列表。
+			'fetched_model_sources' => array(),
 			// 生图配置（generate_image 工具使用，可独立于对话模型）
 			'image_provider' => 'zhipu',
 			'image_base_url' => 'https://open.bigmodel.cn/api/paas/v4',
@@ -273,14 +275,15 @@ class Bokeauto_Settings {
 		return 'openai-chat';
 	}
 
-	/** 存放动态拉取到的模型列表（按 provider 归档，供前端下拉复用） */
-	public static function save_fetched_models( $provider, $models ) {
+	/** 存放动态拉取到的模型列表，并绑定本次请求来源。 */
+	public static function save_fetched_models( $provider, $models, $base_url = '', $protocol = '' ) {
 		$provider = sanitize_key( $provider );
 		if ( '' === $provider ) {
 			return;
 		}
 		$settings = self::get();
 		$all      = isset( $settings['fetched_models'] ) && is_array( $settings['fetched_models'] ) ? $settings['fetched_models'] : array();
+		$sources  = isset( $settings['fetched_model_sources'] ) && is_array( $settings['fetched_model_sources'] ) ? $settings['fetched_model_sources'] : array();
 
 		$clean = array();
 		foreach ( (array) $models as $m ) {
@@ -291,9 +294,46 @@ class Bokeauto_Settings {
 		}
 		// 保留服务商返回的完整模型列表，避免刷新设置页后模型被静默截断。
 		$all[ $provider ] = array_values( array_unique( $clean ) );
+		$sources[ $provider ] = self::model_source_key( $provider, $base_url, $protocol );
 
 		$settings['fetched_models'] = $all;
+		$settings['fetched_model_sources'] = $sources;
 		update_option( self::OPTION, $settings );
+	}
+
+	/** 当前服务商配置对应的模型缓存；来源变化后旧缓存自动隐藏。 */
+	public static function available_fetched_models( $settings = null ) {
+		$settings = is_array( $settings ) ? $settings : self::get();
+		$all      = isset( $settings['fetched_models'] ) && is_array( $settings['fetched_models'] ) ? $settings['fetched_models'] : array();
+		$sources  = isset( $settings['fetched_model_sources'] ) && is_array( $settings['fetched_model_sources'] ) ? $settings['fetched_model_sources'] : array();
+		$providers = isset( $settings['providers'] ) && is_array( $settings['providers'] ) ? $settings['providers'] : array();
+		$out = array();
+
+		foreach ( $all as $provider => $models ) {
+			$config = isset( $providers[ $provider ] ) && is_array( $providers[ $provider ] ) ? $providers[ $provider ] : array();
+			if ( $provider === $settings['provider'] ) {
+				$config = array_merge( $config, array(
+					'base_url' => $settings['base_url'],
+					'protocol' => isset( $settings['protocol'] ) ? $settings['protocol'] : '',
+				) );
+			}
+			$expected = self::model_source_key(
+				$provider,
+				isset( $config['base_url'] ) ? $config['base_url'] : '',
+				isset( $config['protocol'] ) ? $config['protocol'] : ''
+			);
+			if ( isset( $sources[ $provider ] ) && hash_equals( $expected, (string) $sources[ $provider ] ) ) {
+				$out[ $provider ] = array_values( (array) $models );
+			}
+		}
+
+		return $out;
+	}
+
+	/** 模型目录缓存来源指纹，不包含 API Key。 */
+	private static function model_source_key( $provider, $base_url, $protocol ) {
+		$resolved = self::resolve_protocol( $provider, $base_url, $protocol );
+		return hash( 'sha256', sanitize_key( $provider ) . '|' . rtrim( (string) $base_url, '/' ) . '|' . $resolved );
 	}
 
 	/** 两个 URL 是否同域名（用于判断 base_url 是否属于某个 provider 的预设地址） */
@@ -330,14 +370,14 @@ class Bokeauto_Settings {
 				'protocol' => 'openai-chat',
 				'base_url' => 'https://open.bigmodel.cn/api/paas/v4',
 				'model'    => 'glm-4.5-flash',
-				'models'   => array( 'glm-4.5-flash', 'glm-4.5-air', 'glm-4.5-airx', 'glm-4.5', 'glm-4.5-x', 'glm-4-plus', 'glm-4-air', 'glm-4-flash', 'embedding-2' ),
+				'models'   => array( 'glm-4.5-flash', 'glm-4.5-air', 'glm-4.5-airx', 'glm-4.5', 'glm-4.5-x', 'glm-4-plus', 'glm-4-air', 'glm-4-flash' ),
 			),
 			'qwen' => array(
 				'label'    => '通义千问（阿里云）',
 				'protocol' => 'openai-chat',
 				'base_url' => 'https://dashscope.aliyuncs.com/compatible-mode/v1',
 				'model'    => 'qwen-plus',
-				'models'   => array( 'qwen-max', 'qwen-plus', 'qwen-turbo', 'qwen-long', 'qwen2.5-72b-instruct', 'qwen2.5-32b-instruct', 'text-embedding-v3', 'text-embedding-v1' ),
+				'models'   => array( 'qwen-max', 'qwen-plus', 'qwen-turbo', 'qwen-long', 'qwen2.5-72b-instruct', 'qwen2.5-32b-instruct' ),
 			),
 			'hunyuan' => array(
 				'label'    => '腾讯云混元',
@@ -365,7 +405,7 @@ class Bokeauto_Settings {
 				'protocol' => 'openai-chat',
 				'base_url' => 'https://api.openai.com/v1',
 				'model'    => 'gpt-4o-mini',
-				'models'   => array( 'gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-4', 'gpt-3.5-turbo', 'o3-mini', 'text-embedding-3-small' ),
+				'models'   => array( 'gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-4', 'gpt-3.5-turbo', 'o3-mini' ),
 			),
 			'gemini' => array(
 				'label'    => 'Gemini（Google，OpenAI 兼容端点）',
