@@ -177,3 +177,6 @@
 
 # Workspace temp
 .monkeycode-tmp-files/
+
+# Allow distributable plugin zip
+!tianma-chat.zip
