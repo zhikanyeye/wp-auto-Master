@@ -6,7 +6,7 @@
 
 用中文聊天的方式，完成全站管理、内容创作、网页采集、代码开发与系统维护
 
-[![Version](https://img.shields.io/badge/version-2.0-blue)](https://github.com/zhikanyeye/wp-auto-Master/releases)
+[![Version](https://img.shields.io/badge/version-2.1-blue)](https://github.com/zhikanyeye/wp-auto-Master/releases)
 [![License](https://img.shields.io/badge/license-GPL--2.0--or--later-green)](LICENSE)
 [![WordPress](https://img.shields.io/badge/WordPress-6.0%2B-orange)](https://wordpress.org/)
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-blueviolet)](https://www.php.net/)
@@ -77,7 +77,7 @@
 
 ---
 
-## 网页采集（v2.0 新增）
+## 网页采集
 
 面向资讯站与内容聚合站的完整采集链路，全部通过对话完成，无需手写规则文件。
 

@@ -4,7 +4,7 @@ Tags: ai, agent, assistant, automation, collect
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.0
+Stable tag: 2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -92,6 +92,11 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 请只采集你拥有版权或已获授权转载的内容，并遵守目标站点的 robots 协议与服务条款。插件提供工具，合规使用责任在使用者。
 
 == Changelog ==
+
+= 2.1 =
+* 固定使用 BAAI/bge-m3 作为记忆嵌入模型，嵌入 API 地址与 Key 独立于主模型配置
+* 新增嵌入服务测试、模型维度兼容处理与关键词检索降级
+* 新增白名单插件 zip 打包脚本与 GitHub Actions 自动 Release
 
 = 2.0 =
 * 新增网页采集能力：内置 CSS 选择器引擎、相对链接补全、正文清洗、图片本地化、来源去重、采集规则库与批量执行
