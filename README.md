@@ -132,7 +132,7 @@
 bash scripts/package-plugin.sh
 ```
 
-推送 `v*` 标签后，GitHub Actions 会自动执行同一脚本，并把 `boke-wpai-automation.zip` 附加到 GitHub Release。手动运行工作流时会上传构建产物，但不会创建 Release。
+脚本会从 `bokeauto.php` 读取插件版本，默认生成 `boke-wpai-automation-v2.1.zip` 这类带版本号的文件。推送 `v*` 标签后，GitHub Actions 会自动生成带插件名和版本号的构建标题，附加构建摘要，并根据提交记录生成分类 Release Notes，再将同名 zip 附加到 GitHub Release。手动运行工作流时会生成同样的带版本号 zip 和构建摘要，并上传 Artifact。
 
 **环境要求**
 

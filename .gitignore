@@ -180,3 +180,4 @@
 
 # Allow distributable plugin zip
 !boke-wpai-automation.zip
+!boke-wpai-automation-v*.zip

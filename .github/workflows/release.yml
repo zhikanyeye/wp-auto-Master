@@ -1,4 +1,5 @@
 name: Build and Release Plugin
+run-name: "构建波克wpAI自动化插件 ${{ github.ref_name }}"
 
 on:
   push:
@@ -19,13 +20,35 @@ jobs:
           fetch-depth: 0
 
       - name: Build distributable plugin zip
-        run: bash scripts/package-plugin.sh
+        id: package
+        run: |
+          set -euo pipefail
+          package_path="$(bash scripts/package-plugin.sh | sed -n 's/^Created //p' | tail -n 1)"
+          package_name="$(basename "$package_path")"
+          echo "path=$package_path" >> "$GITHUB_OUTPUT"
+          echo "name=$package_name" >> "$GITHUB_OUTPUT"
+          echo "version=${package_name#boke-wpai-automation-v}" | sed 's/\.zip$//' >> "$GITHUB_OUTPUT"
 
       - name: Validate distributable plugin zip
         run: |
-          unzip -t boke-wpai-automation.zip
-          test "$(unzip -Z1 boke-wpai-automation.zip | awk -F/ 'NF > 1 {print $1}' | sort -u)" = "bokeauto"
-          ! unzip -Z1 boke-wpai-automation.zip | grep -E '(^|/)(README\.md|\.github|\.monkeycode|scripts|tests?)(/|$)'
+          unzip -t "${{ steps.package.outputs.path }}"
+          test "$(unzip -Z1 "${{ steps.package.outputs.path }}" | awk -F/ 'NF > 1 {print $1}' | sort -u)" = "bokeauto"
+          ! unzip -Z1 "${{ steps.package.outputs.path }}" | grep -E '(^|/)(README\.md|\.github|\.monkeycode|scripts|tests?)(/|$)'
+
+      - name: Publish build summary
+        env:
+          PACKAGE_NAME: ${{ steps.package.outputs.name }}
+          PACKAGE_PATH: ${{ steps.package.outputs.path }}
+        run: |
+          {
+            printf '# 波克wpAI自动化插件构建\n\n'
+            printf '- 版本：`%s`\n' "${{ steps.package.outputs.version }}"
+            printf '- 触发引用：`%s`\n' "${{ github.ref_name }}"
+            printf '- 提交：`%s`\n' "${{ github.sha }}"
+            printf '- 构建产物：`%s`\n' "$PACKAGE_NAME"
+            printf '- 白名单校验：通过\n'
+            printf '- 压缩包完整性校验：通过\n'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Generate release notes
         if: startsWith(github.ref, 'refs/tags/')
@@ -60,6 +83,8 @@ jobs:
 
           {
             printf '# %s\n\n' "$CURRENT_TAG"
+            printf '> 波克wpAI自动化插件 %s\n\n' "$CURRENT_TAG"
+            printf '**构建产物：** `%s`\n\n' "${{ steps.package.outputs.name }}"
             printf '## 变更概览\n\n'
             if [ -n "$previous_tag" ]; then
               printf '本版本基于 `%s` 生成，完整变更记录：[查看对比]('%s')。\n\n' "$previous_tag" "$compare_url"
@@ -114,13 +139,13 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          name: ${{ github.ref_name }}
+          name: 波克wpAI自动化插件 ${{ github.ref_name }}
           body_path: release-notes.md
           prerelease: ${{ steps.release_metadata.outputs.prerelease }}
-          files: boke-wpai-automation.zip
+          files: ${{ steps.package.outputs.path }}
 
       - name: Upload package artifact
         uses: actions/upload-artifact@v4
         with:
-          name: boke-wpai-automation
-          path: boke-wpai-automation.zip
+          name: ${{ steps.package.outputs.name }}
+          path: ${{ steps.package.outputs.path }}
