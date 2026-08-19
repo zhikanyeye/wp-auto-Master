@@ -4,7 +4,7 @@ Tags: ai, agent, assistant, automation, collect
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1
+Stable tag: 2.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -92,6 +92,11 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 请只采集你拥有版权或已获授权转载的内容，并遵守目标站点的 robots 协议与服务条款。插件提供工具，合规使用责任在使用者。
 
 == Changelog ==
+
+= 2.1.1 =
+* 修复模型设置页未应用新版后台 UI 样式的问题
+* 将模型候选改为可直接操作的下拉框，同时保留自定义模型输入
+* 移除动态模型缓存的 200 条截断，完整保留服务商返回的模型列表
 
 = 2.1 =
 * 固定使用 BAAI/bge-m3 作为记忆嵌入模型，嵌入 API 地址与 Key 独立于主模型配置

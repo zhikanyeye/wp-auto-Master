@@ -1956,6 +1956,22 @@
 	border-color: var(--bk-border);
 }
 
+.bokeauto-model-picker {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-2);
+	flex-wrap: wrap;
+}
+
+.bokeauto-model-picker select {
+	min-width: 260px;
+	max-width: 100%;
+}
+
+.bokeauto-model-picker input {
+	min-width: 280px;
+}
+
 /* 单选组：卡片式选项 */
 .bokeauto-radio-group {
 	display: flex;

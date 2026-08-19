@@ -1,5 +1,14 @@
-<div class="wrap">
-	<h1>波克wpAI自动化插件 — 模型设置</h1>
+<div class="wrap bokeauto-wrap">
+	<div class="bokeauto-page-head">
+		<h1 class="bokeauto-title">
+			<span class="dashicons dashicons-superhero"></span>
+			<span class="bokeauto-title-text">波克wpAI自动化插件 — 模型设置</span>
+			<span class="bokeauto-ver">v<?php echo esc_html( BOKEAUTO_VERSION ); ?> · 配置中心</span>
+		</h1>
+		<div class="bokeauto-sub">
+			<p class="bokeauto-desc">配置对话模型、协议、记忆向量化服务和 Agent 执行策略。</p>
+		</div>
+	</div>
 
 	<?php
 	$settings = Bokeauto_Settings::get();
@@ -40,7 +49,7 @@
 		<?php wp_nonce_field( 'bokeauto_settings' ); ?>
 		<input type="hidden" name="bokeauto_save_settings" value="1">
 
-		<table class="form-table" role="presentation">
+		<table class="form-table bokeauto-form-table" role="presentation">
 			<tr>
 				<th scope="row"><label for="bokeauto-provider">模型服务商</label></th>
 				<td>
@@ -97,9 +106,13 @@
 			<tr>
 				<th scope="row"><label for="bokeauto-model">模型名称</label></th>
 				<td>
-					<input type="text" class="regular-text" id="bokeauto-model" name="model"
-						value="<?php echo esc_attr( $settings['model'] ); ?>" list="bokeauto-models">
-					<datalist id="bokeauto-models"></datalist>
+					<div class="bokeauto-model-picker">
+						<select id="bokeauto-model-select" aria-label="选择模型">
+							<option value="">选择已获取的模型</option>
+						</select>
+						<input type="text" class="regular-text" id="bokeauto-model" name="model"
+							value="<?php echo esc_attr( $settings['model'] ); ?>" placeholder="或手动输入模型名称">
+					</div>
 					<button type="button" class="button" id="bokeauto-fetch-models">获取模型列表</button>
 					<span id="bokeauto-models-result" class="bokeauto-test-result"></span>
 					<p class="description">可直接输入，或从下拉候选中选择。点「获取模型列表」会用当前地址与 Key 拉取该服务商的真实可用模型。</p>
@@ -274,7 +287,7 @@
 		var sel = document.getElementById( 'bokeauto-provider' );
 		var base = document.getElementById( 'bokeauto-base-url' );
 		var model = document.getElementById( 'bokeauto-model' );
-		var modelsList = document.getElementById( 'bokeauto-models' );
+		var modelSelect = document.getElementById( 'bokeauto-model-select' );
 		var keyInput = document.getElementById( 'bokeauto-api-key' );
 		var protoSel = document.getElementById( 'bokeauto-protocol' );
 
@@ -292,9 +305,10 @@
 					if ( m && list.indexOf( m ) === -1 ) { list.push( m ); }
 				} );
 			} );
-			modelsList.innerHTML = list.map( function ( m ) {
-				return '<option value="' + esc( m ) + '">';
+			modelSelect.innerHTML = '<option value="">选择已获取的模型（' + list.length + '）</option>' + list.map( function ( m ) {
+				return '<option value="' + esc( m ) + '">' + esc( m ) + '</option>';
 			} ).join( '' );
+			modelSelect.value = list.indexOf( model.value ) >= 0 ? model.value : '';
 		}
 
 		function applyPreset() {
@@ -320,6 +334,12 @@
 			}
 		}
 		sel.addEventListener( 'change', applyPreset );
+		modelSelect.addEventListener( 'change', function () {
+			if ( this.value ) { model.value = this.value; }
+		} );
+		model.addEventListener( 'input', function () {
+			modelSelect.value = '';
+		} );
 		// 仅填充模型下拉列表；不执行 applyPreset()，避免页面加载时把已保存的 base_url/模型覆盖成预设值
 		renderModels( sel.value );
 

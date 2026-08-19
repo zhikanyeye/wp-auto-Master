@@ -289,8 +289,8 @@ class Bokeauto_Settings {
 				$clean[] = $m;
 			}
 		}
-		// 单个服务商最多缓存 200 个模型，避免 option 体积失控
-		$all[ $provider ] = array_slice( array_values( array_unique( $clean ) ), 0, 200 );
+		// 保留服务商返回的完整模型列表，避免刷新设置页后模型被静默截断。
+		$all[ $provider ] = array_values( array_unique( $clean ) );
 
 		$settings['fetched_models'] = $all;
 		update_option( self::OPTION, $settings );
