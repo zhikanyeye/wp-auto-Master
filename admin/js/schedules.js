@@ -156,6 +156,12 @@
 		b.addEventListener( 'click', closeModal );
 	} );
 
+	var schedModal = document.getElementById( 'bokeauto-sched-modal' );
+	schedModal.addEventListener( 'click', function ( e ) { if ( e.target === schedModal ) { closeModal(); } } );
+	document.addEventListener( 'keydown', function ( e ) {
+		if ( 'Escape' === e.key && 'none' !== schedModal.style.display ) { closeModal(); }
+	} );
+
 	tbody.addEventListener( 'click', function ( e ) {
 		var btn = e.target.closest( 'button' );
 		if ( ! btn ) { return; }

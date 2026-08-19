@@ -1,49 +1,537 @@
-/* 波克wpAI自动化插件 - 对话界面 */
+/**
+ * 波克wpAI自动化插件 — 后台样式表
+ *
+ * 目录
+ *   01  设计变量
+ *   02  页面骨架与标题
+ *   03  通用组件：卡片 / 分区 / 表格 / 徽章 / 工具条
+ *   04  聊天页布局
+ *   05  侧栏
+ *   06  模型切换条
+ *   07  消息流
+ *   08  执行步骤与工具卡片
+ *   09  高危操作确认卡片
+ *   10  可视化卡片与文件编辑器
+ *   11  输入区
+ *   12  弹窗
+ *   13  模型设置页
+ *   14  定时任务页
+ *   15  底部推广位
+ *   16  响应式
+ */
 
-.bokeauto-wrap .bokeauto-title {
+/* ==========================================================================
+   01  设计变量
+   ========================================================================== */
+
+.bokeauto-wrap,
+.bokeauto-modal,
+.bokeauto-memories-modal {
+	/* 主色 */
+	--bk-primary: #2271b1;
+	--bk-primary-dark: #135e96;
+	--bk-primary-soft: #f0f6fc;
+	--bk-primary-line: #c3ccd6;
+	--bk-accent: #7f77dd;
+	--bk-accent-soft: #f7f6fd;
+	--bk-accent-line: #d5d0f2;
+
+	/* 语义色 */
+	--bk-ok: #0f6e56;
+	--bk-ok-soft: #f2faf6;
+	--bk-ok-line: #b8dcc9;
+	--bk-danger: #a32d2d;
+	--bk-danger-strong: #d63638;
+	--bk-danger-soft: #fdf6f6;
+	--bk-danger-line: #f0c1c1;
+	--bk-warn: #8a6100;
+	--bk-warn-soft: #fcf9e8;
+	--bk-warn-line: #ecdba0;
+
+	/* 文本 */
+	--bk-text: #1d2327;
+	--bk-text-2: #50575e;
+	--bk-text-3: #646970;
+	--bk-text-4: #8c8f94;
+
+	/* 描边与底色 */
+	--bk-border: #dcdcde;
+	--bk-border-2: #e2e4e7;
+	--bk-divider: #f0f0f1;
+	--bk-surface: #fff;
+	--bk-surface-2: #f6f7f7;
+	--bk-surface-3: #fbfbfc;
+
+	/* 圆角 */
+	--bk-r-sm: 6px;
+	--bk-r: 10px;
+	--bk-r-lg: 14px;
+	--bk-r-pill: 999px;
+
+	/* 阴影 */
+	--bk-shadow-sm: 0 1px 2px rgba(16, 24, 40, .04);
+	--bk-shadow: 0 1px 3px rgba(16, 24, 40, .06), 0 1px 2px rgba(16, 24, 40, .04);
+	--bk-shadow-lg: 0 12px 32px rgba(16, 24, 40, .16);
+
+	/* 间距 */
+	--bk-sp-1: 4px;
+	--bk-sp-2: 8px;
+	--bk-sp-3: 12px;
+	--bk-sp-4: 16px;
+	--bk-sp-5: 24px;
+
+	/* 动效 */
+	--bk-ease: .18s ease;
+}
+
+/* 键盘焦点环，保证可访问性 */
+.bokeauto-wrap a:focus-visible,
+.bokeauto-wrap button:focus-visible,
+.bokeauto-wrap input:focus-visible,
+.bokeauto-wrap select:focus-visible,
+.bokeauto-wrap textarea:focus-visible,
+.bokeauto-modal button:focus-visible,
+.bokeauto-modal input:focus-visible,
+.bokeauto-modal select:focus-visible,
+.bokeauto-modal textarea:focus-visible {
+	outline: 2px solid var(--bk-primary);
+	outline-offset: 1px;
+	box-shadow: none;
+}
+
+/* 细滚动条 */
+.bokeauto-wrap ::-webkit-scrollbar,
+.bokeauto-modal ::-webkit-scrollbar,
+.bokeauto-memories-modal ::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+.bokeauto-wrap ::-webkit-scrollbar-thumb,
+.bokeauto-modal ::-webkit-scrollbar-thumb,
+.bokeauto-memories-modal ::-webkit-scrollbar-thumb {
+	background: #d3d5d8;
+	border-radius: var(--bk-r-pill);
+}
+
+.bokeauto-wrap ::-webkit-scrollbar-thumb:hover,
+.bokeauto-modal ::-webkit-scrollbar-thumb:hover {
+	background: #b9bcc0;
+}
+
+.bokeauto-wrap ::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+/* ==========================================================================
+   02  页面骨架与标题
+   ========================================================================== */
+
+.bokeauto-wrap {
+	max-width: 1600px;
+}
+
+/* 页面头部：图标 + 标题 + 版本徽章 + 描述 */
+.bokeauto-page-head {
+	margin: var(--bk-sp-4) 0 var(--bk-sp-5);
+	padding-bottom: var(--bk-sp-4);
+	border-bottom: 1px solid var(--bk-border);
+}
+
+.bokeauto-wrap .bokeauto-title,
+.bokeauto-title {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: var(--bk-sp-3);
+	flex-wrap: wrap;
+	margin: 0;
+	padding: 0;
+	font-size: 21px;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--bk-text);
+}
+
+/* 标题左侧的渐变图标块 */
+.bokeauto-title .dashicons {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
 	font-size: 20px;
+	color: #fff;
+	background: linear-gradient(135deg, var(--bk-primary) 0%, var(--bk-accent) 100%);
+	border-radius: var(--bk-r);
+	box-shadow: 0 2px 6px rgba(34, 113, 177, .22);
+}
+
+.bokeauto-title-text {
+	min-width: 0;
+}
+
+.bokeauto-ver {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	background: var(--bk-primary-soft);
+	color: var(--bk-primary-dark);
+	border: 1px solid #cfe0f0;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1;
+	padding: 5px 10px;
+	border-radius: var(--bk-r-pill);
+	vertical-align: middle;
+}
+
+.bokeauto-sub {
+	margin: var(--bk-sp-3) 0 0;
+	max-width: 900px;
+}
+
+.bokeauto-desc {
+	margin: 0;
+	color: var(--bk-text-2);
+	font-size: 13px;
+	line-height: 1.7;
+}
+
+.bokeauto-open-note {
+	display: flex;
+	gap: var(--bk-sp-2);
+	margin: var(--bk-sp-2) 0 0;
+	padding: var(--bk-sp-2) var(--bk-sp-3);
+	background: var(--bk-warn-soft);
+	border: 1px solid var(--bk-warn-line);
+	border-radius: var(--bk-r-sm);
+	color: #6b4e00;
+	font-size: 12px;
+	line-height: 1.7;
+}
+
+.bokeauto-open-note::before {
+	content: '开源';
+	flex: 0 0 auto;
+	align-self: flex-start;
+	margin-top: 1px;
+	padding: 2px 6px;
+	background: #fff;
+	border: 1px solid var(--bk-warn-line);
+	border-radius: var(--bk-r-sm);
+	color: var(--bk-warn);
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1.4;
+}
+
+.bokeauto-about-line {
+	margin: var(--bk-sp-1) 0 0;
+	color: var(--bk-text-3);
+	font-size: 11px;
+	line-height: 1.7;
+}
+
+.bokeauto-about-line a {
+	color: var(--bk-primary);
+	text-decoration: none;
+}
+
+.bokeauto-about-line a:hover {
+	text-decoration: underline;
+}
+
+/* ==========================================================================
+   03  通用组件：卡片 / 分区 / 表格 / 徽章 / 工具条
+   ========================================================================== */
+
+.bokeauto-card {
+	background: var(--bk-surface);
+	border: 1px solid var(--bk-border);
+	border-radius: var(--bk-r);
+	box-shadow: var(--bk-shadow);
+	margin-bottom: var(--bk-sp-5);
+	overflow: hidden;
+}
+
+.bokeauto-card__head {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-3);
+	flex-wrap: wrap;
+	padding: var(--bk-sp-3) var(--bk-sp-4);
+	background: linear-gradient(180deg, #fcfcfd 0%, var(--bk-surface-2) 100%);
+	border-bottom: 1px solid var(--bk-border-2);
+}
+
+.bokeauto-card__title {
+	margin: 0;
+	padding: 0;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--bk-text);
+}
+
+.bokeauto-card__desc {
+	margin: 0;
+	color: var(--bk-text-3);
+	font-size: 12px;
+	line-height: 1.6;
+	flex: 1 1 100%;
+}
+
+.bokeauto-card__actions {
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-2);
+	flex-wrap: wrap;
+}
+
+.bokeauto-card__body {
+	padding: var(--bk-sp-4);
+}
+
+.bokeauto-card__body--flush {
+	padding: 0;
+}
+
+/* 提示条，替代 WordPress 原生 notice 的观感 */
+.bokeauto-tip {
+	display: flex;
+	gap: var(--bk-sp-3);
+	padding: var(--bk-sp-3) var(--bk-sp-4);
+	margin: 0 0 var(--bk-sp-5);
+	background: var(--bk-primary-soft);
+	border: 1px solid #cfe0f0;
+	border-left: 3px solid var(--bk-primary);
+	border-radius: var(--bk-r-sm);
+	color: var(--bk-text-2);
+	font-size: 13px;
+	line-height: 1.75;
+}
+
+.bokeauto-tip strong {
+	color: var(--bk-text);
+}
+
+.bokeauto-tip .dashicons {
+	flex: 0 0 auto;
+	color: var(--bk-primary);
+}
+
+/* 表格：包在卡片内，圆角裁切 */
+.bokeauto-table-wrap {
+	overflow-x: auto;
+}
+
+.bokeauto-wrap .bokeauto-table {
+	border: none;
+	box-shadow: none;
+	margin: 0;
+	border-radius: 0;
+}
+
+.bokeauto-wrap .bokeauto-table thead th {
+	background: var(--bk-surface-2);
+	border-bottom: 1px solid var(--bk-border);
+	padding: 10px 14px;
+	color: var(--bk-text-3);
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: .02em;
+	white-space: nowrap;
+}
+
+.bokeauto-wrap .bokeauto-table tbody td {
+	padding: 11px 14px;
+	border-bottom: 1px solid var(--bk-divider);
+	font-size: 13px;
+	line-height: 1.6;
+	color: var(--bk-text-2);
+	vertical-align: middle;
+}
+
+.bokeauto-wrap .bokeauto-table tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.bokeauto-wrap .bokeauto-table tbody tr:hover td {
+	background: var(--bk-primary-soft);
+}
+
+.bokeauto-wrap .bokeauto-table tbody td:first-child {
+	color: var(--bk-text);
 	font-weight: 500;
 }
+
+.bokeauto-wrap .bokeauto-table .button {
+	margin-right: var(--bk-sp-1);
+}
+
+.bokeauto-roles-table code,
+.bokeauto-table code {
+	font-size: 11px;
+	background: var(--bk-surface-2);
+	border-radius: 4px;
+	padding: 1px 5px;
+}
+
+/* 状态徽章 */
+.bokeauto-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 9px;
+	border-radius: var(--bk-r-pill);
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1.6;
+	white-space: nowrap;
+}
+
+.bokeauto-badge--on {
+	background: var(--bk-ok-soft);
+	border: 1px solid var(--bk-ok-line);
+	color: var(--bk-ok);
+}
+
+.bokeauto-badge--off {
+	background: var(--bk-surface-2);
+	border: 1px solid var(--bk-border);
+	color: var(--bk-text-4);
+}
+
+.bokeauto-badge--warn {
+	background: var(--bk-warn-soft);
+	border: 1px solid var(--bk-warn-line);
+	color: var(--bk-warn);
+}
+
+/* 工具条 */
+.bokeauto-toolbar {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-3);
+	flex-wrap: wrap;
+	margin-bottom: var(--bk-sp-4);
+}
+
+.bokeauto-empty {
+	padding: 28px var(--bk-sp-4);
+	text-align: center;
+	color: var(--bk-text-4);
+	font-size: 13px;
+}
+
+/* ==========================================================================
+   04  聊天页布局
+   ========================================================================== */
 
 .bokeauto-chat-layout {
 	display: flex;
-	gap: 16px;
-	margin-top: 12px;
+	gap: var(--bk-sp-4);
+	margin-top: 0;
 	align-items: stretch;
 }
 
-/* ---------- 侧栏 ---------- */
-
-.bokeauto-sidebar {
-	width: 240px;
-	flex: 0 0 240px;
-	background: #fff;
-	border: 1px solid #dcdcde;
-	border-radius: 8px;
-	padding: 14px;
+.bokeauto-chat-main {
+	flex: 1;
+	min-width: 0;
 	display: flex;
 	flex-direction: column;
-	gap: 14px;
+	background: var(--bk-surface);
+	border: 1px solid var(--bk-border);
+	border-radius: var(--bk-r-lg);
+	box-shadow: var(--bk-shadow);
+	height: calc(100vh - 250px);
+	min-height: 480px;
+	overflow: hidden;
+}
+
+/* ==========================================================================
+   05  侧栏
+   ========================================================================== */
+
+.bokeauto-sidebar {
+	width: 248px;
+	flex: 0 0 248px;
+	background: var(--bk-surface);
+	border: 1px solid var(--bk-border);
+	border-radius: var(--bk-r-lg);
+	box-shadow: var(--bk-shadow);
+	padding: var(--bk-sp-4);
+	display: flex;
+	flex-direction: column;
+	gap: var(--bk-sp-4);
 	align-self: flex-start;
 	position: sticky;
 	top: 50px;
+	max-height: calc(100vh - 250px);
+	min-height: 480px;
+}
+
+.bokeauto-wrap .bokeauto-btn-new {
+	width: 100%;
+	height: 38px;
+	border-radius: var(--bk-r-sm);
+	font-size: 13px;
+	font-weight: 500;
+	background: linear-gradient(135deg, var(--bk-primary) 0%, #2f80c8 100%);
+	border-color: var(--bk-primary-dark);
+	box-shadow: 0 1px 3px rgba(34, 113, 177, .25);
+}
+
+.bokeauto-wrap .bokeauto-btn-new:hover {
+	background: var(--bk-primary-dark);
+	border-color: var(--bk-primary-dark);
+}
+
+.bokeauto-side-block {
+	padding-top: var(--bk-sp-3);
+	border-top: 1px solid var(--bk-divider);
 }
 
 .bokeauto-side-block h3 {
-	margin: 0 0 4px;
-	font-size: 13px;
-	font-weight: 500;
+	margin: 0 0 var(--bk-sp-1);
+	padding: 0;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--bk-text-3);
+	letter-spacing: .03em;
 }
 
 .bokeauto-side-desc {
-	margin: 0 0 8px;
-	color: #646970;
+	margin: 0 0 var(--bk-sp-2);
+	color: var(--bk-text-4);
+	font-size: 12px;
+	line-height: 1.6;
+}
+
+.bokeauto-wrap .bokeauto-btn-memories {
+	width: 100%;
+	justify-content: center;
+	text-align: center;
+	border-radius: var(--bk-r-sm);
 	font-size: 12px;
 }
 
+.bokeauto-side-foot {
+	margin-top: auto;
+	display: flex;
+	flex-direction: column;
+	gap: var(--bk-sp-2);
+}
+
+.bokeauto-side-foot .button {
+	width: 100%;
+	text-align: center;
+	border-radius: var(--bk-r-sm);
+	font-size: 12px;
+}
+
+/* 任务列表 */
 .bokeauto-task-list {
 	margin: 0;
 	padding: 0;
@@ -53,534 +541,33 @@
 }
 
 .bokeauto-task-list li {
-	padding: 6px 0;
-	border-bottom: 1px solid #f0f0f1;
+	padding: var(--bk-sp-2) 0;
+	border-bottom: 1px solid var(--bk-divider);
+}
+
+.bokeauto-task-list li:last-child {
+	border-bottom: none;
 }
 
 .bokeauto-task-list .bokeauto-task-summary {
 	display: block;
 	font-size: 12px;
-	line-height: 1.4;
+	line-height: 1.5;
+	color: var(--bk-text-2);
 }
 
 .bokeauto-task-list .bokeauto-task-meta {
 	display: block;
-	color: #8c8f94;
+	color: var(--bk-text-4);
 	font-size: 11px;
 	margin-top: 2px;
 }
 
 .bokeauto-task-list .empty {
-	color: #8c8f94;
+	color: var(--bk-text-4);
 }
 
-.bokeauto-side-foot {
-	margin-top: auto;
-}
-
-/* ---------- 对话区 ---------- */
-
-.bokeauto-chat-main {
-	flex: 1;
-	min-width: 0;
-	display: flex;
-	flex-direction: column;
-	background: #fff;
-	border: 1px solid #dcdcde;
-	border-radius: 8px;
-	height: calc(100vh - 180px);
-	min-height: 480px;
-}
-
-.bokeauto-messages {
-	flex: 1;
-	overflow-y: auto;
-	padding: 20px;
-	display: flex;
-	flex-direction: column;
-	gap: 14px;
-}
-
-.bokeauto-msg.user {
-	align-self: flex-end;
-	max-width: 78%;
-}
-
-.bokeauto-msg.assistant {
-	align-self: flex-start;
-	max-width: 100%;
-}
-
-.bokeauto-msg .bubble {
-	background: #f6f7f7;
-	border: 1px solid #e2e4e7;
-	border-radius: 12px;
-	padding: 10px 14px;
-	line-height: 1.65;
-	font-size: 13px;
-	word-break: break-word;
-}
-
-.bokeauto-msg.user .bubble {
-	background: #eef3fd;
-	border-color: #d0d9ea;
-}
-
-.bokeauto-msg.thinking .bubble {
-	color: #8c8f94;
-	font-style: italic;
-}
-
-.bokeauto-msg.error .bubble {
-	background: #fbeaea;
-	border-color: #f0c1c1;
-	color: #791f1f;
-}
-
-/* ---------- 步骤列表 ---------- */
-
-.bokeauto-steps {
-	border: 1px solid #e2e4e7;
-	border-radius: 12px;
-	margin-bottom: 10px;
-	background: #fbfbfc;
-}
-
-.bokeauto-steps-head {
-	padding: 8px 14px;
-	font-size: 12px;
-	font-weight: 500;
-	color: #646970;
-	border-bottom: 1px solid #eee;
-}
-
-.bokeauto-steps ol {
-	margin: 0;
-	padding: 8px 14px 8px 34px;
-	font-size: 12px;
-}
-
-.bokeauto-steps li {
-	margin: 4px 0;
-	line-height: 1.5;
-}
-
-.bokeauto-steps .step-icon {
-	margin-right: 6px;
-	font-weight: 500;
-}
-
-.bokeauto-steps li.ok .step-icon { color: #0f6e56; }
-.bokeauto-steps li.fail .step-icon { color: #a32d2d; }
-.bokeauto-steps .step-name {
-	font-weight: 500;
-	margin-right: 8px;
-}
-.bokeauto-steps .step-msg { color: #646970; }
-
-/* ---------- 确认卡片 ---------- */
-
-.bokeauto-confirm {
-	border: 1px solid #f0c1c1;
-	border-radius: 12px;
-	background: #fff8f8;
-	padding: 14px;
-	margin-bottom: 10px;
-}
-
-.bokeauto-confirm-title {
-	font-weight: 500;
-	color: #a32d2d;
-	margin-bottom: 8px;
-}
-
-.bokeauto-confirm-tool { font-size: 13px; margin-bottom: 6px; }
-.bokeauto-confirm-desc { color: #646970; font-size: 13px; margin-bottom: 8px; }
-
-.bokeauto-confirm-args {
-	background: #f6f7f7;
-	border: 1px solid #e2e4e7;
-	border-radius: 8px;
-	padding: 10px;
-	font-size: 12px;
-	overflow-x: auto;
-	max-height: 160px;
-}
-
-.bokeauto-confirm-btns { margin-top: 10px; }
-
-/* ---------- 反馈 ---------- */
-
-.bokeauto-feedback {
-	font-size: 12px;
-	color: #8c8f94;
-	margin-top: 8px;
-}
-
-.bokeauto-feedback .btn-fb {
-	background: none;
-	border: 1px solid #dcdcde;
-	border-radius: 6px;
-	padding: 2px 8px;
-	margin-left: 6px;
-	cursor: pointer;
-	font-size: 13px;
-}
-
-.bokeauto-feedback .btn-fb:hover { background: #f0f0f1; }
-
-/* ---------- 输入区 ---------- */
-
-.bokeauto-composer {
-	display: flex;
-	gap: 10px;
-	padding: 14px;
-	border-top: 1px solid #e2e4e7;
-	align-items: flex-end;
-}
-
-.bokeauto-composer textarea {
-	flex: 1;
-	min-height: 42px;
-	max-height: 160px;
-	resize: none;
-	border-radius: 8px;
-	padding: 10px 12px;
-	font-size: 13px;
-	line-height: 1.5;
-}
-
-.bokeauto-composer .button {
-	height: 42px;
-	padding: 0 20px;
-	font-size: 13px;
-}
-
-/* ---------- 记忆弹窗 ---------- */
-
-.bokeauto-memories-modal {
-	position: fixed;
-	inset: 0;
-	background: rgba(0, 0, 0, 0.45);
-	z-index: 100000;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.bokeauto-memories-modal .modal-inner {
-	background: #fff;
-	border-radius: 12px;
-	padding: 20px 24px;
-	width: 640px;
-	max-width: 92vw;
-	max-height: 80vh;
-	overflow-y: auto;
-	position: relative;
-}
-
-.bokeauto-memories-modal h2 {
-	margin: 0 0 12px;
-	font-size: 16px;
-	font-weight: 500;
-}
-
-.bokeauto-memories-modal .modal-close {
-	position: absolute;
-	top: 16px;
-	right: 16px;
-}
-
-.bokeauto-memories-modal .mem-list {
-	list-style: none;
-	margin: 12px 0 0;
-	padding: 0;
-}
-
-.bokeauto-memories-modal .mem-list li {
-	border: 1px solid #eee;
-	border-radius: 8px;
-	padding: 10px 12px;
-	margin-bottom: 8px;
-}
-
-.bokeauto-memories-modal .mem-list .tag {
-	display: inline-block;
-	background: #eef3fd;
-	color: #185fa5;
-	border-radius: 4px;
-	font-size: 11px;
-	padding: 1px 6px;
-	margin-right: 8px;
-}
-
-.bokeauto-memories-modal .mem-list .meta {
-	font-size: 11px;
-	color: #8c8f94;
-	margin-top: 4px;
-}
-
-.bokeauto-memories-modal .mem-list .preview {
-	font-size: 12px;
-	color: #646970;
-	margin-top: 4px;
-	display: -webkit-box;
-	-webkit-line-clamp: 2;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
-}
-
-/* 窄屏适配 */
-@media (max-width: 960px) {
-	.bokeauto-chat-layout { flex-direction: column; }
-	.bokeauto-sidebar { width: 100%; flex-basis: auto; position: static; }
-	.bokeauto-chat-main { height: 560px; }
-}
-
-/* ---------- 模型切换条 ---------- */
-
-.bokeauto-model-bar {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 8px 14px;
-	border-bottom: 1px solid #e2e4e7;
-	background: #fafafa;
-	flex-wrap: wrap;
-}
-
-.bokeauto-model-bar .model-bar-label {
-	font-size: 12px;
-	color: #646970;
-	font-weight: 500;
-}
-
-.bokeauto-model-bar select {
-	max-width: 220px;
-	font-size: 12px;
-	height: 28px;
-	border-radius: 6px;
-}
-
-.bokeauto-model-bar .model-bar-current {
-	font-size: 12px;
-	color: #0f6e56;
-	margin-left: auto;
-	white-space: nowrap;
-}
-
-/* ---------- 免授权执行开关 ---------- */
-
-.bokeauto-auto-confirm {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	margin-left: auto;
-	font-size: 12px;
-	color: #666;
-	cursor: pointer;
-	user-select: none;
-	white-space: nowrap;
-}
-
-.bokeauto-auto-confirm input {
-	display: none;
-}
-
-.bokeauto-auto-confirm .auto-confirm-switch {
-	width: 32px;
-	height: 18px;
-	border-radius: 10px;
-	background: #ccc;
-	position: relative;
-	transition: background .2s;
-	flex-shrink: 0;
-}
-
-.bokeauto-auto-confirm .auto-confirm-switch::after {
-	content: '';
-	position: absolute;
-	top: 2px;
-	left: 2px;
-	width: 14px;
-	height: 14px;
-	border-radius: 50%;
-	background: #fff;
-	transition: left .2s;
-}
-
-.bokeauto-auto-confirm.on {
-	color: #b32d2e;
-	font-weight: 600;
-}
-
-.bokeauto-auto-confirm.on .auto-confirm-switch {
-	background: #d63638;
-}
-
-.bokeauto-auto-confirm.on .auto-confirm-switch::after {
-	left: 16px;
-}
-
-.auto-confirm-tip {
-	margin-left: 6px;
-	font-size: 11px;
-	color: #d63638;
-	font-weight: 400;
-}
-
-/* ---------- 执行参数（最大工具步数 / PHP 超时） ---------- */
-
-.bokeauto-run-opts {
-	display: inline-flex;
-	align-items: center;
-	gap: 12px;
-	font-size: 12px;
-	color: #646970;
-}
-
-.bokeauto-run-opts label {
-	display: inline-flex;
-	align-items: center;
-	gap: 4px;
-	white-space: nowrap;
-}
-
-.bokeauto-run-opts input {
-	width: 64px;
-	height: 26px;
-	font-size: 12px;
-	border-radius: 6px;
-	border: 1px solid #c3c4c7;
-	padding: 0 6px;
-}
-
-/* ---------- 流式思考动画 ---------- */
-
-.bokeauto-stream .bokeauto-think {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	padding: 8px 2px;
-	color: #8c8f94;
-	font-size: 13px;
-}
-
-.bokeauto-think .dot {
-	width: 7px;
-	height: 7px;
-	border-radius: 50%;
-	background: #7f77dd;
-	animation: bokeauto-bounce 1.2s infinite ease-in-out;
-}
-
-.bokeauto-think .dot:nth-child(2) { animation-delay: 0.15s; background: #1d9e75; }
-.bokeauto-think .dot:nth-child(3) { animation-delay: 0.3s; background: #d85a30; }
-
-@keyframes bokeauto-bounce {
-	0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-	30% { transform: translateY(-5px); opacity: 1; }
-}
-
-/* ---------- 深度思考过程 ---------- */
-
-.bokeauto-reasoning {
-	background: #fbfbfc;
-	border-left: 3px solid #c8c4ea;
-	border-radius: 0 8px 8px 0;
-	padding: 8px 12px;
-	margin-bottom: 8px;
-}
-
-.bokeauto-reasoning .reasoning-head {
-	font-size: 11px;
-	color: #8c8f94;
-	margin-bottom: 4px;
-	display: block;
-}
-
-.bokeauto-reasoning .reasoning-body {
-	font-size: 12px;
-	color: #a0a0a0;
-	font-style: italic;
-	line-height: 1.6;
-	max-height: 160px;
-	overflow-y: auto;
-	word-break: break-word;
-}
-
-/* ---------- 工具实时卡片 ---------- */
-
-.bokeauto-tools {
-	display: flex;
-	flex-direction: column;
-	gap: 6px;
-	margin-bottom: 8px;
-}
-
-.bokeauto-tool-card {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	font-size: 12px;
-	background: #fbfbfc;
-	border: 1px solid #e2e4e7;
-	border-radius: 8px;
-	padding: 6px 10px;
-}
-
-.bokeauto-tool-card .tc-name { font-weight: 500; }
-.bokeauto-tool-card .tc-args { color: #8c8f94; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; }
-.bokeauto-tool-card .tc-msg { color: #646970; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; display: block; flex-basis: 100%; }
-
-.bokeauto-tool-card .tc-spin {
-	width: 12px;
-	height: 12px;
-	border: 2px solid #e2e4e7;
-	border-top-color: #7f77dd;
-	border-radius: 50%;
-	animation: bokeauto-spin 0.8s linear infinite;
-	flex: 0 0 12px;
-}
-
-@keyframes bokeauto-spin {
-	to { transform: rotate(360deg); }
-}
-
-.bokeauto-tool-card.ok { border-color: #b8dcc9; background: #f2faf6; }
-.bokeauto-tool-card.ok .tc-name { color: #0f6e56; }
-.bokeauto-tool-card.fail { border-color: #f0c1c1; background: #fdf6f6; }
-.bokeauto-tool-card.fail .tc-name { color: #a32d2d; }
-
-.bokeauto-tool-card.running { border-color: #d5d0f2; background: #f7f6fd; }
-
-/* ---------- 流式输出区 ---------- */
-
-.bokeauto-stream .bokeauto-out {
-	display: none;
-	background: #f6f7f7;
-	border: 1px solid #e2e4e7;
-	border-radius: 12px;
-	padding: 10px 14px;
-	line-height: 1.65;
-	font-size: 13px;
-	word-break: break-word;
-	margin-bottom: 8px;
-}
-
-.bokeauto-stream .bokeauto-err {
-	display: inline-block;
-	background: #fbeaea;
-	border: 1px solid #f0c1c1;
-	color: #791f1f;
-	border-radius: 12px;
-	padding: 10px 14px;
-	font-size: 13px;
-	line-height: 1.6;
-}
-
-/* ---------- 会话列表（微信式） ---------- */
-
+/* 会话列表 */
 .bokeauto-conv-block {
 	display: flex;
 	flex-direction: column;
@@ -593,42 +580,46 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin-bottom: 6px;
+	margin-bottom: var(--bk-sp-2);
 }
 
 .bokeauto-conv-head h3 {
 	margin: 0;
-	font-size: 13px;
-	font-weight: 500;
+	padding: 0;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--bk-text-3);
+	letter-spacing: .03em;
 }
 
 .bokeauto-btn-clear {
 	background: none;
-	border: 1px solid #dcdcde;
-	border-radius: 6px;
+	border: 1px solid var(--bk-border);
+	border-radius: var(--bk-r-sm);
 	font-size: 11px;
-	color: #8c8f94;
-	padding: 2px 8px;
+	color: var(--bk-text-4);
+	padding: 3px 9px;
 	cursor: pointer;
+	transition: color var(--bk-ease), border-color var(--bk-ease), background var(--bk-ease);
 }
 
 .bokeauto-btn-clear:hover {
-	color: #a32d2d;
-	border-color: #f0c1c1;
-	background: #fdf6f6;
+	color: var(--bk-danger);
+	border-color: var(--bk-danger-line);
+	background: var(--bk-danger-soft);
 }
 
 .bokeauto-clear-menu {
 	position: absolute;
-	top: 26px;
+	top: 28px;
 	right: 0;
 	z-index: 50;
-	background: #fff;
-	border: 1px solid #dcdcde;
-	border-radius: 8px;
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-	padding: 4px;
-	min-width: 130px;
+	background: var(--bk-surface);
+	border: 1px solid var(--bk-border);
+	border-radius: var(--bk-r);
+	box-shadow: var(--bk-shadow-lg);
+	padding: var(--bk-sp-1);
+	min-width: 136px;
 }
 
 .bokeauto-clear-menu button {
@@ -639,16 +630,27 @@
 	text-align: left;
 	padding: 7px 10px;
 	font-size: 12px;
+	color: var(--bk-text-2);
 	cursor: pointer;
-	border-radius: 5px;
+	border-radius: var(--bk-r-sm);
 }
 
-.bokeauto-clear-menu button:hover { background: #f0f0f1; }
-.bokeauto-clear-menu button:last-child { color: #a32d2d; }
+.bokeauto-clear-menu button:hover {
+	background: var(--bk-primary-soft);
+	color: var(--bk-primary-dark);
+}
+
+.bokeauto-clear-menu button:last-child {
+	color: var(--bk-danger);
+}
+
+.bokeauto-clear-menu button:last-child:hover {
+	background: var(--bk-danger-soft);
+}
 
 .bokeauto-conv-list {
-	margin: 0;
-	padding: 0;
+	margin: 0 calc(var(--bk-sp-1) * -1);
+	padding: 0 var(--bk-sp-1);
 	list-style: none;
 	overflow-y: auto;
 	flex: 1;
@@ -658,28 +660,39 @@
 .bokeauto-conv-list li {
 	position: relative;
 	padding: 9px 10px;
-	border-radius: 8px;
+	border-radius: var(--bk-r-sm);
 	cursor: pointer;
 	border: 1px solid transparent;
-	margin-bottom: 4px;
-	transition: background 0.15s;
+	margin-bottom: 3px;
+	transition: background var(--bk-ease), border-color var(--bk-ease);
 }
 
-.bokeauto-conv-list li:hover { background: #f0f0f1; }
-.bokeauto-conv-list li.active { background: #eef3fd; border-color: #d0d9ea; }
+.bokeauto-conv-list li:hover {
+	background: var(--bk-surface-2);
+}
+
+.bokeauto-conv-list li.active {
+	background: var(--bk-primary-soft);
+	border-color: #cfe0f0;
+}
 
 .bokeauto-conv-list .conv-title {
 	font-size: 13px;
 	font-weight: 500;
+	color: var(--bk-text);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	padding-right: 18px;
+	padding-right: 20px;
+}
+
+.bokeauto-conv-list li.active .conv-title {
+	color: var(--bk-primary-dark);
 }
 
 .bokeauto-conv-list .conv-preview {
 	font-size: 11px;
-	color: #8c8f94;
+	color: var(--bk-text-4);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -688,83 +701,674 @@
 
 .bokeauto-conv-list .conv-del {
 	position: absolute;
-	top: 6px;
+	top: 7px;
 	right: 6px;
-	width: 16px;
-	height: 16px;
-	line-height: 14px;
+	width: 18px;
+	height: 18px;
+	line-height: 16px;
 	text-align: center;
 	border-radius: 50%;
-	color: #8c8f94;
+	color: var(--bk-text-4);
 	font-size: 13px;
 	display: none;
+	cursor: pointer;
 }
 
-.bokeauto-conv-list li:hover .conv-del { display: block; }
-.bokeauto-conv-list .conv-del:hover { background: #e2e4e7; color: #a32d2d; }
+.bokeauto-conv-list li:hover .conv-del {
+	display: block;
+}
 
-.bokeauto-conv-list .empty { color: #8c8f94; font-size: 12px; cursor: default; }
-.bokeauto-conv-list .empty:hover { background: transparent; }
+.bokeauto-conv-list .conv-del:hover {
+	background: var(--bk-danger-line);
+	color: var(--bk-danger);
+}
 
-/* ---------- Token 用量 ---------- */
+.bokeauto-conv-list .empty {
+	color: var(--bk-text-4);
+	font-size: 12px;
+	cursor: default;
+}
 
+.bokeauto-conv-list .empty:hover {
+	background: transparent;
+}
+
+/* Token 用量 */
 .bokeauto-usage {
 	margin: 0;
 	padding: 0;
 	list-style: none;
 	font-size: 12px;
-	line-height: 1.8;
-	color: #646970;
+	line-height: 1.9;
+	color: var(--bk-text-3);
 }
 
-.bokeauto-usage strong { color: #2c2c2a; font-weight: 500; }
-.bokeauto-usage .desc { color: #8c8f94; font-size: 11px; }
+.bokeauto-usage li {
+	display: flex;
+	justify-content: space-between;
+	gap: var(--bk-sp-2);
+	margin: 0;
+}
 
-/* ---------- 角色/技能管理弹窗 ---------- */
+.bokeauto-usage strong {
+	color: var(--bk-text);
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
 
-.bokeauto-modal {
-	position: fixed;
-	inset: 0;
-	background: rgba(0, 0, 0, 0.45);
-	z-index: 100001;
+.bokeauto-usage .desc {
+	display: block;
+	color: var(--bk-text-4);
+	font-size: 11px;
+	margin-top: var(--bk-sp-1);
+	padding-top: var(--bk-sp-1);
+	border-top: 1px dashed var(--bk-divider);
+}
+
+/* ==========================================================================
+   06  模型切换条
+   ========================================================================== */
+
+.bokeauto-model-bar {
+	display: flex;
+	flex-direction: column;
+	gap: var(--bk-sp-2);
+	padding: 10px var(--bk-sp-4);
+	border-bottom: 1px solid var(--bk-border-2);
+	background: linear-gradient(180deg, #fcfcfd 0%, var(--bk-surface-2) 100%);
+}
+
+.bokeauto-model-bar__row {
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	gap: var(--bk-sp-2);
+	flex-wrap: wrap;
 }
 
-.bokeauto-modal-inner {
+.bokeauto-model-bar__opts {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-4);
+	flex-wrap: wrap;
+	padding-top: var(--bk-sp-2);
+	border-top: 1px dashed var(--bk-border-2);
+}
+
+.bokeauto-model-bar .model-bar-label {
+	font-size: 12px;
+	color: var(--bk-text-3);
+	font-weight: 600;
+}
+
+.bokeauto-model-bar select {
+	max-width: 220px;
+	font-size: 12px;
+	height: 30px;
+	line-height: 28px;
+	border-radius: var(--bk-r-sm);
+	border-color: var(--bk-border);
+}
+
+.bokeauto-model-bar .button {
+	height: 30px;
+	line-height: 28px;
+	border-radius: var(--bk-r-sm);
+}
+
+.bokeauto-model-bar .model-bar-current {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	margin-left: auto;
+	padding: 3px 10px;
+	background: var(--bk-ok-soft);
+	border: 1px solid var(--bk-ok-line);
+	border-radius: var(--bk-r-pill);
+	font-size: 12px;
+	color: var(--bk-ok);
+	white-space: nowrap;
+}
+
+.bokeauto-model-bar .model-bar-current:empty {
+	display: none;
+}
+
+/* 免授权执行开关 */
+.bokeauto-auto-confirm {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--bk-sp-2);
+	font-size: 12px;
+	color: var(--bk-text-3);
+	cursor: pointer;
+	user-select: none;
+	white-space: nowrap;
+}
+
+.bokeauto-auto-confirm input {
+	display: none;
+}
+
+.bokeauto-auto-confirm .auto-confirm-switch {
+	width: 34px;
+	height: 19px;
+	border-radius: var(--bk-r-pill);
+	background: #c3c4c7;
+	position: relative;
+	transition: background var(--bk-ease);
+	flex-shrink: 0;
+}
+
+.bokeauto-auto-confirm .auto-confirm-switch::after {
+	content: '';
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 15px;
+	height: 15px;
+	border-radius: 50%;
 	background: #fff;
-	border-radius: 12px;
-	padding: 20px 24px;
-	width: 560px;
-	max-width: 94vw;
-	max-height: 86vh;
-	overflow-y: auto;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+	transition: left var(--bk-ease);
 }
 
-.bokeauto-modal-inner h3 {
-	margin: 0 0 14px;
-	font-size: 15px;
-	font-weight: 500;
+.bokeauto-auto-confirm:hover .auto-confirm-switch {
+	background: #a7aaad;
 }
 
-.bokeauto-modal-inner textarea,
-.bokeauto-modal-inner select {
-	width: 100%;
-	margin-top: 4px;
+.bokeauto-auto-confirm.on {
+	color: var(--bk-danger-strong);
+	font-weight: 600;
 }
 
-.bokeauto-roles-table code {
+.bokeauto-auto-confirm.on .auto-confirm-switch,
+.bokeauto-auto-confirm.on:hover .auto-confirm-switch {
+	background: var(--bk-danger-strong);
+}
+
+.bokeauto-auto-confirm.on .auto-confirm-switch::after {
+	left: 17px;
+}
+
+.auto-confirm-tip {
 	font-size: 11px;
+	color: var(--bk-danger-strong);
+	font-weight: 400;
 }
 
-/* ---------- 可视化文件卡片与编辑器 ---------- */
+.auto-confirm-tip:empty {
+	display: none;
+}
 
-.bokeauto-file-card {
-	margin: 8px 0;
-	border: 1px solid #e2e4e7;
-	border-radius: 8px;
-	background: #f6f7f7;
+/* 执行参数 */
+.bokeauto-run-opts {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--bk-sp-3);
+	margin-left: auto;
+	font-size: 12px;
+	color: var(--bk-text-3);
+}
+
+.bokeauto-run-opts label {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--bk-sp-1);
+	white-space: nowrap;
+}
+
+.bokeauto-run-opts input {
+	width: 64px;
+	height: 28px;
+	font-size: 12px;
+	border-radius: var(--bk-r-sm);
+	border: 1px solid var(--bk-border);
+	padding: 0 var(--bk-sp-2);
+	font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   07  消息流
+   ========================================================================== */
+
+.bokeauto-messages {
+	flex: 1;
+	overflow-y: auto;
+	padding: var(--bk-sp-5);
+	display: flex;
+	flex-direction: column;
+	gap: var(--bk-sp-4);
+	background:
+		radial-gradient(circle at 1px 1px, #e9eaec 1px, transparent 0) 0 0 / 22px 22px,
+		var(--bk-surface);
+}
+
+.bokeauto-msg.user {
+	align-self: flex-end;
+	max-width: 78%;
+}
+
+.bokeauto-msg.assistant {
+	align-self: flex-start;
+	max-width: 100%;
+	width: 100%;
+}
+
+.bokeauto-msg .bubble {
+	background: var(--bk-surface);
+	border: 1px solid var(--bk-border-2);
+	border-radius: var(--bk-r-lg);
+	box-shadow: var(--bk-shadow-sm);
+	padding: 11px var(--bk-sp-4);
+	line-height: 1.75;
+	font-size: 13px;
+	color: var(--bk-text-2);
+	word-break: break-word;
+}
+
+.bokeauto-msg .bubble > *:first-child {
+	margin-top: 0;
+}
+
+.bokeauto-msg .bubble > *:last-child {
+	margin-bottom: 0;
+}
+
+.bokeauto-msg .bubble code {
+	background: var(--bk-surface-2);
+	border-radius: 4px;
+	padding: 1px 5px;
+	font-size: 12px;
+}
+
+.bokeauto-msg .bubble pre {
+	background: var(--bk-surface-2);
+	border: 1px solid var(--bk-border-2);
+	border-radius: var(--bk-r-sm);
+	padding: 10px 12px;
+	overflow-x: auto;
+	font-size: 12px;
+	line-height: 1.6;
+}
+
+.bokeauto-msg.user .bubble {
+	background: linear-gradient(135deg, #eef3fd 0%, #e9f1fb 100%);
+	border-color: #d0d9ea;
+	border-bottom-right-radius: var(--bk-r-sm);
+	color: var(--bk-text);
+}
+
+.bokeauto-msg.assistant .bubble {
+	border-bottom-left-radius: var(--bk-r-sm);
+}
+
+.bokeauto-msg.thinking .bubble {
+	color: var(--bk-text-4);
+	font-style: italic;
+	background: var(--bk-surface-3);
+}
+
+.bokeauto-msg.error .bubble {
+	background: var(--bk-danger-soft);
+	border-color: var(--bk-danger-line);
+	color: #791f1f;
+}
+
+/* 流式思考动画 */
+.bokeauto-stream .bokeauto-think {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-2);
+	padding: var(--bk-sp-2) 2px;
+	color: var(--bk-text-4);
+	font-size: 13px;
+}
+
+.bokeauto-think .dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--bk-accent);
+	animation: bokeauto-bounce 1.2s infinite ease-in-out;
+}
+
+.bokeauto-think .dot:nth-child(2) {
+	animation-delay: .15s;
+	background: #1d9e75;
+}
+
+.bokeauto-think .dot:nth-child(3) {
+	animation-delay: .3s;
+	background: #d85a30;
+}
+
+@keyframes bokeauto-bounce {
+	0%, 60%, 100% { transform: translateY(0); opacity: .5; }
+	30% { transform: translateY(-5px); opacity: 1; }
+}
+
+/* 深度思考过程 */
+.bokeauto-reasoning {
+	background: var(--bk-accent-soft);
+	border: 1px solid var(--bk-accent-line);
+	border-left: 3px solid var(--bk-accent);
+	border-radius: var(--bk-r-sm);
+	padding: var(--bk-sp-2) var(--bk-sp-3);
+	margin-bottom: var(--bk-sp-2);
+}
+
+.bokeauto-reasoning .reasoning-head {
+	font-size: 11px;
+	font-weight: 600;
+	color: #5b53b8;
+	margin-bottom: var(--bk-sp-1);
+	display: block;
+}
+
+.bokeauto-reasoning .reasoning-body {
+	font-size: 12px;
+	color: #7b7b86;
+	line-height: 1.7;
+	max-height: 160px;
+	overflow-y: auto;
+	word-break: break-word;
+}
+
+/* 流式输出区 */
+.bokeauto-stream .bokeauto-out {
+	display: none;
+	background: var(--bk-surface);
+	border: 1px solid var(--bk-border-2);
+	border-radius: var(--bk-r-lg);
+	border-bottom-left-radius: var(--bk-r-sm);
+	box-shadow: var(--bk-shadow-sm);
+	padding: 11px var(--bk-sp-4);
+	line-height: 1.75;
+	font-size: 13px;
+	color: var(--bk-text-2);
+	word-break: break-word;
+	margin-bottom: var(--bk-sp-2);
+}
+
+.bokeauto-stream .bokeauto-err {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--bk-sp-2);
+	background: var(--bk-danger-soft);
+	border: 1px solid var(--bk-danger-line);
+	color: #791f1f;
+	border-radius: var(--bk-r-lg);
+	padding: 11px var(--bk-sp-4);
+	font-size: 13px;
+	line-height: 1.7;
+}
+
+.bokeauto-stream .bokeauto-err .dashicons,
+.bokeauto-confirm-title .dashicons {
+	flex: 0 0 auto;
+	width: 16px;
+	height: 16px;
+	font-size: 16px;
+	line-height: 1;
+}
+
+/* 反馈 */
+.bokeauto-feedback {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-1);
+	font-size: 12px;
+	color: var(--bk-text-4);
+	margin-top: var(--bk-sp-2);
+}
+
+.bokeauto-feedback .btn-fb {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--bk-surface);
+	border: 1px solid var(--bk-border);
+	border-radius: var(--bk-r-sm);
+	padding: 4px 9px;
+	cursor: pointer;
+	font-size: 13px;
+	line-height: 1.4;
+	color: var(--bk-text-3);
+	transition: background var(--bk-ease), border-color var(--bk-ease), color var(--bk-ease);
+}
+
+.bokeauto-feedback .btn-fb .dashicons {
+	width: 16px;
+	height: 16px;
+	font-size: 16px;
+	line-height: 1;
+}
+
+.bokeauto-feedback .btn-fb:hover {
+	background: var(--bk-primary-soft);
+	border-color: var(--bk-primary-line);
+	color: var(--bk-primary);
+}
+
+.bokeauto-feedback .btn-fb.down:hover {
+	background: var(--bk-danger-soft);
+	border-color: var(--bk-danger-line);
+	color: var(--bk-danger);
+}
+
+/* ==========================================================================
+   08  执行步骤与工具卡片
+   ========================================================================== */
+
+.bokeauto-steps {
+	border: 1px solid var(--bk-border-2);
+	border-radius: var(--bk-r);
+	margin-bottom: var(--bk-sp-3);
+	background: var(--bk-surface-3);
+	overflow: hidden;
+}
+
+.bokeauto-steps-head {
+	padding: var(--bk-sp-2) var(--bk-sp-4);
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--bk-text-3);
+	background: var(--bk-surface-2);
+	border-bottom: 1px solid var(--bk-border-2);
+}
+
+.bokeauto-steps ol {
+	margin: 0;
+	padding: var(--bk-sp-2) var(--bk-sp-4) var(--bk-sp-2) 34px;
+	font-size: 12px;
+}
+
+.bokeauto-steps li {
+	margin: var(--bk-sp-1) 0;
+	line-height: 1.6;
+	color: var(--bk-text-2);
+}
+
+.bokeauto-steps .step-icon {
+	margin-right: var(--bk-sp-2);
+	font-weight: 600;
+}
+
+.bokeauto-steps li.ok .step-icon {
+	color: var(--bk-ok);
+}
+
+.bokeauto-steps li.fail .step-icon {
+	color: var(--bk-danger);
+}
+
+.bokeauto-steps .step-name {
+	font-weight: 600;
+	color: var(--bk-text);
+	margin-right: var(--bk-sp-2);
+}
+
+.bokeauto-steps .step-msg {
+	color: var(--bk-text-3);
+}
+
+/* 工具实时卡片 */
+.bokeauto-tools {
+	display: flex;
+	flex-direction: column;
+	gap: var(--bk-sp-2);
+	margin-bottom: var(--bk-sp-2);
+}
+
+.bokeauto-tool-card {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-2);
+	flex-wrap: wrap;
+	font-size: 12px;
+	background: var(--bk-surface);
+	border: 1px solid var(--bk-border-2);
+	border-radius: var(--bk-r-sm);
+	box-shadow: var(--bk-shadow-sm);
+	padding: 7px 11px;
+	transition: border-color var(--bk-ease), background var(--bk-ease);
+}
+
+.bokeauto-tool-card .tc-name {
+	font-weight: 600;
+	color: var(--bk-text);
+}
+
+.bokeauto-tool-card .tc-args {
+	color: var(--bk-text-4);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	max-width: 60%;
+	font-family: Consolas, Monaco, monospace;
+}
+
+.bokeauto-tool-card .tc-msg {
+	color: var(--bk-text-3);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	max-width: 100%;
+	display: block;
+	flex-basis: 100%;
+}
+
+.bokeauto-tool-card .tc-spin {
+	width: 12px;
+	height: 12px;
+	border: 2px solid var(--bk-border-2);
+	border-top-color: var(--bk-accent);
+	border-radius: 50%;
+	animation: bokeauto-spin .8s linear infinite;
+	flex: 0 0 12px;
+}
+
+@keyframes bokeauto-spin {
+	to { transform: rotate(360deg); }
+}
+
+.bokeauto-tool-card.running {
+	border-color: var(--bk-accent-line);
+	background: var(--bk-accent-soft);
+}
+
+.bokeauto-tool-card.ok {
+	border-color: var(--bk-ok-line);
+	background: var(--bk-ok-soft);
+}
+
+.bokeauto-tool-card.ok .tc-name {
+	color: var(--bk-ok);
+}
+
+.bokeauto-tool-card.fail {
+	border-color: var(--bk-danger-line);
+	background: var(--bk-danger-soft);
+}
+
+.bokeauto-tool-card.fail .tc-name {
+	color: var(--bk-danger);
+}
+
+/* ==========================================================================
+   09  高危操作确认卡片
+   ========================================================================== */
+
+.bokeauto-confirm {
+	border: 1px solid var(--bk-danger-line);
+	border-left: 3px solid var(--bk-danger-strong);
+	border-radius: var(--bk-r);
+	background: linear-gradient(180deg, #fff8f8 0%, #fffdfd 100%);
+	box-shadow: var(--bk-shadow-sm);
+	padding: var(--bk-sp-4);
+	margin-bottom: var(--bk-sp-3);
+}
+
+.bokeauto-confirm-title {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-2);
+	font-weight: 600;
+	font-size: 13px;
+	color: var(--bk-danger);
+	margin-bottom: var(--bk-sp-2);
+}
+
+.bokeauto-confirm-tool {
+	font-size: 13px;
+	color: var(--bk-text);
+	margin-bottom: var(--bk-sp-1);
+}
+
+.bokeauto-confirm-desc {
+	color: var(--bk-text-3);
+	font-size: 13px;
+	line-height: 1.7;
+	margin-bottom: var(--bk-sp-2);
+}
+
+.bokeauto-confirm-args {
+	background: var(--bk-surface-2);
+	border: 1px solid var(--bk-border-2);
+	border-radius: var(--bk-r-sm);
+	padding: 10px 12px;
+	font-size: 12px;
+	line-height: 1.6;
+	overflow-x: auto;
+	max-height: 160px;
+	color: var(--bk-text-2);
+}
+
+.bokeauto-confirm-btns {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-2);
+	margin-top: var(--bk-sp-3);
+}
+
+/* 拒绝按钮：悬停时给出明确的危险语义 */
+.bokeauto-confirm-btns .bokeauto-confirm-reject:hover {
+	border-color: var(--bk-danger-line);
+	color: var(--bk-danger);
+}
+
+/* ==========================================================================
+   10  可视化卡片与文件编辑器
+   ========================================================================== */
+
+.bokeauto-file-card,
+.bokeauto-dir-card,
+.bokeauto-image-card {
+	margin: var(--bk-sp-2) 0;
+	border: 1px solid var(--bk-border-2);
+	border-radius: var(--bk-r);
+	background: var(--bk-surface);
+	box-shadow: var(--bk-shadow-sm);
 	overflow: hidden;
 	max-width: 720px;
 }
@@ -772,38 +1376,163 @@
 .bokeauto-file-head {
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	padding: 8px 12px;
-	background: #fff;
-	border-bottom: 1px solid #e2e4e7;
+	gap: var(--bk-sp-2);
+	padding: var(--bk-sp-2) var(--bk-sp-3);
+	background: linear-gradient(180deg, #fcfcfd 0%, var(--bk-surface-2) 100%);
+	border-bottom: 1px solid var(--bk-border-2);
 }
 
-.bokeauto-file-icon { font-size: 15px; }
+.bokeauto-file-icon,
+.bokeauto-dir-icon,
+.bokeauto-visual-icon {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 14px;
+	line-height: 1;
+}
+
+/* 图标统一走 Dashicons，避免 emoji 在不同系统字体下大小与色彩不一致 */
+.bokeauto-file-icon .dashicons,
+.bokeauto-dir-icon .dashicons,
+.bokeauto-visual-icon .dashicons {
+	width: 16px;
+	height: 16px;
+	font-size: 16px;
+	line-height: 1;
+	color: var(--bk-text-3);
+}
+
+.bokeauto-visual-icon .dashicons-yes-alt {
+	color: var(--bk-ok);
+}
+
+.bokeauto-dir-icon .dashicons-portfolio {
+	color: var(--bk-warn);
+}
+
+.bokeauto-file-icon .dashicons-format-image {
+	color: var(--bk-primary);
+}
 
 .bokeauto-file-path {
 	flex: 1;
+	min-width: 0;
 	font-size: 12px;
+	font-family: Consolas, Monaco, monospace;
 	word-break: break-all;
-	color: #2271b1;
+	color: var(--bk-primary);
+}
+
+.bokeauto-file-label {
+	padding: var(--bk-sp-1) var(--bk-sp-3) 0;
+	font-size: 11px;
+	color: var(--bk-text-4);
 }
 
 .bokeauto-file-preview {
 	margin: 0;
-	padding: 10px 12px;
+	padding: 10px var(--bk-sp-3);
 	font-size: 11px;
-	line-height: 1.5;
-	color: #50575e;
+	font-family: Consolas, Monaco, monospace;
+	line-height: 1.6;
+	color: var(--bk-text-2);
+	background: var(--bk-surface-3);
 	max-height: 120px;
 	overflow: auto;
 	white-space: pre-wrap;
 	word-break: break-all;
 }
 
-.bokeauto-editor-inner { width: 780px; }
+.bokeauto-dir-count {
+	font-size: 11px;
+	color: var(--bk-text-4);
+	white-space: nowrap;
+}
+
+.bokeauto-dir-list {
+	max-height: 240px;
+	overflow: auto;
+	padding: var(--bk-sp-1) 0;
+}
+
+.bokeauto-dir-row {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-2);
+	padding: 5px var(--bk-sp-3);
+	font-size: 12px;
+	border-bottom: 1px solid var(--bk-divider);
+}
+
+.bokeauto-dir-row:last-child {
+	border-bottom: none;
+}
+
+.bokeauto-dir-row:hover {
+	background: var(--bk-surface-2);
+}
+
+.bokeauto-dir-name {
+	flex: 1;
+	min-width: 0;
+	font-family: Consolas, Monaco, monospace;
+	color: var(--bk-text);
+	word-break: break-all;
+}
+
+.bokeauto-dir-meta {
+	font-size: 11px;
+	color: var(--bk-text-4);
+	white-space: nowrap;
+}
+
+.bokeauto-visual-result {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-2);
+	margin: var(--bk-sp-2) 0;
+	padding: var(--bk-sp-2) var(--bk-sp-3);
+	background: var(--bk-surface);
+	border: 1px solid var(--bk-border-2);
+	border-left: 3px solid var(--bk-ok-line);
+	border-radius: var(--bk-r-sm);
+	box-shadow: var(--bk-shadow-sm);
+	max-width: 720px;
+	font-size: 12px;
+	color: var(--bk-text);
+}
+
+.bokeauto-visual-title {
+	word-break: break-all;
+}
+
+.bokeauto-image-prompt {
+	flex: 1;
+	min-width: 0;
+	font-size: 12px;
+	color: var(--bk-text);
+	word-break: break-all;
+}
+
+.bokeauto-image-preview {
+	display: block;
+	width: 100%;
+	max-height: 340px;
+	object-fit: contain;
+	background: var(--bk-surface-2);
+}
+
+/* 文件编辑器 */
+.bokeauto-editor-inner {
+	width: 820px;
+}
 
 .bokeauto-editor-path {
-	background: #f0f0f1;
-	padding: 2px 8px;
+	background: var(--bk-surface-2);
+	border: 1px solid var(--bk-border-2);
+	padding: 2px var(--bk-sp-2);
 	border-radius: 4px;
 	font-size: 12px;
 	word-break: break-all;
@@ -814,245 +1543,934 @@
 	height: 46vh;
 	font-family: Consolas, Monaco, "Courier New", monospace;
 	font-size: 12px;
-	line-height: 1.55;
+	line-height: 1.6;
 	padding: 10px 12px;
-	border: 1px solid #dcdcde;
-	border-radius: 6px;
-	background: #fff;
-	color: #1d2327;
+	border: 1px solid var(--bk-border);
+	border-radius: var(--bk-r-sm);
+	background: var(--bk-surface);
+	color: var(--bk-text);
 	resize: vertical;
 	tab-size: 4;
 }
 
 .bokeauto-editor-ta:focus {
-	border-color: #2271b1;
-	box-shadow: 0 0 0 1px #2271b1;
+	border-color: var(--bk-primary);
+	box-shadow: 0 0 0 1px var(--bk-primary);
 	outline: none;
 }
 
 .bokeauto-editor-msg {
 	min-height: 18px;
 	font-size: 12px;
-	margin: 6px 0 0;
+	margin: var(--bk-sp-2) 0 0;
 }
 
-/* ---------- 目录卡片 / 结果卡片 / 文件标签 ---------- */
-
-.bokeauto-file-label {
-	padding: 4px 12px 0;
-	font-size: 11px;
-	color: #8c8f94;
+.bokeauto-editor-msg.is-ok {
+	color: var(--bk-ok);
 }
 
-.bokeauto-dir-card {
-	margin: 8px 0;
-	border: 1px solid #e2e4e7;
-	border-radius: 8px;
-	background: #fff;
-	overflow: hidden;
-	max-width: 720px;
+.bokeauto-editor-msg.is-err {
+	color: var(--bk-danger);
 }
 
-.bokeauto-dir-count {
-	font-size: 11px;
-	color: #8c8f94;
-	white-space: nowrap;
+.bokeauto-editor-msg.is-busy {
+	color: var(--bk-text-3);
 }
 
-.bokeauto-dir-list {
-	max-height: 240px;
-	overflow: auto;
-	padding: 4px 0;
+/* ==========================================================================
+   11  输入区
+   ========================================================================== */
+
+.bokeauto-composer {
+	display: flex;
+	gap: var(--bk-sp-3);
+	padding: var(--bk-sp-3) var(--bk-sp-4);
+	border-top: 1px solid var(--bk-border-2);
+	background: var(--bk-surface);
+	align-items: flex-end;
 }
 
-.bokeauto-dir-row {
+.bokeauto-composer textarea {
+	flex: 1;
+	min-height: 44px;
+	max-height: 160px;
+	resize: none;
+	border: 1px solid var(--bk-border);
+	border-radius: var(--bk-r);
+	padding: 11px var(--bk-sp-3);
+	font-size: 13px;
+	line-height: 1.6;
+	box-shadow: none;
+	transition: border-color var(--bk-ease), box-shadow var(--bk-ease);
+}
+
+.bokeauto-composer textarea:focus {
+	border-color: var(--bk-primary);
+	box-shadow: 0 0 0 3px rgba(34, 113, 177, .1);
+	outline: none;
+}
+
+.bokeauto-composer .button {
+	height: 44px;
+	padding: 0 var(--bk-sp-5);
+	border-radius: var(--bk-r);
+	font-size: 13px;
+	font-weight: 500;
+}
+
+/* ==========================================================================
+   12  弹窗
+   ========================================================================== */
+
+.bokeauto-modal,
+.bokeauto-memories-modal {
+	position: fixed;
+	inset: 0;
+	background: rgba(16, 24, 40, .5);
+	z-index: 100001;
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	padding: 4px 12px;
-	font-size: 12px;
-	border-bottom: 1px solid #f0f0f1;
+	justify-content: center;
+	padding: var(--bk-sp-4);
+	animation: bokeauto-fade .15s ease;
 }
 
-.bokeauto-dir-row:last-child { border-bottom: none; }
-
-.bokeauto-dir-icon { font-size: 13px; }
-
-.bokeauto-dir-name {
-	flex: 1;
-	font-family: Consolas, Monaco, monospace;
-	color: #1d2327;
-	word-break: break-all;
+.bokeauto-memories-modal {
+	z-index: 100000;
 }
 
-.bokeauto-dir-meta {
-	font-size: 11px;
-	color: #8c8f94;
-	white-space: nowrap;
+@keyframes bokeauto-fade {
+	from { opacity: 0; }
+	to { opacity: 1; }
 }
 
-.bokeauto-visual-result {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	margin: 8px 0;
-	padding: 8px 12px;
-	background: #f6f7f7;
-	border: 1px solid #e2e4e7;
-	border-radius: 8px;
-	max-width: 720px;
-	font-size: 12px;
-	color: #1d2327;
+/* 单层结构弹窗（聊天页文件编辑器、角色编辑） */
+.bokeauto-modal-inner,
+.bokeauto-memories-modal .modal-inner {
+	background: var(--bk-surface);
+	border-radius: var(--bk-r-lg);
+	box-shadow: var(--bk-shadow-lg);
+	padding: var(--bk-sp-5);
+	width: 600px;
+	max-width: 94vw;
+	max-height: 86vh;
+	overflow-y: auto;
+	position: relative;
 }
 
-.bokeauto-visual-icon { font-size: 14px; }
-
-.bokeauto-visual-title { word-break: break-all; }
-
-/* ---------- AI 生成图片卡片 ---------- */
-
-.bokeauto-image-card {
-	margin: 8px 0;
-	border: 1px solid #e2e4e7;
-	border-radius: 8px;
-	background: #fff;
-	overflow: hidden;
-	max-width: 720px;
+.bokeauto-memories-modal .modal-inner {
+	width: 660px;
+	max-height: 80vh;
 }
 
-.bokeauto-image-prompt {
-	flex: 1;
-	font-size: 12px;
-	color: #1d2327;
-	word-break: break-all;
+.bokeauto-modal-inner h3 {
+	margin: 0 0 var(--bk-sp-4);
+	padding: 0 0 var(--bk-sp-3);
+	border-bottom: 1px solid var(--bk-divider);
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--bk-text);
 }
 
-.bokeauto-image-preview {
-	display: block;
+.bokeauto-modal-inner label {
+	font-size: 13px;
+	color: var(--bk-text-2);
+}
+
+.bokeauto-modal-inner textarea,
+.bokeauto-modal-inner select {
 	width: 100%;
-	max-height: 340px;
-	object-fit: contain;
-	background: #f6f7f7;
+	margin-top: var(--bk-sp-1);
+	border-radius: var(--bk-r-sm);
 }
 
-/* ---------- 聊天页标题下的描述与关于信息 ---------- */
+.bokeauto-modal-inner input[type="text"],
+.bokeauto-modal-inner input[type="url"],
+.bokeauto-modal-inner input[type="password"] {
+	border-radius: var(--bk-r-sm);
+}
 
-.bokeauto-sub { margin: 2px 0 12px; }
-
-.bokeauto-desc { margin: 0 0 4px; color: #50575e; font-size: 12px; }
-
-.bokeauto-about-line { margin: 0; color: #646970; font-size: 11px; line-height: 1.7; }
-
-.bokeauto-about-line a { color: #2271b1; text-decoration: none; }
-
-.bokeauto-about-line a:hover { text-decoration: underline; }
-
-/* ---------- 标题版本徽章与开源说明 ---------- */
-
-.bokeauto-title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-
-.bokeauto-ver {
+.bokeauto-modal-inner .description {
 	display: inline-block;
-	background: #e8f0fe;
-	color: #1e63f0;
+	margin-top: 3px;
+	font-size: 12px;
+	line-height: 1.6;
+	color: var(--bk-text-4);
+}
+
+.bokeauto-memories-modal h2 {
+	margin: 0 0 var(--bk-sp-3);
+	padding-right: 90px;
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--bk-text);
+}
+
+.bokeauto-memories-modal .modal-close {
+	position: absolute;
+	top: var(--bk-sp-4);
+	right: var(--bk-sp-4);
+}
+
+.bokeauto-memories-modal .mem-list {
+	list-style: none;
+	margin: var(--bk-sp-3) 0 0;
+	padding: 0;
+}
+
+.bokeauto-memories-modal .mem-list li {
+	border: 1px solid var(--bk-border-2);
+	border-radius: var(--bk-r-sm);
+	padding: 10px 12px;
+	margin-bottom: var(--bk-sp-2);
+	transition: border-color var(--bk-ease), background var(--bk-ease);
+}
+
+.bokeauto-memories-modal .mem-list li:hover {
+	border-color: var(--bk-primary-line);
+	background: var(--bk-surface-3);
+}
+
+.bokeauto-memories-modal .mem-list .tag {
+	display: inline-block;
+	background: var(--bk-primary-soft);
+	border: 1px solid #cfe0f0;
+	color: var(--bk-primary-dark);
+	border-radius: 4px;
 	font-size: 11px;
 	font-weight: 600;
-	line-height: 1;
-	padding: 5px 9px;
-	border-radius: 12px;
-	vertical-align: middle;
+	padding: 1px 7px;
+	margin-right: var(--bk-sp-2);
 }
 
-.bokeauto-open-note { margin: 0 0 4px; color: #50575e; font-size: 12px; line-height: 1.7; }
+.bokeauto-memories-modal .mem-list .meta {
+	font-size: 11px;
+	color: var(--bk-text-4);
+	margin-top: var(--bk-sp-1);
+}
 
-/* ---------- 后台页面底部推广位 ---------- */
+.bokeauto-memories-modal .mem-list .preview {
+	font-size: 12px;
+	line-height: 1.6;
+	color: var(--bk-text-3);
+	margin-top: var(--bk-sp-1);
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+/* 三段结构弹窗：头部固定 + 内容滚动 + 底部操作栏 */
+.bokeauto-modal-box {
+	display: flex;
+	flex-direction: column;
+	background: var(--bk-surface);
+	border-radius: var(--bk-r-lg);
+	box-shadow: var(--bk-shadow-lg);
+	width: 600px;
+	max-width: 94vw;
+	max-height: 86vh;
+	overflow: hidden;
+}
+
+.bokeauto-sched-modal-box {
+	width: 640px;
+}
+
+.bokeauto-role-modal-box {
+	width: 660px;
+}
+
+.bokeauto-modal-head {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-3);
+	padding: var(--bk-sp-4) var(--bk-sp-5);
+	background: linear-gradient(180deg, #fcfcfd 0%, var(--bk-surface-2) 100%);
+	border-bottom: 1px solid var(--bk-border-2);
+}
+
+.bokeauto-modal-head h3 {
+	margin: 0;
+	padding: 0;
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--bk-text);
+}
+
+.bokeauto-modal-body {
+	flex: 1;
+	overflow-y: auto;
+	padding: var(--bk-sp-5);
+}
+
+.bokeauto-modal-body > p {
+	margin: 0 0 var(--bk-sp-4);
+}
+
+.bokeauto-modal-body > p:last-child {
+	margin-bottom: 0;
+}
+
+.bokeauto-modal-body label {
+	font-size: 13px;
+	color: var(--bk-text-2);
+}
+
+.bokeauto-modal-body input[type="text"],
+.bokeauto-modal-body input[type="time"],
+.bokeauto-modal-body input[type="number"],
+.bokeauto-modal-body input[type="password"],
+.bokeauto-modal-body textarea,
+.bokeauto-modal-body select {
+	width: 100%;
+	margin-top: var(--bk-sp-1);
+	border-radius: var(--bk-r-sm);
+}
+
+.bokeauto-modal-body select[multiple] {
+	padding: var(--bk-sp-1);
+}
+
+.bokeauto-modal-body .description {
+	display: block;
+	margin-top: 4px;
+	font-size: 12px;
+	line-height: 1.6;
+	color: var(--bk-text-4);
+}
+
+/* 勾选项：复选框与文案同行对齐 */
+.bokeauto-modal-body .bokeauto-inline-check {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.bokeauto-modal-body .bokeauto-inline-check input[type="checkbox"] {
+	width: auto;
+	margin: 0;
+}
+
+/* 弹窗内的次级配置区（如角色独立模型凭据） */
+.bokeauto-subpanel {
+	padding: var(--bk-sp-4);
+	margin-bottom: var(--bk-sp-4);
+	background: var(--bk-surface-2);
+	border: 1px solid var(--bk-border-2);
+	border-radius: var(--bk-r-md);
+}
+
+.bokeauto-subpanel > p {
+	margin: 0 0 var(--bk-sp-3);
+}
+
+.bokeauto-subpanel > p:last-child {
+	margin-bottom: 0;
+}
+
+.bokeauto-subpanel-actions {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-2);
+	margin-top: var(--bk-sp-2);
+}
+
+.bokeauto-subpanel-actions .bokeauto-test-result {
+	margin-left: 0;
+}
+
+.bokeauto-modal-foot {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-2);
+	padding: var(--bk-sp-3) var(--bk-sp-5);
+	background: var(--bk-surface-2);
+	border-top: 1px solid var(--bk-border-2);
+}
+
+/* 关闭按钮：头部为图标态，底部为普通按钮态 */
+.bokeauto-modal-head .bokeauto-modal-close {
+	width: 30px;
+	height: 30px;
+	margin-left: auto;
+	padding: 0;
+	background: none;
+	border: 1px solid transparent;
+	border-radius: var(--bk-r-sm);
+	color: var(--bk-text-4);
+	font-size: 20px;
+	line-height: 1;
+	cursor: pointer;
+	transition: color var(--bk-ease), background var(--bk-ease), border-color var(--bk-ease);
+}
+
+.bokeauto-modal-head .bokeauto-modal-close:hover {
+	background: var(--bk-danger-soft);
+	border-color: var(--bk-danger-line);
+	color: var(--bk-danger);
+}
+
+/* ==========================================================================
+   13  模型设置页
+   ========================================================================== */
+
+.bokeauto-wrap .bokeauto-form-table {
+	margin: 0;
+}
+
+.bokeauto-wrap .bokeauto-form-table th {
+	width: 200px;
+	padding: 16px var(--bk-sp-5) 16px 0;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--bk-text);
+	vertical-align: top;
+}
+
+.bokeauto-wrap .bokeauto-form-table td {
+	padding: 14px 0;
+	vertical-align: top;
+}
+
+.bokeauto-wrap .bokeauto-form-table tr + tr th,
+.bokeauto-wrap .bokeauto-form-table tr + tr td {
+	border-top: 1px solid var(--bk-divider);
+}
+
+.bokeauto-wrap .bokeauto-form-table .description {
+	margin: var(--bk-sp-2) 0 0;
+	color: var(--bk-text-3);
+	font-size: 12px;
+	line-height: 1.7;
+	max-width: 620px;
+}
+
+.bokeauto-wrap .bokeauto-form-table input[type="text"],
+.bokeauto-wrap .bokeauto-form-table input[type="url"],
+.bokeauto-wrap .bokeauto-form-table input[type="password"],
+.bokeauto-wrap .bokeauto-form-table input[type="number"],
+.bokeauto-wrap .bokeauto-form-table select {
+	border-radius: var(--bk-r-sm);
+	border-color: var(--bk-border);
+}
+
+/* 单选组：卡片式选项 */
+.bokeauto-radio-group {
+	display: flex;
+	flex-direction: column;
+	gap: var(--bk-sp-2);
+	max-width: 520px;
+}
+
+.bokeauto-radio-group label {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-2);
+	margin: 0;
+	padding: 9px var(--bk-sp-3);
+	background: var(--bk-surface);
+	border: 1px solid var(--bk-border);
+	border-radius: var(--bk-r-sm);
+	font-size: 13px;
+	color: var(--bk-text-2);
+	cursor: pointer;
+	transition: border-color var(--bk-ease), background var(--bk-ease);
+}
+
+.bokeauto-radio-group label:hover {
+	border-color: var(--bk-primary-line);
+	background: var(--bk-surface-3);
+}
+
+.bokeauto-radio-group input:checked + span {
+	color: var(--bk-primary-dark);
+	font-weight: 600;
+}
+
+/* 连接测试结果 */
+.bokeauto-test-result {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	margin-left: var(--bk-sp-2);
+	font-size: 12px;
+	font-weight: 500;
+}
+
+.bokeauto-test-result:empty {
+	display: none;
+}
+
+.bokeauto-test-result.is-ok {
+	color: var(--bk-ok);
+}
+
+.bokeauto-test-result.is-err {
+	color: var(--bk-danger);
+}
+
+.bokeauto-test-result.is-busy {
+	color: var(--bk-text-3);
+}
+
+/* 表单提交栏 */
+.bokeauto-form-actions {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-3);
+	padding: var(--bk-sp-3) var(--bk-sp-4);
+	background: var(--bk-surface-2);
+	border-top: 1px solid var(--bk-border-2);
+}
+
+.bokeauto-form-actions .button {
+	border-radius: var(--bk-r-sm);
+}
+
+.bokeauto-form-actions p.submit {
+	margin: 0;
+	padding: 0;
+}
+
+/* 工作日志 */
+.bokeauto-wl-toolbar {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-3);
+	margin-bottom: var(--bk-sp-3);
+}
+
+.bokeauto-wl-toolbar .button {
+	border-radius: var(--bk-r-sm);
+}
+
+.bokeauto-wl-status {
+	color: var(--bk-primary);
+	font-size: 12px;
+}
+
+.bokeauto-wl-status.err {
+	color: var(--bk-danger);
+}
+
+.bokeauto-wl-editor {
+	background: var(--bk-surface);
+	border: 1px solid var(--bk-border);
+	border-left: 3px solid var(--bk-primary);
+	border-radius: var(--bk-r-sm);
+	box-shadow: var(--bk-shadow-sm);
+	padding: var(--bk-sp-3) var(--bk-sp-4);
+	margin-bottom: var(--bk-sp-3);
+}
+
+.bokeauto-wl-editor p:first-child {
+	margin-top: 0;
+}
+
+.bokeauto-wl-editor textarea,
+.bokeauto-wl-body textarea {
+	width: 100%;
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.7;
+	border-radius: var(--bk-r-sm);
+	border-color: var(--bk-border);
+}
+
+.bokeauto-wl-item {
+	background: var(--bk-surface);
+	border: 1px solid var(--bk-border);
+	border-left: 3px solid #c3c4c7;
+	border-radius: var(--bk-r-sm);
+	box-shadow: var(--bk-shadow-sm);
+	margin-bottom: var(--bk-sp-2);
+	transition: border-color var(--bk-ease);
+}
+
+.bokeauto-wl-item:hover {
+	border-left-color: var(--bk-primary-line);
+}
+
+.bokeauto-wl-item.active {
+	border-left-color: var(--bk-primary);
+}
+
+.bokeauto-wl-head {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-3);
+	padding: 11px var(--bk-sp-4);
+	cursor: pointer;
+}
+
+.bokeauto-wl-head .bokeauto-wl-date {
+	font-weight: 600;
+	font-size: 13px;
+	color: var(--bk-text);
+	min-width: 104px;
+	font-variant-numeric: tabular-nums;
+}
+
+.bokeauto-wl-head .bokeauto-wl-meta {
+	color: var(--bk-text-4);
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+.bokeauto-wl-head .bokeauto-wl-actions {
+	margin-left: auto;
+	display: flex;
+	gap: var(--bk-sp-1);
+	flex: 0 0 auto;
+}
+
+.bokeauto-wl-preview {
+	flex: 1;
+	min-width: 0;
+	color: var(--bk-text-3);
+	font-size: 13px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.bokeauto-wl-body {
+	display: none;
+	padding: 0 var(--bk-sp-4) var(--bk-sp-4);
+	border-top: 1px solid var(--bk-divider);
+}
+
+.bokeauto-wl-item.active .bokeauto-wl-body {
+	display: block;
+	padding-top: var(--bk-sp-3);
+}
+
+.bokeauto-wl-body .bokeauto-wl-actions-row {
+	margin-top: var(--bk-sp-2);
+	display: flex;
+	gap: var(--bk-sp-2);
+}
+
+.bokeauto-wl-empty {
+	padding: 24px 0;
+	color: var(--bk-text-4);
+	text-align: center;
+	font-size: 13px;
+}
+
+/* 聊天页中的工作日志卡片 */
+.bokeauto-worklog-card .bokeauto-file-head {
+	background: linear-gradient(180deg, #fcfcfd 0%, var(--bk-primary-soft) 100%);
+}
+
+.bokeauto-worklog-preview {
+	margin: 0;
+	padding: 10px var(--bk-sp-3);
+	font-size: 12px;
+	line-height: 1.7;
+	color: var(--bk-text-2);
+	background: var(--bk-surface-3);
+	max-height: 180px;
+	overflow: auto;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+/* 关于插件 */
+.bokeauto-about {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--bk-sp-2) var(--bk-sp-5);
+	margin: 0;
+}
+
+.bokeauto-about p {
+	margin: 0;
+	color: var(--bk-text-2);
+	font-size: 13px;
+	line-height: 1.8;
+}
+
+.bokeauto-about dl {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: var(--bk-sp-2) var(--bk-sp-4);
+	margin: 0;
+	font-size: 13px;
+}
+
+.bokeauto-about dt {
+	color: var(--bk-text-3);
+	font-weight: 500;
+}
+
+.bokeauto-about dd {
+	margin: 0;
+	color: var(--bk-text);
+}
+
+.bokeauto-about a {
+	color: var(--bk-primary);
+	text-decoration: none;
+}
+
+.bokeauto-about a:hover {
+	text-decoration: underline;
+}
+
+/* ==========================================================================
+   14  定时任务页
+   ========================================================================== */
+
+.bokeauto-sched-toolbar {
+	display: flex;
+	align-items: center;
+	gap: var(--bk-sp-3);
+	flex-wrap: wrap;
+}
+
+.bokeauto-sched-toolbar .button {
+	border-radius: var(--bk-r-sm);
+}
+
+.bokeauto-sched-detail {
+	margin-top: var(--bk-sp-5);
+}
+
+.bokeauto-sched-detail h2 {
+	margin: 0 0 var(--bk-sp-3);
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--bk-text);
+}
+
+.bokeauto-sched-detail pre {
+	margin: 0;
+	padding: var(--bk-sp-3) var(--bk-sp-4);
+	background: var(--bk-surface-3);
+	border: 1px solid var(--bk-border-2);
+	border-radius: var(--bk-r-sm);
+	font-size: 12px;
+	line-height: 1.7;
+	color: var(--bk-text-2);
+	max-height: 320px;
+	overflow: auto;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+/* ==========================================================================
+   15  底部推广位
+   ========================================================================== */
 
 .bokeauto-promo {
-	margin: 24px 0 12px;
-	padding: 14px 18px;
+	margin: var(--bk-sp-5) 0 var(--bk-sp-3);
+	padding: var(--bk-sp-4) var(--bk-sp-5);
 	background: linear-gradient(135deg, #f6f9ff 0%, #fdfbff 100%);
-	border: 1px solid #dcdcde;
-	border-left: 3px solid #2271b1;
-	border-radius: 8px;
+	border: 1px solid var(--bk-border);
+	border-left: 3px solid var(--bk-primary);
+	border-radius: var(--bk-r);
+	box-shadow: var(--bk-shadow-sm);
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 16px;
+	gap: var(--bk-sp-4);
 	flex-wrap: wrap;
 }
 
 .bokeauto-promo__main {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: var(--bk-sp-3);
 	flex-wrap: wrap;
 	min-width: 0;
 }
 
 .bokeauto-promo__badge {
 	flex: 0 0 auto;
-	background: #2271b1;
+	background: var(--bk-primary);
 	color: #fff;
 	font-size: 11px;
 	font-weight: 600;
 	line-height: 1;
-	padding: 5px 9px;
-	border-radius: 4px;
+	padding: 6px 10px;
+	border-radius: var(--bk-r-sm);
 }
 
 .bokeauto-promo__text {
-	color: #50575e;
+	color: var(--bk-text-2);
 	font-size: 12px;
-	line-height: 1.7;
+	line-height: 1.8;
 }
 
 .bokeauto-promo__text strong {
-	color: #1d2327;
+	color: var(--bk-text);
 	font-weight: 600;
 }
 
 .bokeauto-promo__links {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: var(--bk-sp-2);
 	flex-wrap: wrap;
 }
 
 .bokeauto-promo__btn {
 	display: inline-block;
-	padding: 6px 12px;
+	padding: 6px 13px;
 	font-size: 12px;
 	line-height: 1.5;
 	text-decoration: none;
-	color: #2271b1;
-	background: #fff;
-	border: 1px solid #c3ccd6;
-	border-radius: 4px;
-	transition: background .15s ease, border-color .15s ease, color .15s ease;
+	color: var(--bk-primary);
+	background: var(--bk-surface);
+	border: 1px solid var(--bk-primary-line);
+	border-radius: var(--bk-r-sm);
+	transition: background var(--bk-ease), border-color var(--bk-ease), color var(--bk-ease);
 }
 
 .bokeauto-promo__btn:hover {
-	background: #f0f6fc;
-	border-color: #2271b1;
-	color: #135e96;
+	background: var(--bk-primary-soft);
+	border-color: var(--bk-primary);
+	color: var(--bk-primary-dark);
 }
 
 .bokeauto-promo__btn--primary {
-	background: #2271b1;
-	border-color: #2271b1;
+	background: var(--bk-primary);
+	border-color: var(--bk-primary);
 	color: #fff;
 	font-weight: 500;
 }
 
 .bokeauto-promo__btn--primary:hover {
-	background: #135e96;
-	border-color: #135e96;
+	background: var(--bk-primary-dark);
+	border-color: var(--bk-primary-dark);
 	color: #fff;
 }
 
+/* ==========================================================================
+   16  响应式
+   ========================================================================== */
+
+@media screen and (max-width: 1200px) {
+	.bokeauto-sidebar {
+		width: 220px;
+		flex-basis: 220px;
+	}
+}
+
+@media screen and (max-width: 960px) {
+	.bokeauto-chat-layout {
+		flex-direction: column;
+	}
+
+	.bokeauto-sidebar {
+		width: 100%;
+		flex-basis: auto;
+		position: static;
+		max-height: none;
+		min-height: 0;
+	}
+
+	.bokeauto-conv-list {
+		max-height: 240px;
+	}
+
+	.bokeauto-chat-main {
+		height: 560px;
+	}
+
+	.bokeauto-side-foot {
+		flex-direction: row;
+	}
+}
+
 @media screen and (max-width: 782px) {
+	.bokeauto-page-head {
+		margin-bottom: var(--bk-sp-4);
+	}
+
+	.bokeauto-title {
+		font-size: 18px;
+	}
+
+	.bokeauto-title .dashicons {
+		width: 32px;
+		height: 32px;
+		font-size: 18px;
+	}
+
+	.bokeauto-messages {
+		padding: var(--bk-sp-3);
+	}
+
+	.bokeauto-msg.user {
+		max-width: 92%;
+	}
+
+	.bokeauto-composer {
+		padding: var(--bk-sp-3);
+	}
+
+	.bokeauto-model-bar {
+		padding: var(--bk-sp-2) var(--bk-sp-3);
+	}
+
+	.bokeauto-model-bar select {
+		max-width: 160px;
+	}
+
+	.bokeauto-model-bar .model-bar-current,
+	.bokeauto-run-opts {
+		margin-left: 0;
+	}
+
 	.bokeauto-promo {
 		flex-direction: column;
 		align-items: flex-start;
+	}
+
+	.bokeauto-wrap .bokeauto-form-table th {
+		width: auto;
+		padding-bottom: 0;
+	}
+
+	.bokeauto-wrap .bokeauto-form-table tr + tr td {
+		border-top: none;
+	}
+
+	.bokeauto-card__body {
+		padding: var(--bk-sp-3);
+	}
+
+	.bokeauto-modal-body,
+	.bokeauto-modal-head,
+	.bokeauto-modal-foot {
+		padding-left: var(--bk-sp-4);
+		padding-right: var(--bk-sp-4);
+	}
+
+	.bokeauto-modal-inner {
+		padding: var(--bk-sp-4);
+	}
+
+	.bokeauto-wl-head {
+		flex-wrap: wrap;
+	}
+
+	.bokeauto-wl-preview {
+		flex-basis: 100%;
+		white-space: normal;
+	}
+}
+
+/* 尊重系统的减少动效设置 */
+@media (prefers-reduced-motion: reduce) {
+	.bokeauto-modal,
+	.bokeauto-memories-modal,
+	.bokeauto-think .dot,
+	.bokeauto-tool-card .tc-spin {
+		animation: none;
 	}
 }

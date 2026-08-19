@@ -391,7 +391,8 @@ class Bokeauto_Core {
 		$screen = get_current_screen();
 		$page   = $screen ? $screen->id : '';
 
-		wp_enqueue_style( 'bokeauto-chat', BOKEAUTO_URL . 'admin/css/chat.css', array(), BOKEAUTO_VERSION );
+		// 界面图标依赖 dashicons，显式声明依赖避免图标缺失。
+		wp_enqueue_style( 'bokeauto-chat', BOKEAUTO_URL . 'admin/css/chat.css', array( 'dashicons' ), BOKEAUTO_VERSION );
 
 		if ( false !== strpos( $page, 'bokeauto-roles' ) ) {
 			wp_enqueue_script( 'bokeauto-roles', BOKEAUTO_URL . 'admin/js/roles.js', array(), BOKEAUTO_VERSION, true );
@@ -494,6 +495,18 @@ class Bokeauto_Core {
 		register_rest_route( 'bokeauto/v1', '/test-llm', array(
 			'methods'             => 'POST',
 			'callback'            => array( $this, 'api_test_llm' ),
+			'permission_callback' => array( $this, 'check_permission' ),
+		) );
+
+		register_rest_route( 'bokeauto/v1', '/test-embedding', array(
+			'methods'             => 'POST',
+			'callback'            => array( $this, 'api_test_embedding' ),
+			'permission_callback' => array( $this, 'check_permission' ),
+		) );
+
+		register_rest_route( 'bokeauto/v1', '/models', array(
+			'methods'             => 'POST',
+			'callback'            => array( $this, 'api_models' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
@@ -958,6 +971,7 @@ class Bokeauto_Core {
 		$base_url = esc_url_raw( (string) $request->get_param( 'base_url' ) );
 		$api_key  = sanitize_text_field( (string) $request->get_param( 'api_key' ) );
 		$model    = sanitize_text_field( (string) $request->get_param( 'model' ) );
+		$protocol = sanitize_text_field( (string) $request->get_param( 'protocol' ) );
 
 		// 掩码/空 Key → 用当前已保存的 Key 测试（设置页打码回显后也能正常测试连接）
 		if ( '' === $api_key || false !== strpos( $api_key, '•' ) ) {
@@ -968,12 +982,66 @@ class Bokeauto_Core {
 			if ( '' === $provider ) { $provider = $saved['provider']; }
 		}
 
-		$llm = new Bokeauto_LLM();
-		$ok  = $llm->test_connection( $provider, $base_url, $api_key, $model );
+		$llm   = new Bokeauto_LLM();
+		$ok    = $llm->test_connection( $provider, $base_url, $api_key, $model, $protocol );
+		$proto = Bokeauto_Settings::resolve_protocol( $provider, $base_url, $protocol );
+		$label = Bokeauto_Settings::protocol_labels();
+		$name  = isset( $label[ $proto ] ) ? $label[ $proto ] : $proto;
 
 		return rest_ensure_response( array(
-			'ok'      => $ok,
-			'message' => $ok ? '连接成功，模型可用' : '连接失败，请检查配置',
+			'ok'       => $ok,
+			'protocol' => $proto,
+			'message'  => $ok ? '连接成功，模型可用（' . $name . '）' : '连接失败，请检查配置（当前按 ' . $name . ' 请求）',
+		) );
+	}
+
+	/** 测试嵌入服务（独立于对话模型，只验证嵌入地址与 Key） */
+	public function api_test_embedding( $request ) {
+		$base_url = esc_url_raw( (string) $request->get_param( 'embedding_base_url' ) );
+		$api_key  = sanitize_text_field( (string) $request->get_param( 'embedding_api_key' ) );
+
+		// 掩码回显的 Key 不是真实值 → 用已保存的 Key 测试
+		if ( false !== strpos( $api_key, '•' ) ) {
+			$api_key = '';
+		}
+
+		$llm = new Bokeauto_LLM();
+		return rest_ensure_response( $llm->test_embedding( $base_url, $api_key ) );
+	}
+
+	/** 拉取服务商模型列表，成功后按 provider 缓存供下拉复用 */
+
+	public function api_models( $request ) {
+		$provider = sanitize_key( (string) $request->get_param( 'provider' ) );
+		$base_url = esc_url_raw( (string) $request->get_param( 'base_url' ) );
+		$api_key  = sanitize_text_field( (string) $request->get_param( 'api_key' ) );
+		$protocol = sanitize_text_field( (string) $request->get_param( 'protocol' ) );
+
+		$saved = Bokeauto_Settings::get();
+		// 掩码/空 Key → 复用已保存的 Key（与测试连接一致的行为）
+		if ( '' === $api_key || false !== strpos( $api_key, '•' ) ) {
+			$api_key = ( $provider === $saved['provider'] || '' === $provider )
+				? $saved['api_key']
+				: ( isset( $saved['providers'][ $provider ]['api_key'] ) ? $saved['providers'][ $provider ]['api_key'] : '' );
+		}
+		if ( '' === $base_url ) { $base_url = $saved['base_url']; }
+		if ( '' === $provider ) { $provider = $saved['provider']; }
+
+		$models = Bokeauto_LLM::fetch_models( $provider, $base_url, $api_key, $protocol );
+		if ( is_wp_error( $models ) ) {
+			return rest_ensure_response( array(
+				'ok'      => false,
+				'models'  => array(),
+				'message' => '获取失败：' . $models->get_error_message(),
+			) );
+		}
+
+		Bokeauto_Settings::save_fetched_models( $provider, $models );
+
+		return rest_ensure_response( array(
+			'ok'      => true,
+			'models'  => $models,
+			'message' => '已获取 ' . count( $models ) . ' 个模型',
 		) );
 	}
 
@@ -1204,6 +1272,7 @@ class Bokeauto_Core {
 					'has_key'       => '' !== $s['api_key'],
 					'key_masked'    => '' === $s['api_key'] ? '' : substr( $s['api_key'], 0, 4 ) . '••••' . substr( $s['api_key'], -4 ),
 					'embedding_model' => $s['embedding_model'],
+					'embedding_ready' => '' !== $s['embedding_api_key'],
 					'confirm_mode'  => $s['confirm_mode'],
 					'mock_mode'     => $s['mock_mode'],
 				),

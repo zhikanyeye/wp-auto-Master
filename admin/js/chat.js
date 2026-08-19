@@ -327,7 +327,8 @@
 				} else if ( 'result' === v.type ) {
 					var r = document.createElement( 'div' );
 					r.className = 'bokeauto-visual-result';
-					r.innerHTML = '<span class="bokeauto-visual-icon">' + esc( v.icon || '✅' ) + '</span>'
+					r.innerHTML = '<span class="bokeauto-visual-icon">'
+						+ ( v.icon ? esc( v.icon ) : '<span class="dashicons dashicons-yes-alt"></span>' ) + '</span>'
 						+ '<span class="bokeauto-visual-title">' + esc( v.title || '' ) + '</span>';
 					this.el.appendChild( r );
 					scrollBottom();
@@ -340,7 +341,7 @@
 				var card = document.createElement( 'div' );
 				card.className = 'bokeauto-file-card bokeauto-worklog-card';
 				card.innerHTML = '<div class="bokeauto-file-head">'
-					+ '<span class="bokeauto-file-icon">📓</span>'
+					+ '<span class="bokeauto-file-icon"><span class="dashicons dashicons-book-alt"></span></span>'
 					+ '<code class="bokeauto-file-path">工作日志' + ( day ? ' · ' + esc( day ) : '' ) + '</code>'
 					+ '</div>'
 					+ '<pre class="bokeauto-file-preview bokeauto-worklog-preview">' + esc( ( content || '' ).slice( 0, 1500 ) )
@@ -353,7 +354,7 @@
 				var card = document.createElement( 'div' );
 				card.className = 'bokeauto-image-card';
 				card.innerHTML = '<div class="bokeauto-file-head">'
-					+ '<span class="bokeauto-file-icon">🖼</span>'
+					+ '<span class="bokeauto-file-icon"><span class="dashicons dashicons-format-image"></span></span>'
 					+ '<span class="bokeauto-image-prompt">' + esc( prompt || 'AI 生成的图片' ) + '</span>'
 					+ '<a class="button button-small" href="' + esc( url ) + '" target="_blank" rel="noopener">打开原图</a>'
 					+ '</div>'
@@ -366,7 +367,7 @@
 				var card = document.createElement( 'div' );
 				card.className = 'bokeauto-file-card';
 				card.innerHTML = '<div class="bokeauto-file-head">'
-					+ '<span class="bokeauto-file-icon">📄</span>'
+					+ '<span class="bokeauto-file-icon"><span class="dashicons dashicons-media-text"></span></span>'
 					+ '<code class="bokeauto-file-path">' + esc( path ) + '</code>'
 					+ '<button type="button" class="button button-small bokeauto-file-edit">打开编辑器修改</button>'
 					+ '</div>'
@@ -385,12 +386,13 @@
 				card.className = 'bokeauto-dir-card';
 				var rows = items.slice( 0, 50 ).map( function ( it ) {
 					var isDir = it['类型'] === '目录';
-					return '<div class="bokeauto-dir-row"><span class="bokeauto-dir-icon">' + ( isDir ? '📁' : '📄' ) + '</span>'
+					return '<div class="bokeauto-dir-row"><span class="bokeauto-dir-icon"><span class="dashicons '
+						+ ( isDir ? 'dashicons-portfolio' : 'dashicons-media-text' ) + '"></span></span>'
 						+ '<span class="bokeauto-dir-name">' + esc( it['名称'] ) + '</span>'
 						+ '<span class="bokeauto-dir-meta">' + ( isDir ? '目录' : ( it['大小'] || '' ) ) + '</span></div>';
 				} ).join( '' );
 				card.innerHTML = '<div class="bokeauto-file-head">'
-					+ '<span class="bokeauto-file-icon">📂</span>'
+					+ '<span class="bokeauto-file-icon"><span class="dashicons dashicons-open-folder"></span></span>'
 					+ '<code class="bokeauto-file-path">' + esc( path || '(站点根目录)' ) + '</code>'
 					+ '<span class="bokeauto-dir-count">' + items.length + ' 项</span>'
 					+ '</div>'
@@ -405,7 +407,7 @@
 				pendingConfirm = { id: confirm.confirm_id, taskId: d.task_id };
 				var box = document.createElement( 'div' );
 				box.className = 'bokeauto-confirm';
-				box.innerHTML = '<div class="bokeauto-confirm-title">⚠ ' + esc( I18N.confirm ) + '</div>'
+				box.innerHTML = '<div class="bokeauto-confirm-title"><span class="dashicons dashicons-warning"></span>' + esc( I18N.confirm ) + '</div>'
 					+ '<div class="bokeauto-confirm-tool">工具：<code>' + esc( confirm.tool_name ) + '</code></div>'
 					+ '<div class="bokeauto-confirm-desc">' + esc( confirm.summary ) + '</div>'
 					+ '<pre class="bokeauto-confirm-args">' + esc( JSON.stringify( confirm.args || {}, null, 2 ) ) + '</pre>'
@@ -434,7 +436,9 @@
 				var fb = document.createElement( 'div' );
 				fb.className = 'bokeauto-feedback';
 				fb.dataset.task = d.task_id || 0;
-				fb.innerHTML = '这次任务满意吗？<button class="btn-fb up" title="满意">👍</button><button class="btn-fb down" title="不满意">👎</button>';
+				fb.innerHTML = '这次任务满意吗？'
+					+ '<button class="btn-fb up" title="满意"><span class="dashicons dashicons-thumbs-up"></span></button>'
+					+ '<button class="btn-fb down" title="不满意"><span class="dashicons dashicons-thumbs-down"></span></button>';
 				this.el.appendChild( fb );
 				convMsgs.push( { role: 'assistant', content: d.text || '（任务已完成）' } );
 				loadConversations();
@@ -445,7 +449,7 @@
 			showError: function ( msg ) {
 				this.el.querySelector( '.bokeauto-think' ).style.display = 'none';
 				this.el.querySelector( '.bokeauto-stream' ).insertAdjacentHTML( 'beforeend',
-					'<div class="bubble bokeauto-err">⚠ ' + esc( msg ) + '</div>' );
+					'<div class="bubble bokeauto-err"><span class="dashicons dashicons-warning"></span>' + esc( msg ) + '</div>' );
 				scrollBottom();
 			}
 		};
@@ -528,7 +532,9 @@
 				var fb = document.createElement( 'div' );
 				fb.className = 'bokeauto-feedback';
 				fb.dataset.task = data.task_id || 0;
-				fb.innerHTML = '这次任务满意吗？<button class="btn-fb up" title="满意">👍</button><button class="btn-fb down" title="不满意">👎</button>';
+				fb.innerHTML = '这次任务满意吗？'
+					+ '<button class="btn-fb up" title="满意"><span class="dashicons dashicons-thumbs-up"></span></button>'
+					+ '<button class="btn-fb down" title="不满意"><span class="dashicons dashicons-thumbs-down"></span></button>';
 				ui.el.appendChild( fb );
 				convMsgs.push( { role: 'assistant', content: data.text || '（任务已完成）' } );
 				loadConversations();
@@ -751,7 +757,7 @@
 			autoConfirmEl.closest( '.bokeauto-auto-confirm' ).classList.toggle( 'on', autoConfirmEl.checked );
 			var tip = autoConfirmEl.closest( '.bokeauto-model-bar' ).querySelector( '.auto-confirm-tip' );
 			if ( tip ) {
-				tip.textContent = autoConfirmEl.checked ? '⚠ 高危操作将直接执行' : '';
+				tip.textContent = autoConfirmEl.checked ? '高危操作将直接执行' : '';
 			}
 		} );
 		autoConfirmEl.dispatchEvent( new Event( 'change' ) );
@@ -831,7 +837,7 @@
 		} ).then( function ( d ) {
 			barSettings = d.settings;
 			updateBarCurrent();
-			barSwitch.textContent = '✓ 已切换';
+			barSwitch.textContent = '已切换';
 			setTimeout( function () { barSwitch.textContent = '切换'; }, 1500 );
 		} ).catch( function ( e ) {
 			alert( '切换失败：' + errText( e ) );
@@ -927,17 +933,28 @@
 	var editorContent = document.getElementById( 'bokeauto-editor-content' );
 	var editorMsg = document.getElementById( 'bokeauto-editor-msg' );
 
+	/**
+	 * 设置编辑器提示文案与状态（成功 / 失败 / 进行中），颜色交由 CSS 控制。
+	 *
+	 * @param {string} text  提示文案，空字符串表示清空。
+	 * @param {string} state 状态类名：is-ok / is-err / is-busy。
+	 */
+	function setEditorMsg( text, state ) {
+		editorMsg.textContent = text || '';
+		editorMsg.className = 'bokeauto-editor-msg' + ( text && state ? ' ' + state : '' );
+	}
+
 	function openEditor( path, content ) {
 		editorPath.textContent = path;
 		editorContent.value = content || '';
-		editorMsg.textContent = '';
+		setEditorMsg( '' );
 		editorModal.style.display = 'flex';
 		editorContent.focus();
 	}
 
 	function closeEditor() {
 		editorModal.style.display = 'none';
-		editorMsg.textContent = '';
+		setEditorMsg( '' );
 	}
 
 	function saveEditor() {
@@ -946,31 +963,30 @@
 		if ( ! path ) { return; }
 		var btn = document.getElementById( 'bokeauto-editor-save' );
 		btn.disabled = true;
-		editorMsg.textContent = '保存中…';
-		editorMsg.style.color = '#888';
+		setEditorMsg( '保存中…', 'is-busy' );
 		post( 'file-save', { path: path, content: content } ).then( function ( d ) {
 			if ( d.code && d.message ) {
-				editorMsg.textContent = '❌ ' + d.message;
-				editorMsg.style.color = '#a32d2d';
+				setEditorMsg( d.message, 'is-err' );
 			} else if ( d.ok ) {
-				editorMsg.textContent = '✅ ' + ( d.message || '已保存' );
-				editorMsg.style.color = '#0f6e56';
-				addMsg( 'assistant', '<div class="bubble">✅ 你手动保存了文件：<code>' + esc( path ) + '</code></div>' );
+				setEditorMsg( d.message || '已保存', 'is-ok' );
+				addMsg( 'assistant', '<div class="bubble">你手动保存了文件：<code>' + esc( path ) + '</code></div>' );
 			} else {
-				editorMsg.textContent = '❌ 保存失败';
-				editorMsg.style.color = '#a32d2d';
+				setEditorMsg( '保存失败', 'is-err' );
 			}
 		} ).catch( function ( e ) {
-			editorMsg.textContent = '❌ 请求失败：' + errText( e );
-			editorMsg.style.color = '#a32d2d';
+			setEditorMsg( '请求失败：' + errText( e ), 'is-err' );
 		} ).finally( function () { btn.disabled = false; } );
 	}
 
 	document.getElementById( 'bokeauto-editor-save' ).addEventListener( 'click', saveEditor );
 	document.getElementById( 'bokeauto-editor-close' ).addEventListener( 'click', closeEditor );
+	document.getElementById( 'bokeauto-editor-close-x' ).addEventListener( 'click', closeEditor );
 	editorModal.addEventListener( 'click', function ( e ) { if ( e.target === editorModal ) { closeEditor(); } } );
 	editorContent.addEventListener( 'keydown', function ( e ) {
 		if ( ( e.ctrlKey || e.metaKey ) && 's' === e.key.toLowerCase() ) { e.preventDefault(); saveEditor(); }
+	} );
+	document.addEventListener( 'keydown', function ( e ) {
+		if ( 'Escape' === e.key && 'none' !== editorModal.style.display ) { closeEditor(); }
 	} );
 
 	/* ---------------- 启动：恢复上次会话 ---------------- */

@@ -70,6 +70,7 @@ class Bokeauto_Memory {
 		$emb = $this->llm->embed( array( mb_substr( $text, 0, 600 ) ) );
 		if ( ! is_wp_error( $emb ) && ! empty( $emb[0] ) ) {
 			$query_vec = $emb[0];
+			$query_dim = count( $query_vec );
 			$scored    = array();
 			foreach ( $rows as $row ) {
 				if ( empty( $row['embedding'] ) ) {
@@ -79,22 +80,32 @@ class Bokeauto_Memory {
 				if ( ! is_array( $vec ) ) {
 					continue;
 				}
+				// 维度不一致说明这条记忆是用另一个嵌入模型写入的（如老版本的
+				// text-embedding-v1 为 1536 维，bge-m3 为 1024 维）。不同模型的
+				// 向量空间不可比，截断后算出的相似度是噪声，直接跳过而不是硬算。
+				if ( count( $vec ) !== $query_dim ) {
+					continue;
+				}
 				$score = self::cosine( $query_vec, $vec );
-			$scored[] = array(
-				'm_type' => $row['m_type'],
-				'title'  => mb_substr( $row['title'], 0, 60 ),
-				'content'=> mb_substr( $row['content'], 0, 260 ),
-				'weight' => (float) $row['weight'],
-				'score'  => $score,
-				'id'     => (int) $row['id'],
-			);
-		}
-		usort( $scored, function ( $a, $b ) {
-			return ( $b['score'] * $b['weight'] ) <=> ( $a['score'] * $a['weight'] );
-		} );
-		$scored = array_slice( $scored, 0, $k );
-			$this->bump_hits( array_column( $scored, 'id' ) );
-			return $scored;
+				$scored[] = array(
+					'm_type' => $row['m_type'],
+					'title'  => mb_substr( $row['title'], 0, 60 ),
+					'content'=> mb_substr( $row['content'], 0, 260 ),
+					'weight' => (float) $row['weight'],
+					'score'  => $score,
+					'id'     => (int) $row['id'],
+				);
+			}
+			// 一条可比向量都没有（例如刚从旧嵌入模型切换过来，库里全是旧维度）
+			// 时不能直接返回空，否则记忆等于凭空消失，此处继续走关键词检索兜底。
+			if ( $scored ) {
+				usort( $scored, function ( $a, $b ) {
+					return ( $b['score'] * $b['weight'] ) <=> ( $a['score'] * $a['weight'] );
+				} );
+				$scored = array_slice( $scored, 0, $k );
+				$this->bump_hits( array_column( $scored, 'id' ) );
+				return $scored;
+			}
 		}
 
 		// 关键词降级检索（中文按 2-gram 匹配，提高召回）

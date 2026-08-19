@@ -31,6 +31,19 @@
 		return d.innerHTML;
 	}
 
+	/**
+	 * 渲染连接测试结果，颜色由 CSS 状态类控制。
+	 *
+	 * @param {HTMLElement} el    结果容器。
+	 * @param {string}      text  提示文案，空字符串表示清空。
+	 * @param {string}      state 状态类名：is-ok / is-err / is-busy。
+	 */
+	function setTestResult( el, text, state ) {
+		if ( ! el ) { return; }
+		el.textContent = text || '';
+		el.className = 'bokeauto-test-result' + ( text && state ? ' ' + state : '' );
+	}
+
 	/* ---------------- 角色 ---------------- */
 
 	function loadRoles() {
@@ -112,7 +125,7 @@
 		document.getElementById( 'bokeauto-role-llm-baseurl' ).value = llm.base_url || '';
 		document.getElementById( 'bokeauto-role-llm-apikey' ).value = llm.api_key || '';
 		document.getElementById( 'bokeauto-role-llm-model' ).value = llm.model || '';
-		document.getElementById( 'bokeauto-role-llm-result' ).textContent = '';
+		setTestResult( document.getElementById( 'bokeauto-role-llm-result' ), '' );
 
 		document.getElementById( 'bokeauto-role-modal' ).style.display = 'flex';
 	}
@@ -157,8 +170,18 @@
 	document.getElementById( 'bokeauto-role-new' ).addEventListener( 'click', function () { openRoleModal( null ); } );
 	document.getElementById( 'bokeauto-role-save' ).addEventListener( 'click', saveRole );
 	document.getElementById( 'bokeauto-role-type' ).addEventListener( 'change', applyRoleTypeUI );
+	var roleModal = document.getElementById( 'bokeauto-role-modal' );
+
+	function closeRoleModal() {
+		roleModal.style.display = 'none';
+	}
+
 	document.querySelectorAll( '.bokeauto-modal-close' ).forEach( function ( b ) {
-		b.addEventListener( 'click', function () { document.getElementById( 'bokeauto-role-modal' ).style.display = 'none'; } );
+		b.addEventListener( 'click', closeRoleModal );
+	} );
+	roleModal.addEventListener( 'click', function ( e ) { if ( e.target === roleModal ) { closeRoleModal(); } } );
+	document.addEventListener( 'keydown', function ( e ) {
+		if ( 'Escape' === e.key && 'none' !== roleModal.style.display ) { closeRoleModal(); }
 	} );
 
 	/* 独立模型配置区 */
@@ -185,7 +208,7 @@
 		var btn = this;
 		var out = document.getElementById( 'bokeauto-role-llm-result' );
 		btn.disabled = true;
-		out.textContent = '测试中…';
+		setTestResult( out, '测试中…', 'is-busy' );
 		req( 'test-llm', {
 			json: {
 				provider: llmProvider.value,
@@ -194,11 +217,9 @@
 				model: document.getElementById( 'bokeauto-role-llm-model' ).value
 			}
 		} ).then( function ( d ) {
-			out.textContent = d.ok ? '✅ ' + d.message : '❌ ' + d.message;
-			out.style.color = d.ok ? '#0f6e56' : '#a32d2d';
+			setTestResult( out, d.message, d.ok ? 'is-ok' : 'is-err' );
 		} ).catch( function () {
-			out.textContent = '❌ 请求失败';
-			out.style.color = '#a32d2d';
+			setTestResult( out, '请求失败', 'is-err' );
 		} ).finally( function () { btn.disabled = false; } );
 	} );
 

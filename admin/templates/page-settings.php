@@ -4,12 +4,20 @@
 	<?php
 	$settings = Bokeauto_Settings::get();
 	$presets  = Bokeauto_Settings::presets();
+	$protos   = Bokeauto_Settings::protocol_labels();
 
 	if ( isset( $_POST['bokeauto_save_settings'] ) && check_admin_referer( 'bokeauto_settings' ) ) {
 		$saved = Bokeauto_Settings::update( $_POST );
 		echo '<div class="notice notice-success is-dismissible"><p>设置已保存。</p></div>';
 		$settings = $saved;
 	}
+
+	// 当前实际生效的协议（用于「自动」选项的提示文案）
+	$active_proto = Bokeauto_Settings::resolve_protocol(
+		$settings['provider'],
+		$settings['base_url'],
+		$settings['protocol']
+	);
 
 	// 各服务商已保存的配置（供前端切换时动态加载；Key 打码）
 	$provider_configs = array();
@@ -19,9 +27,13 @@
 		$provider_configs[ $pk ] = array(
 			'base_url' => isset( $pv['base_url'] ) ? $pv['base_url'] : '',
 			'model'    => isset( $pv['model'] ) ? $pv['model'] : '',
+			'protocol' => isset( $pv['protocol'] ) ? $pv['protocol'] : '',
 			'api_key'  => '' === $key ? '' : substr( $key, 0, 4 ) . '••••••••' . substr( $key, -4 ),
 		);
 	}
+
+	// 已拉取缓存的模型列表（与预设模型合并展示）
+	$fetched_models = isset( $settings['fetched_models'] ) && is_array( $settings['fetched_models'] ) ? $settings['fetched_models'] : array();
 	?>
 
 	<form method="post">
@@ -52,12 +64,32 @@
 			</tr>
 
 			<tr>
+				<th scope="row"><label for="bokeauto-protocol">接口协议</label></th>
+				<td>
+					<select id="bokeauto-protocol" name="protocol">
+						<option value="" <?php selected( $settings['protocol'], '' ); ?>>
+							自动识别（当前：<?php echo esc_html( isset( $protos[ $active_proto ] ) ? $protos[ $active_proto ] : $active_proto ); ?>）
+						</option>
+						<?php foreach ( $protos as $pkey => $plabel ) : ?>
+							<option value="<?php echo esc_attr( $pkey ); ?>" <?php selected( $settings['protocol'], $pkey ); ?>>
+								<?php echo esc_html( $plabel ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+					<p class="description">
+						默认按服务商与 API 地址自动判断，绝大多数服务商用 Chat Completions。
+						接入只支持 Responses API 的端点，或用中转站代理 Claude 时，可在此手动指定。
+					</p>
+				</td>
+			</tr>
+
+			<tr>
 				<th scope="row"><label for="bokeauto-api-key">API Key</label></th>
 				<td>
 					<input type="password" class="regular-text" id="bokeauto-api-key" name="api_key"
 						value="<?php echo esc_attr( '' === $settings['api_key'] ? '' : substr( $settings['api_key'], 0, 4 ) . '••••••••' . substr( $settings['api_key'], -4 ) ); ?>" autocomplete="off" placeholder="填写 API Key（留空则保持原 Key；含掩码提交不会覆盖）">
 					<button type="button" class="button" id="bokeauto-test-llm">测试连接</button>
-					<span id="bokeauto-test-result"></span>
+					<span id="bokeauto-test-result" class="bokeauto-test-result"></span>
 					<p class="description">Key 已打码显示，直接保存不会丢失原 Key；输入新 Key 即替换。</p>
 				</td>
 			</tr>
@@ -68,7 +100,9 @@
 					<input type="text" class="regular-text" id="bokeauto-model" name="model"
 						value="<?php echo esc_attr( $settings['model'] ); ?>" list="bokeauto-models">
 					<datalist id="bokeauto-models"></datalist>
-					<p class="description">可直接输入，或从该服务商的内置模型列表中选择。</p>
+					<button type="button" class="button" id="bokeauto-fetch-models">获取模型列表</button>
+					<span id="bokeauto-models-result" class="bokeauto-test-result"></span>
+					<p class="description">可直接输入，或从下拉候选中选择。点「获取模型列表」会用当前地址与 Key 拉取该服务商的真实可用模型。</p>
 				</td>
 			</tr>
 
@@ -77,6 +111,18 @@
 				<td>
 					<input type="number" min="0" max="2" step="0.1" id="bokeauto-temperature" name="temperature"
 						value="<?php echo esc_attr( $settings['temperature'] ); ?>">
+				</td>
+			</tr>
+
+			<tr>
+				<th scope="row"><label for="bokeauto-max-tokens">单次回复上限（tokens）</label></th>
+				<td>
+					<input type="number" min="256" max="128000" step="256" id="bokeauto-max-tokens" name="max_tokens"
+						value="<?php echo esc_attr( $settings['max_tokens'] ); ?>">
+					<p class="description">
+						Claude 与 Responses 协议必须携带该上限，取值 256-128000。
+						生成长文时可调高，但需不超过所选模型自身的输出上限。
+					</p>
 				</td>
 			</tr>
 
@@ -100,11 +146,34 @@
 			</tr>
 
 			<tr>
-				<th scope="row"><label for="bokeauto-embedding-model">嵌入模型</label></th>
+				<th scope="row">记忆向量化</th>
 				<td>
-					<input type="text" class="regular-text" id="bokeauto-embedding-model" name="embedding_model"
-						value="<?php echo esc_attr( $settings['embedding_model'] ); ?>">
-					<p class="description">用于记忆向量化。DeepSeek 官方 API 未开放嵌入时，建议通义：text-embedding-v1 / text-embedding-v3。</p>
+					<p class="description" style="margin: 0 0 8px;">
+						固定使用 <code><?php echo esc_html( Bokeauto_Settings::EMBEDDING_MODEL ); ?></code>（中文语义检索效果好、有免费额度）。
+						这套配置<strong>完全独立于上面的对话模型</strong>，互不影响：对话用 DeepSeek、Claude 或任意服务商都不妨碍这里。
+						<a href="https://cloud.siliconflow.cn/account/ak" target="_blank" rel="noopener">前往硅基流动获取 API Key</a>
+					</p>
+
+					<p style="margin: 0 0 6px;">
+						<label for="bokeauto-embedding-key" style="display:inline-block; min-width:70px;">API Key</label>
+						<input type="password" class="regular-text" id="bokeauto-embedding-key" name="embedding_api_key"
+							autocomplete="new-password"
+							placeholder="<?php echo esc_attr( '' === $settings['embedding_api_key'] ? 'sk-…（留空则使用关键词检索）' : '已保存，留空不修改' ); ?>"
+							value="">
+						<button type="button" class="button" id="bokeauto-test-embedding">测试嵌入服务</button>
+						<span id="bokeauto-embedding-result" class="bokeauto-test-result"></span>
+					</p>
+
+					<p style="margin: 0 0 6px;">
+						<label for="bokeauto-embedding-base" style="display:inline-block; min-width:70px;">接口地址</label>
+						<input type="text" class="regular-text" id="bokeauto-embedding-base" name="embedding_base_url"
+							value="<?php echo esc_attr( $settings['embedding_base_url'] ); ?>">
+					</p>
+
+					<p class="description">
+						地址一般无需修改，走代理或私有部署时再改（需为 OpenAI 兼容的 embeddings 接口）。
+						Key 留空时记忆自动降级为中文关键词检索，插件其余功能不受影响。
+					</p>
 				</td>
 			</tr>
 
@@ -194,6 +263,9 @@
 	<script>
 	(function () {
 		var presets = <?php echo wp_json_encode( $presets ); ?>;
+		var providerConfigs = <?php echo wp_json_encode( $provider_configs ); ?>;
+		var fetchedModels = <?php echo wp_json_encode( $fetched_models ); ?>;
+
 		function esc( s ) {
 			var d = document.createElement( 'div' );
 			d.textContent = s == null ? '' : String( s );
@@ -203,8 +275,27 @@
 		var base = document.getElementById( 'bokeauto-base-url' );
 		var model = document.getElementById( 'bokeauto-model' );
 		var modelsList = document.getElementById( 'bokeauto-models' );
-		var providerConfigs = <?php echo wp_json_encode( $provider_configs ); ?>;
 		var keyInput = document.getElementById( 'bokeauto-api-key' );
+		var protoSel = document.getElementById( 'bokeauto-protocol' );
+
+		/**
+		 * 渲染模型候选：预设内置 + 已拉取缓存合并去重。
+		 *
+		 * @param {string} provider 服务商键名。
+		 * @param {Array}  extra    本次新拉取到的模型（可选）。
+		 */
+		function renderModels( provider, extra ) {
+			var p = presets[ provider ] || {};
+			var list = [];
+			[ p.models || [], fetchedModels[ provider ] || [], extra || [] ].forEach( function ( arr ) {
+				arr.forEach( function ( m ) {
+					if ( m && list.indexOf( m ) === -1 ) { list.push( m ); }
+				} );
+			} );
+			modelsList.innerHTML = list.map( function ( m ) {
+				return '<option value="' + esc( m ) + '">';
+			} ).join( '' );
+		}
 
 		function applyPreset() {
 			var p = presets[ sel.value ];
@@ -215,59 +306,114 @@
 				if ( saved.base_url ) { base.value = saved.base_url; }
 				if ( saved.model ) { model.value = saved.model; }
 				if ( saved.api_key ) { keyInput.value = saved.api_key; }
+				protoSel.value = saved.protocol || '';
 			} else {
-				// 从未保存过 → 填充该服务商预设，Key 清空（避免残留上一个服务商的值）
+				// 从未保存过 → 填充该服务商预设，Key 与协议清空（避免残留上一个服务商的值）
 				if ( p.base_url ) { base.value = p.base_url; }
 				if ( p.model ) { model.value = p.model; }
 				keyInput.value = '';
+				protoSel.value = '';
 			}
-			if ( p.models && p.models.length ) {
-				modelsList.innerHTML = p.models.map( function ( m ) {
-					return '<option value="' + esc( m ) + '">';
-				} ).join( '' );
-			} else {
-				modelsList.innerHTML = '';
-			}
+			renderModels( sel.value );
 			if ( sel.value === 'mock' ) {
 				keyInput.value = '';
 			}
 		}
 		sel.addEventListener( 'change', applyPreset );
 		// 仅填充模型下拉列表；不执行 applyPreset()，避免页面加载时把已保存的 base_url/模型覆盖成预设值
-		var p0 = presets[ sel.value ];
-		if ( p0 && p0.models && p0.models.length ) {
-			modelsList.innerHTML = p0.models.map( function ( m ) {
-				return '<option value="' + esc( m ) + '">';
-			} ).join( '' );
+		renderModels( sel.value );
+
+		/**
+		 * 渲染操作结果，颜色由 CSS 状态类控制。
+		 *
+		 * @param {HTMLElement} out   结果容器。
+		 * @param {string}      text  提示文案。
+		 * @param {string}      state 状态类名：is-ok / is-err / is-busy。
+		 */
+		function setResult( out, text, state ) {
+			out.textContent = text || '';
+			out.className = 'bokeauto-test-result' + ( text && state ? ' ' + state : '' );
 		}
 
-		document.getElementById( 'bokeauto-test-llm' ).addEventListener( 'click', function () {
-			var btn = this;
-			var out = document.getElementById( 'bokeauto-test-result' );
-			btn.disabled = true;
-			out.textContent = '测试中…';
-
-			fetch( BOKEAUTO.api + 'test-llm', {
+		function apiPost( path, body ) {
+			return fetch( BOKEAUTO.api + path, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 					'X-WP-Nonce': BOKEAUTO.nonce
 				},
-				body: JSON.stringify( {
-					provider: sel.value,
-					base_url: base.value,
-					api_key: document.getElementById( 'bokeauto-api-key' ).value,
-					model: model.value
-				} )
+				body: JSON.stringify( body )
+			} ).then( function ( r ) { return r.json(); } );
+		}
+
+		document.getElementById( 'bokeauto-test-llm' ).addEventListener( 'click', function () {
+			var btn = this;
+			var out = document.getElementById( 'bokeauto-test-result' );
+
+			btn.disabled = true;
+			setResult( out, '测试中…', 'is-busy' );
+
+			apiPost( 'test-llm', {
+				provider: sel.value,
+				base_url: base.value,
+				api_key: keyInput.value,
+				model: model.value,
+				protocol: protoSel.value
 			} )
-			.then( function ( r ) { return r.json(); } )
 			.then( function ( d ) {
-				out.textContent = d.ok ? '✅ ' + d.message : '❌ ' + d.message;
-				out.style.color = d.ok ? '#0f6e56' : '#a32d2d';
+				setResult( out, d.message, d.ok ? 'is-ok' : 'is-err' );
 			} )
 			.catch( function () {
-				out.textContent = '❌ 请求失败';
-				out.style.color = '#a32d2d';
+				setResult( out, '请求失败', 'is-err' );
+			} )
+			.finally( function () { btn.disabled = false; } );
+		} );
+
+		document.getElementById( 'bokeauto-test-embedding' ).addEventListener( 'click', function () {
+			var btn = this;
+			var out = document.getElementById( 'bokeauto-embedding-result' );
+
+			btn.disabled = true;
+			setResult( out, '测试中…', 'is-busy' );
+
+			apiPost( 'test-embedding', {
+				embedding_base_url: document.getElementById( 'bokeauto-embedding-base' ).value,
+				embedding_api_key: document.getElementById( 'bokeauto-embedding-key' ).value
+			} )
+			.then( function ( d ) {
+				setResult( out, d.message, d.ok ? 'is-ok' : 'is-err' );
+			} )
+			.catch( function () {
+				setResult( out, '请求失败', 'is-err' );
+			} )
+			.finally( function () { btn.disabled = false; } );
+		} );
+
+		document.getElementById( 'bokeauto-fetch-models' ).addEventListener( 'click', function () {
+
+			var btn = this;
+			var out = document.getElementById( 'bokeauto-models-result' );
+
+			btn.disabled = true;
+			setResult( out, '获取中…', 'is-busy' );
+
+			apiPost( 'models', {
+				provider: sel.value,
+				base_url: base.value,
+				api_key: keyInput.value,
+				protocol: protoSel.value
+			} )
+			.then( function ( d ) {
+				setResult( out, d.message, d.ok ? 'is-ok' : 'is-err' );
+				if ( d.ok && d.models && d.models.length ) {
+					fetchedModels[ sel.value ] = d.models;
+					renderModels( sel.value );
+					// 点开输入框即可看到候选，无需再次刷新页面
+					model.focus();
+				}
+			} )
+			.catch( function () {
+				setResult( out, '请求失败', 'is-err' );
 			} )
 			.finally( function () { btn.disabled = false; } );
 		} );

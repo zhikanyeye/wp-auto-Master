@@ -39,45 +39,55 @@
 
 	<!-- 角色编辑弹窗 -->
 	<div class="bokeauto-modal" id="bokeauto-role-modal" style="display:none;">
-		<div class="bokeauto-modal-inner">
-			<h3 id="bokeauto-role-modal-title">新建角色</h3>
-			<input type="hidden" id="bokeauto-role-id">
-			<p><label>角色名称 *<br><input type="text" id="bokeauto-role-name" class="regular-text" placeholder="如：客服专员"></label></p>
-			<p><label>职责描述 *<br><textarea id="bokeauto-role-desc" class="large-text" rows="2" placeholder="这个角色负责什么、擅长什么"></textarea></label></p>
-			<p><label>角色类型<br>
-				<select id="bokeauto-role-type">
-					<option value="chat">聊天型（对话 + 工具完成任务）</option>
-					<option value="functional">功能性（绑定工具直接输出，不做对话）</option>
-				</select>
-				<br><span class="description">功能性角色如「生图助手」：AI 调用时直接执行绑定工具出结果，无需它对话</span>
-			</label></p>
-			<div id="bokeauto-role-bind-box" style="display:none;">
-				<p><label>绑定输出工具（功能性角色）<br>
-					<select id="bokeauto-role-bindtool" class="regular-text" style="width:100%;"></select>
-					<br><span class="description">AI 调用该角色时直接执行此工具，如生图助手 → generate_image</span>
-				</label></p>
+		<div class="bokeauto-modal-box bokeauto-role-modal-box">
+			<div class="bokeauto-modal-head">
+				<h3 id="bokeauto-role-modal-title">新建角色</h3>
+				<button type="button" class="bokeauto-modal-close" title="关闭">×</button>
 			</div>
-			<p id="bokeauto-role-prompt-row"><label>行为风格（system prompt，可选）<br><textarea id="bokeauto-role-prompt" class="large-text" rows="3" placeholder="角色的语气、工作方式、注意事项等"></textarea></label></p>
-			<p id="bokeauto-role-tools-row"><label>可用工具（留空 = 全部工具）<br>
-				<select id="bokeauto-role-tools" multiple size="6" class="large-text"></select>
-				<br><span class="description">按住 Ctrl/Cmd 多选</span>
-			</label></p>
-			<p id="bokeauto-role-ownllm-row"><label><input type="checkbox" id="bokeauto-role-ownllm"> 为该角色单独配置模型/执行凭据<span class="description">（聊天型：对话用该模型；功能性：绑定工具调用用该 Key/模型，如生图助手配自己的智谱 Key）</span></label></p>
-			<div id="bokeauto-role-llm-box" style="display:none; background:#f6f7f7; border:1px solid #e2e4e7; border-radius:8px; padding:12px; margin-bottom:12px;">
-				<p style="margin-top:0;"><label>服务商<br>
-					<select id="bokeauto-role-llm-provider"></select>
+			<div class="bokeauto-modal-body">
+				<input type="hidden" id="bokeauto-role-id">
+				<p><label>角色名称 *<br><input type="text" id="bokeauto-role-name" placeholder="如：客服专员"></label></p>
+				<p><label>职责描述 *<br><textarea id="bokeauto-role-desc" rows="2" placeholder="这个角色负责什么、擅长什么"></textarea></label></p>
+				<p><label>角色类型<br>
+					<select id="bokeauto-role-type">
+						<option value="chat">聊天型（对话 + 工具完成任务）</option>
+						<option value="functional">功能性（绑定工具直接输出，不做对话）</option>
+					</select>
+					<span class="description">功能性角色如「生图助手」：AI 调用时直接执行绑定工具出结果，无需它对话</span>
 				</label></p>
-				<p><label>API 地址<br><input type="text" id="bokeauto-role-llm-baseurl" class="regular-text" style="width:100%;"></label></p>
-				<p><label>API Key<br><input type="password" id="bokeauto-role-llm-apikey" class="regular-text" style="width:100%;" autocomplete="off">
-					<button type="button" class="button button-small" id="bokeauto-role-llm-test">测试连接</button>
-					<span id="bokeauto-role-llm-result"></span></label></p>
-				<p><label>模型名称<br><input type="text" id="bokeauto-role-llm-model" class="regular-text" style="width:100%;" placeholder="如 glm-4.5-flash"></label></p>
+				<div id="bokeauto-role-bind-box" style="display:none;">
+					<p><label>绑定输出工具（功能性角色）<br>
+						<select id="bokeauto-role-bindtool"></select>
+						<span class="description">AI 调用该角色时直接执行此工具，如生图助手 → generate_image</span>
+					</label></p>
+				</div>
+				<p id="bokeauto-role-prompt-row"><label>行为风格（system prompt，可选）<br><textarea id="bokeauto-role-prompt" rows="3" placeholder="角色的语气、工作方式、注意事项等"></textarea></label></p>
+				<p id="bokeauto-role-tools-row"><label>可用工具（留空 = 全部工具）<br>
+					<select id="bokeauto-role-tools" multiple size="6"></select>
+					<span class="description">按住 Ctrl/Cmd 多选</span>
+				</label></p>
+				<p id="bokeauto-role-ownllm-row"><label class="bokeauto-inline-check"><input type="checkbox" id="bokeauto-role-ownllm"> 为该角色单独配置模型/执行凭据</label>
+					<span class="description">聊天型：对话用该模型；功能性：绑定工具调用用该 Key/模型，如生图助手配自己的智谱 Key</span>
+				</p>
+				<div class="bokeauto-subpanel" id="bokeauto-role-llm-box" style="display:none;">
+					<p><label>服务商<br>
+						<select id="bokeauto-role-llm-provider"></select>
+					</label></p>
+					<p><label>API 地址<br><input type="text" id="bokeauto-role-llm-baseurl"></label></p>
+					<p><label>API Key<br><input type="password" id="bokeauto-role-llm-apikey" autocomplete="off"></label>
+						<span class="bokeauto-subpanel-actions">
+							<button type="button" class="button button-small" id="bokeauto-role-llm-test">测试连接</button>
+							<span id="bokeauto-role-llm-result" class="bokeauto-test-result"></span>
+						</span>
+					</p>
+					<p><label>模型名称<br><input type="text" id="bokeauto-role-llm-model" placeholder="如 glm-4.5-flash"></label></p>
+				</div>
+				<p><label class="bokeauto-inline-check"><input type="checkbox" id="bokeauto-role-status" checked> 启用该角色</label></p>
 			</div>
-			<p><label><input type="checkbox" id="bokeauto-role-status" checked> 启用该角色</label></p>
-			<p>
+			<div class="bokeauto-modal-foot">
 				<button type="button" class="button button-primary" id="bokeauto-role-save">保存</button>
 				<button type="button" class="button bokeauto-modal-close">取消</button>
-			</p>
+			</div>
 		</div>
 	</div>
 </div>

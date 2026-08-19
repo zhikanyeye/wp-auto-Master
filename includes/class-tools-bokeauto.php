@@ -146,6 +146,9 @@ class Bokeauto_Tools_Bokeauto {
 				'api地址'       => $s['base_url'],
 				'已配Key'       => '' !== $s['api_key'],
 				'嵌入模型'      => $s['embedding_model'],
+				'嵌入服务'      => '' !== $s['embedding_api_key']
+					? $s['embedding_base_url'] . '（已配 Key，记忆走向量检索）'
+					: '未配 Key（记忆走关键词检索）',
 				'确认策略'      => array( 'auto' => '全部自动', 'high' => '高危需确认', 'all' => '全部确认' )[ $s['confirm_mode'] ],
 				'记忆系统'      => $s['memory_enabled'] ? '开启' : '关闭',
 				'最大步数'      => (int) $s['max_steps'],
