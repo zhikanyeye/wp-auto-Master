@@ -2,12 +2,12 @@
 /**
  * 内容管理工具：文章 / 页面 / 媒体 / 分类
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_Tools_Content {
+class Bokeauto_Tools_Content {
 
 	public static function get_site_info( $args ) {
 		$count_posts   = wp_count_posts();
@@ -272,7 +272,7 @@ class Tianma_Tools_Content {
 		}
 
 		// SSRF 防护：禁止下载本机/内网地址
-		$safe = Tianma_Tools::validate_download_url( $url );
+		$safe = Bokeauto_Tools::validate_download_url( $url );
 		if ( true !== $safe ) {
 			return array( 'ok' => false, 'message' => $safe );
 		}
@@ -309,7 +309,7 @@ class Tianma_Tools_Content {
 	 */
 	public static function fetch_webpage( $args ) {
 		$url  = esc_url_raw( isset( $args['url'] ) ? $args['url'] : '' );
-		$safe = Tianma_Tools::validate_download_url( $url );
+		$safe = Bokeauto_Tools::validate_download_url( $url );
 		if ( true !== $safe ) {
 			return array( 'ok' => false, 'message' => $safe );
 		}
@@ -318,7 +318,7 @@ class Tianma_Tools_Content {
 			'timeout'             => 15,
 			'redirection'         => 3,
 			'limit_response_size' => 1024 * 1024,
-			'user-agent'          => 'Boke-wpAI/' . ( defined( 'TIANMA_VERSION' ) ? TIANMA_VERSION : '1.0' ) . '; WordPress webpage reader',
+			'user-agent'          => 'Boke-wpAI/' . ( defined( 'BOKEAUTO_VERSION' ) ? BOKEAUTO_VERSION : '1.0' ) . '; WordPress webpage reader',
 			'headers'             => array( 'Accept' => 'text/html,application/xhtml+xml;q=0.9,text/plain;q=0.8' ),
 		) );
 		if ( is_wp_error( $response ) ) {
@@ -435,7 +435,7 @@ class Tianma_Tools_Content {
 	 * 支持同步返回 url 与异步任务轮询两种模式。
 	 */
 	public static function generate_image( $args ) {
-		$s = Tianma_Settings::get();
+		$s = Bokeauto_Settings::get();
 
 		$prompt = trim( (string) ( isset( $args['prompt'] ) ? $args['prompt'] : '' ) );
 		if ( '' === $prompt ) {

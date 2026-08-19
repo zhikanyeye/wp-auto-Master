@@ -5,12 +5,12 @@
  * Agent 遇到高危工具时，不直接执行，而是挂起上下文并生成确认码；
  * 前端展示确认卡片，用户批准后通过确认码续跑 Agent 循环。
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_Confirm {
+class Bokeauto_Confirm {
 
 	/**
 	 * 挂起一个待确认的高危工具调用
@@ -24,7 +24,7 @@ class Tianma_Confirm {
 		$hash = wp_generate_password( 32, false, false );
 
 		$wpdb->insert(
-			$wpdb->prefix . 'tianma_confirmations',
+			$wpdb->prefix . 'bokeauto_confirmations',
 			array(
 				'confirm_hash' => $hash,
 				'payload'      => wp_json_encode( $payload, JSON_UNESCAPED_UNICODE ),
@@ -47,7 +47,7 @@ class Tianma_Confirm {
 		global $wpdb;
 		$row = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM {$wpdb->prefix}tianma_confirmations WHERE confirm_hash = %s AND status = 'pending'",
+				"SELECT * FROM {$wpdb->prefix}bokeauto_confirmations WHERE confirm_hash = %s AND status = 'pending'",
 				$hash
 			)
 		);
@@ -65,7 +65,7 @@ class Tianma_Confirm {
 	public static function resolve( $hash, $status ) {
 		global $wpdb;
 		return $wpdb->update(
-			$wpdb->prefix . 'tianma_confirmations',
+			$wpdb->prefix . 'bokeauto_confirmations',
 			array( 'status' => $status ),
 			array( 'confirm_hash' => $hash ),
 			array( '%s' ),
@@ -77,7 +77,7 @@ class Tianma_Confirm {
 	public static function cleanup_old() {
 		global $wpdb;
 		$wpdb->query(
-			"DELETE FROM {$wpdb->prefix}tianma_confirmations WHERE created_at < DATE_SUB(NOW(), INTERVAL 2 HOUR)"
+			"DELETE FROM {$wpdb->prefix}bokeauto_confirmations WHERE created_at < DATE_SUB(NOW(), INTERVAL 2 HOUR)"
 		);
 	}
 }

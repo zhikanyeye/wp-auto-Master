@@ -6,12 +6,12 @@
  * 高危工具调用会挂起并生成确认码，用户批准后续跑。
  * 任务结束后自动沉淀记忆（自学习）。
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_Agent {
+class Bokeauto_Agent {
 
 	private $settings;
 	private $memory;
@@ -32,8 +32,8 @@ class Tianma_Agent {
 	public $role = null;
 
 	public function __construct() {
-		$this->settings = Tianma_Settings::get();
-		$this->memory   = new Tianma_Memory();
+		$this->settings = Bokeauto_Settings::get();
+		$this->memory   = new Bokeauto_Memory();
 	}
 
 	/** 聊天页可覆盖单条消息的最大工具步数：0 = 不限制（即使工具失败也继续，不强制中止） */
@@ -95,11 +95,11 @@ class Tianma_Agent {
 		// 角色模式：工具按角色权限过滤
 		$role_tools = $this->role_tools();
 		if ( null !== $role_tools ) {
-			$core = array_intersect( Tianma_Tools::core_names(), $role_tools );
-			$tools = Tianma_Tools::schemas_for_names( array_values( array_unique( array_merge( $core, $role_tools ) ) ) );
-			$tools[] = Tianma_Tools::group_use_schema();
+			$core = array_intersect( Bokeauto_Tools::core_names(), $role_tools );
+			$tools = Bokeauto_Tools::schemas_for_names( array_values( array_unique( array_merge( $core, $role_tools ) ) ) );
+			$tools[] = Bokeauto_Tools::group_use_schema();
 		} else {
-			$tools = Tianma_Tools::schemas();
+			$tools = Bokeauto_Tools::schemas();
 		}
 
 		$memories = $this->memory->retrieve( $message, 5 );
@@ -143,7 +143,7 @@ class Tianma_Agent {
 	 * ------------------------------------------------------------------- */
 
 	private function agent_loop( $messages, $tools, $summary, $user_id, $start_steps = array(), $start_sigs = array(), $start_groups = array() ) {
-		$llm        = new Tianma_LLM( $this->role_llm_override() );
+		$llm        = new Bokeauto_LLM( $this->role_llm_override() );
 		$max_steps  = (int) $this->settings['max_steps'];
 		$steps      = $start_steps;
 		$confirm    = null;
@@ -243,7 +243,7 @@ class Tianma_Agent {
 					continue;
 				}
 
-				$risk = Tianma_Tools::risk( $name );
+				$risk = Bokeauto_Tools::risk( $name );
 
 				// 无头模式（定时任务）：未授权高危 → 自动跳过并告知模型
 				if ( $this->headless && 'high' === $risk && ! $this->auto_high ) {
@@ -281,7 +281,7 @@ class Tianma_Agent {
 					'active_groups' => $active_groups,
 					'max_steps' => (int) $this->settings['max_steps'],
 				);
-				$confirm = Tianma_Confirm::create( $payload );
+				$confirm = Bokeauto_Confirm::create( $payload );
 
 				return $this->finish_task(
 						$summary,
@@ -440,12 +440,12 @@ class Tianma_Agent {
 
 	/** 按已激活组构建工具 Schema（核心工具 + use_tool_group + 已加载组），降低 prompt 开销 */
 	private function build_tools( $active_groups ) {
-		$names = Tianma_Tools::core_names();
+		$names = Bokeauto_Tools::core_names();
 		foreach ( (array) $active_groups as $g ) {
-			$names = array_merge( $names, Tianma_Tools::group_names( $g ) );
+			$names = array_merge( $names, Bokeauto_Tools::group_names( $g ) );
 		}
-		$tools = Tianma_Tools::schemas_for_names( $names );
-		$tools[] = Tianma_Tools::group_use_schema();
+		$tools = Bokeauto_Tools::schemas_for_names( $names );
+		$tools[] = Bokeauto_Tools::group_use_schema();
 		return $tools;
 	}
 
@@ -458,16 +458,16 @@ class Tianma_Agent {
 		$loaded = array();
 		$errors = array();
 		foreach ( $groups as $group ) {
-			if ( ! Tianma_Tools::valid_group( $group ) ) {
+			if ( ! Bokeauto_Tools::valid_group( $group ) ) {
 				$errors[] = '未知工具组：' . $group . '（可选：content/file/plugin/system/agent）';
 				continue;
 			}
 			if ( in_array( $group, $active_groups, true ) ) {
-				$loaded[] = '「' . Tianma_Tools::group_label( $group ) . '」已加载';
+				$loaded[] = '「' . Bokeauto_Tools::group_label( $group ) . '」已加载';
 				continue;
 			}
 			$active_groups[] = $group;
-			$loaded[] = '已加载「' . Tianma_Tools::group_label( $group ) . '」';
+			$loaded[] = '已加载「' . Bokeauto_Tools::group_label( $group ) . '」';
 		}
 		if ( $loaded ) {
 			$tools = $this->build_tools( $active_groups );
@@ -499,7 +499,7 @@ class Tianma_Agent {
 			return $res;
 		}
 
-		$tools    = Tianma_Tools::schemas();
+		$tools    = Bokeauto_Tools::schemas();
 		$memories = $this->memory->retrieve( $message, 5 );
 		$system   = $this->build_system_prompt( $memories, $message );
 
@@ -524,7 +524,7 @@ class Tianma_Agent {
 	}
 
 	private function agent_loop_stream( $messages, $tools, $summary, $user_id, $emitter ) {
-		$llm       = new Tianma_LLM( $this->role_llm_override() );
+		$llm       = new Bokeauto_LLM( $this->role_llm_override() );
 		$max_steps = (int) $this->settings['max_steps'];
 		$steps     = array();
 		$usage     = array( 'prompt_tokens' => 0, 'completion_tokens' => 0 );
@@ -592,7 +592,7 @@ class Tianma_Agent {
 
 				// 循环熔断：仅拦截「已成功执行」的相同写操作（防重复创建/删除）；
 				// 只读工具与 use_tool_group 完全豁免（无副作用，允许重复查询）。
-				$no_break = 'use_tool_group' === $name || Tianma_Tools::is_read_only( $name );
+				$no_break = 'use_tool_group' === $name || Bokeauto_Tools::is_read_only( $name );
 				$sig = '';
 				if ( ! $no_break ) {
 					$sig = $name . ':' . md5( wp_json_encode( $args ) );
@@ -640,7 +640,7 @@ class Tianma_Agent {
 					continue;
 				}
 
-				$risk = Tianma_Tools::risk( $name );
+				$risk = Bokeauto_Tools::risk( $name );
 
 				// 无头模式（定时任务）：未授权高危 → 自动跳过并告知模型
 				if ( $this->headless && 'high' === $risk && ! $this->auto_high ) {
@@ -679,7 +679,7 @@ class Tianma_Agent {
 					'active_groups' => $active_groups,
 					'max_steps' => (int) $this->settings['max_steps'],
 				);
-				$confirm = Tianma_Confirm::create( $payload );
+				$confirm = Bokeauto_Confirm::create( $payload );
 				$emitter( 'confirm', array( 'confirm' => $confirm, 'steps' => $this->public_steps( $steps ) ) );
 					return $this->finish_task( $summary, 'pending', $steps, $user_id, array(
 						'status'  => 'needs_confirmation',
@@ -820,9 +820,9 @@ class Tianma_Agent {
 	 * ------------------------------------------------------------------- */
 
 	public function resume_after_confirm( $hash, $approve, $user_id = 0 ) {
-		$pending = Tianma_Confirm::get( $hash );
+		$pending = Bokeauto_Confirm::get( $hash );
 		if ( ! $pending ) {
-			return new WP_Error( 'tianma_confirm_expired', '确认请求不存在或已过期' );
+			return new WP_Error( 'bokeauto_confirm_expired', '确认请求不存在或已过期' );
 		}
 		$payload = $pending['payload'];
 
@@ -844,12 +844,12 @@ class Tianma_Agent {
 			$result = $this->execute_tool( $name, $args, $user_id );
 			$steps[] = array( 'tool' => $name, 'args' => $args, 'ok' => $result['ok'], 'msg' => $result['message'] );
 			$tool_content = $this->tool_result_text( $result );
-			Tianma_Confirm::resolve( $hash, 'approved' );
+			Bokeauto_Confirm::resolve( $hash, 'approved' );
 		} else {
 			// 用户拒绝 → 告知模型，让其调整方案
 			$steps[] = array( 'tool' => $name, 'args' => $args, 'ok' => false, 'msg' => '用户拒绝了该高危操作' );
 			$tool_content = '用户拒绝了此操作（' . $name . '），请调整方案，选择其他安全的做法，或向用户说明后果并征询替代方案。';
-			Tianma_Confirm::resolve( $hash, 'rejected' );
+			Bokeauto_Confirm::resolve( $hash, 'rejected' );
 		}
 
 		$messages[] = array(
@@ -867,7 +867,7 @@ class Tianma_Agent {
 			'content'      => $tool_content,
 		);
 
-		$tools = Tianma_Tools::schemas();
+		$tools = Bokeauto_Tools::schemas();
 		$resp  = $this->agent_loop(
 			$messages,
 			$tools,
@@ -890,7 +890,7 @@ class Tianma_Agent {
 	 */
 	private function run_functional_role( $message, $user_id ) {
 		$bind_tool = $this->role->bind_tool ? $this->role->bind_tool : '';
-		if ( ! $bind_tool || ! in_array( $bind_tool, Tianma_Tools::names(), true ) ) {
+		if ( ! $bind_tool || ! in_array( $bind_tool, Bokeauto_Tools::names(), true ) ) {
 			return array(
 				'status' => 'error',
 				'error'  => '功能性角色「' . $this->role->name . '」未绑定有效的输出工具（bind_tool）',
@@ -900,15 +900,15 @@ class Tianma_Agent {
 		}
 		// 角色独立配置作为工具执行凭据（如生图助手用自己的 Key/模型出图），未配置则用全局
 		$tool_args = array( 'prompt' => $message );
-		if ( Tianma_Role::has_own_llm( $this->role ) ) {
+		if ( Bokeauto_Role::has_own_llm( $this->role ) ) {
 			if ( ! empty( $this->role->llm_base_url ) ) { $tool_args['base_url'] = $this->role->llm_base_url; }
 			if ( ! empty( $this->role->llm_api_key ) )  { $tool_args['api_key'] = $this->role->llm_api_key; }
 			if ( ! empty( $this->role->llm_model ) )    { $tool_args['model'] = $this->role->llm_model; }
 		}
-		$res = Tianma_Tools::execute( $bind_tool, $tool_args );
+		$res = Bokeauto_Tools::execute( $bind_tool, $tool_args );
 		if ( ! $res['ok'] && false !== strpos( $res['message'], '缺少必填' ) ) {
 			// 工具没有 prompt 参数 → 把用户消息作为唯一参数直接执行
-			$res = Tianma_Tools::execute( $bind_tool, array( $message ) );
+			$res = Bokeauto_Tools::execute( $bind_tool, array( $message ) );
 		}
 		return array(
 			'status' => $res['ok'] ? 'done' : 'error',
@@ -923,9 +923,9 @@ class Tianma_Agent {
 	 * ------------------------------------------------------------------- */
 
 	private function execute_tool( $name, $args, $user_id ) {
-		$result = Tianma_Tools::execute( $name, $args );
+		$result = Bokeauto_Tools::execute( $name, $args );
 
-		Tianma_Audit::log(
+		Bokeauto_Audit::log(
 			$name,
 			array(
 				'args'    => $args,
@@ -974,7 +974,7 @@ class Tianma_Agent {
 
 		$tool_count = count( $steps );
 		$wpdb->insert(
-			$wpdb->prefix . 'tianma_tasks',
+			$wpdb->prefix . 'bokeauto_tasks',
 			array(
 				'user_id'    => $user_id ? (int) $user_id : get_current_user_id(),
 				'summary'    => mb_substr( $summary, 0, 255 ),
@@ -989,7 +989,7 @@ class Tianma_Agent {
 		$response['task_id'] = $task_id;
 
 		// 工作日志自动沉淀：执行过工具的任务结束后写入当天日志（跨对话可查）
-		Tianma_Worklog::auto_log( $summary, $status, $steps );
+		Bokeauto_Worklog::auto_log( $summary, $status, $steps );
 
 		if ( $learn && in_array( $status, array( 'done', 'error' ), true ) ) {
 			$this->memory->learn( array(
@@ -1000,7 +1000,7 @@ class Tianma_Agent {
 
 			// 技能自动提炼：成功任务 → 新技能加入能力库
 			if ( 'done' === $status && count( $steps ) >= 2 ) {
-				Tianma_Skill::learn_from_task( $summary, $steps );
+				Bokeauto_Skill::learn_from_task( $summary, $steps );
 			}
 		}
 
@@ -1030,7 +1030,7 @@ class Tianma_Agent {
 	 * ------------------------------------------------------------------- */
 
 	private function build_system_prompt( $memories, $message = '' ) {
-		$settings = Tianma_Settings::get();
+		$settings = Bokeauto_Settings::get();
 
 		// 角色模式：以角色身份运行（角色自己的行为风格 + 职责）
 		if ( $this->role ) {
@@ -1075,24 +1075,24 @@ class Tianma_Agent {
 		$prompt .= "14. 定时任务（重要）：当用户要求『定时/周期/每天/每周/每小时/定期』执行某任务时（如每天备份数据库、每周一发布文章、每小时检查一次更新），先加载 agent 组，然后用 schedule_create 创建定时任务（指定周期与执行指令）。定时任务到点后会自动唤醒你执行，无需用户在线。可用 schedule_list 查看、schedule_update 修改、schedule_delete 删除、schedule_run_now 立即执行。创建时注意：危险操作默认不会被自动执行（除非 auto_high=true），请向用户说明这一点。\n";
 		$prompt .= "15. 文件路径（重要）：传文件/目录路径参数时务必逐段书写、用 / 分隔，不要粘连或省略分段。站点标准目录：wp-content/plugins/、wp-content/themes/、wp-content/uploads/、wp-admin/、wp-includes/。例如读取本插件设置类：先用 file_list 在 wp-content/plugins/ 中确认实际安装目录，再读取 includes/class-settings.php。\n";
 		$prompt .= "16. 网页链接解读：用户提供公开网页 URL 并要求总结、翻译、提取信息或回答网页内容时，先调用 fetch_webpage 获取正文，再基于工具返回的标题、描述和 content 作答。遇到登录墙、验证码、动态渲染或抓取失败时，说明具体原因并请用户提供页面文本。\n";
-		$prompt .= "17. 能力自我进化（重要）：当用户请求的任务超出你现有工具能力时（如调用某个外部 API、某种特殊处理），先向用户说明插件缺少这个能力，可以新增。若用户同意，加载 tianma 组后用 create_tool 编写实现代码动态注册新工具（php_code 为 PHP 函数体，接收 \$args 返回 array('ok'=>true,'message'=>...,'data'=>...)，可用 wp_remote_get/post、get_option 等 WordPress 函数），创建后该能力立即可用。创建高风险工具前必须获得用户明确同意。\n";
+		$prompt .= "17. 能力自我进化（重要）：当用户请求的任务超出你现有工具能力时（如调用某个外部 API、某种特殊处理），先向用户说明插件缺少这个能力，可以新增。若用户同意，加载 bokeauto 组后用 create_tool 编写实现代码动态注册新工具（php_code 为 PHP 函数体，接收 \$args 返回 array('ok'=>true,'message'=>...,'data'=>...)，可用 wp_remote_get/post、get_option 等 WordPress 函数），创建后该能力立即可用。创建高风险工具前必须获得用户明确同意。\n";
 		$prompt .= "19. 角色类型与调用方式（重要）：每个角色在创建时已声明类型，用 list_roles 查看类型与绑定工具；聊天型角色通过对话和工具完成任务，功能性角色直接执行绑定工具。\n";
 		$prompt .= "20. 工作日志（重要）：用户询问近期进展时先用 worklog_read，用户要求记录信息时用 worklog_append，需要修改既有记录时先读取再整体重写。\n";
 		$prompt .= "21. 记住用户信息（重要）：当用户主动告知称呼、偏好或重要约定时，使用 worklog_append 记录；用户询问历史信息时先用 worklog_read 回忆。\n\n";
 
 		// 注入技能库与角色库
-		$skills_context = Tianma_Skill::context_prompt();
+		$skills_context = Bokeauto_Skill::context_prompt();
 		if ( $skills_context ) {
 			$prompt .= $skills_context . "\n";
 		}
-		$roles_context = Tianma_Role::context_prompt();
+		$roles_context = Bokeauto_Role::context_prompt();
 		if ( $roles_context ) {
 			$prompt .= $roles_context . "\n";
 		}
 
 		// 任务角色自动匹配：按用户当前需求提示最相关的角色（仅总调度模式，角色模式下已指定身份）
 		if ( null === $this->role && ! empty( $message ) ) {
-			$suggested = Tianma_Role::match_for_message( $message );
+			$suggested = Bokeauto_Role::match_for_message( $message );
 			if ( $suggested ) {
 				$prompt .= "【本任务建议角色】根据用户需求，以下角色与任务匹配：若任务可由单个角色完成，请直接用 invoke_role 让该角色执行（快速、无需确认）；若确需多角色分工，再用 start_collaboration：\n";
 				foreach ( $suggested as $s ) {

@@ -3,7 +3,7 @@
  * 定时任务：让 Agent 可以自主创建周期性的自动化任务
  *
  * 核心机制：
- * - 任务表 tianma_schedules 存储任务（指令、周期、授权策略）
+ * - 任务表 bokeauto_schedules 存储任务（指令、周期、授权策略）
  * - 基于 WordPress wp-cron（wp_schedule_single_event）调度，到点自动唤醒
  * - 唤醒后以「无头模式」执行 Agent：无需用户在线、跳过交互确认，
  *   高危操作按任务创建时的授权策略处理（授权则执行 / 未授权则跳过）
@@ -13,14 +13,14 @@
  * 真正免访问需在服务器配置系统计划任务定期调用 wp-cron.php，
  * 详见 README「定时任务」章节与本地 tick-cron.php 辅助脚本。
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_Schedule {
+class Bokeauto_Schedule {
 
-	const HOOK = 'tianma_schedule_run';
+	const HOOK = 'bokeauto_schedule_run';
 
 	/** 周期类型 → 中文名 */
 	public static function interval_labels() {
@@ -44,7 +44,7 @@ class Tianma_Schedule {
 		$name  = mb_substr( sanitize_text_field( (string) ( isset( $data['name'] ) ? $data['name'] : '' ) ), 0, 120 );
 		$prompt = trim( (string) ( isset( $data['prompt'] ) ? $data['prompt'] : '' ) );
 		if ( '' === $name || '' === $prompt ) {
-			return new WP_Error( 'tianma_schedule', '任务名称与执行指令必填' );
+			return new WP_Error( 'bokeauto_schedule', '任务名称与执行指令必填' );
 		}
 
 		$interval = self::clean_interval( isset( $data['interval_type'] ) ? $data['interval_type'] : 'daily' );
@@ -57,7 +57,7 @@ class Tianma_Schedule {
 		$next = self::next_run_time( $interval, $at_time, $dow, $minutes );
 
 		$wpdb->insert(
-			$wpdb->prefix . 'tianma_schedules',
+			$wpdb->prefix . 'bokeauto_schedules',
 			array(
 				'name'             => $name,
 				'prompt'           => mb_substr( $prompt, 0, 4000 ),
@@ -116,7 +116,7 @@ class Tianma_Schedule {
 		}
 		$clean['updated_at'] = current_time( 'mysql' );
 
-		$ok = $wpdb->update( $wpdb->prefix . 'tianma_schedules', $clean, array( 'id' => (int) $id ) );
+		$ok = $wpdb->update( $wpdb->prefix . 'bokeauto_schedules', $clean, array( 'id' => (int) $id ) );
 
 		// 重新调度：先清旧事件，再按新配置注册
 		wp_clear_scheduled_hook( self::HOOK, array( (int) $id ) );
@@ -133,17 +133,17 @@ class Tianma_Schedule {
 	public static function delete( $id ) {
 		global $wpdb;
 		wp_clear_scheduled_hook( self::HOOK, array( (int) $id ) );
-		return $wpdb->delete( $wpdb->prefix . 'tianma_schedules', array( 'id' => (int) $id ), array( '%d' ) );
+		return $wpdb->delete( $wpdb->prefix . 'bokeauto_schedules', array( 'id' => (int) $id ), array( '%d' ) );
 	}
 
 	public static function get( $id ) {
 		global $wpdb;
-		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}tianma_schedules WHERE id = %d", (int) $id ) );
+		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}bokeauto_schedules WHERE id = %d", (int) $id ) );
 	}
 
 	public static function list_all( $status = '' ) {
 		global $wpdb;
-		$sql = "SELECT * FROM {$wpdb->prefix}tianma_schedules";
+		$sql = "SELECT * FROM {$wpdb->prefix}bokeauto_schedules";
 		if ( $status ) {
 			$sql .= $wpdb->prepare( ' WHERE status = %s', $status );
 		}
@@ -221,7 +221,7 @@ class Tianma_Schedule {
 	private static function update_next_run( $id, $ts ) {
 		global $wpdb;
 		$wpdb->update(
-			$wpdb->prefix . 'tianma_schedules',
+			$wpdb->prefix . 'bokeauto_schedules',
 			array( 'next_run' => gmdate( 'Y-m-d H:i:s', $ts + get_option( 'gmt_offset' ) * HOUR_IN_SECONDS ) ),
 			array( 'id' => (int) $id )
 		);
@@ -289,13 +289,13 @@ class Tianma_Schedule {
 
 		// 标记开始
 		$wpdb->update(
-			$wpdb->prefix . 'tianma_schedules',
+			$wpdb->prefix . 'bokeauto_schedules',
 			array( 'last_run' => current_time( 'mysql' ) ),
 			array( 'id' => (int) $id )
 		);
 
 		// 无头模式执行 Agent：不交互确认；高危按任务授权策略
-		$agent = new Tianma_Agent();
+		$agent = new Bokeauto_Agent();
 		$agent->headless  = true;
 		$agent->auto_high = (bool) $task->auto_high;
 
@@ -331,7 +331,7 @@ class Tianma_Schedule {
 		// 更新任务记录
 		$next = self::next_run_time( $task->interval_type, $task->at_time, $task->day_of_week, $task->interval_minutes );
 		$wpdb->update(
-			$wpdb->prefix . 'tianma_schedules',
+			$wpdb->prefix . 'bokeauto_schedules',
 			array(
 				'last_result' => wp_json_encode( $record, JSON_UNESCAPED_UNICODE ),
 				'run_count'   => (int) $task->run_count + 1,

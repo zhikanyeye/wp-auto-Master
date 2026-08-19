@@ -10,7 +10,7 @@
 
 ## 效果演示
 
-![波克wpAI自动化插件演示](assets/tianma-demo.gif)
+![波克wpAI自动化插件演示](assets/bokeauto-demo.gif)
 
 > 用自然语言让智能体发布文章、安装插件、优化数据库、创建定时任务……
 

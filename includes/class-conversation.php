@@ -2,15 +2,15 @@
 /**
  * 会话管理：微信式聊天记录持久化
  *
- * - tianma_conversations：会话（标题/归属/时间）
- * - tianma_messages：消息（角色/内容）
+ * - bokeauto_conversations：会话（标题/归属/时间）
+ * - bokeauto_messages：消息（角色/内容）
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_Conversation {
+class Bokeauto_Conversation {
 
 	/* ---------------------------------------------------------------------
 	 * 会话 CRUD
@@ -20,7 +20,7 @@ class Tianma_Conversation {
 		global $wpdb;
 		$now = current_time( 'mysql' );
 		$wpdb->insert(
-			$wpdb->prefix . 'tianma_conversations',
+			$wpdb->prefix . 'bokeauto_conversations',
 			array(
 				'user_id'    => (int) $user_id,
 				'title'      => '' === $title ? '新对话' : mb_substr( sanitize_text_field( $title ), 0, 120 ),
@@ -35,7 +35,7 @@ class Tianma_Conversation {
 	public static function get( $id, $user_id ) {
 		global $wpdb;
 		return $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM {$wpdb->prefix}tianma_conversations WHERE id = %d AND user_id = %d",
+			"SELECT * FROM {$wpdb->prefix}bokeauto_conversations WHERE id = %d AND user_id = %d",
 			(int) $id,
 			(int) $user_id
 		) );
@@ -45,10 +45,10 @@ class Tianma_Conversation {
 		global $wpdb;
 		return $wpdb->get_results( $wpdb->prepare(
 			"SELECT c.*,
-				(SELECT COUNT(*) FROM {$wpdb->prefix}tianma_messages m WHERE m.conversation_id = c.id) AS msg_count,
-				(SELECT m.content FROM {$wpdb->prefix}tianma_messages m
+				(SELECT COUNT(*) FROM {$wpdb->prefix}bokeauto_messages m WHERE m.conversation_id = c.id) AS msg_count,
+				(SELECT m.content FROM {$wpdb->prefix}bokeauto_messages m
 				 WHERE m.conversation_id = c.id AND m.role = 'assistant' ORDER BY m.id DESC LIMIT 1) AS last_reply
-			 FROM {$wpdb->prefix}tianma_conversations c
+			 FROM {$wpdb->prefix}bokeauto_conversations c
 			 WHERE c.user_id = %d
 			 ORDER BY c.updated_at DESC LIMIT %d",
 			(int) $user_id,
@@ -62,8 +62,8 @@ class Tianma_Conversation {
 		if ( ! $conv ) {
 			return false;
 		}
-		$wpdb->delete( $wpdb->prefix . 'tianma_messages', array( 'conversation_id' => (int) $id ), array( '%d' ) );
-		$wpdb->delete( $wpdb->prefix . 'tianma_conversations', array( 'id' => (int) $id ), array( '%d' ) );
+		$wpdb->delete( $wpdb->prefix . 'bokeauto_messages', array( 'conversation_id' => (int) $id ), array( '%d' ) );
+		$wpdb->delete( $wpdb->prefix . 'bokeauto_conversations', array( 'id' => (int) $id ), array( '%d' ) );
 		return true;
 	}
 
@@ -74,9 +74,9 @@ class Tianma_Conversation {
 		if ( ! $conv ) {
 			return false;
 		}
-		$wpdb->delete( $wpdb->prefix . 'tianma_messages', array( 'conversation_id' => (int) $id ), array( '%d' ) );
+		$wpdb->delete( $wpdb->prefix . 'bokeauto_messages', array( 'conversation_id' => (int) $id ), array( '%d' ) );
 		$wpdb->update(
-			$wpdb->prefix . 'tianma_conversations',
+			$wpdb->prefix . 'bokeauto_conversations',
 			array( 'title' => '新对话', 'updated_at' => current_time( 'mysql' ) ),
 			array( 'id' => (int) $id ),
 			array( '%s', '%s' ),
@@ -89,19 +89,19 @@ class Tianma_Conversation {
 	public static function clear_all( $user_id ) {
 		global $wpdb;
 		$wpdb->query( $wpdb->prepare(
-			"DELETE m FROM {$wpdb->prefix}tianma_messages m
-			 INNER JOIN {$wpdb->prefix}tianma_conversations c ON c.id = m.conversation_id
+			"DELETE m FROM {$wpdb->prefix}bokeauto_messages m
+			 INNER JOIN {$wpdb->prefix}bokeauto_conversations c ON c.id = m.conversation_id
 			 WHERE c.user_id = %d",
 			(int) $user_id
 		) );
-		$wpdb->delete( $wpdb->prefix . 'tianma_conversations', array( 'user_id' => (int) $user_id ), array( '%d' ) );
+		$wpdb->delete( $wpdb->prefix . 'bokeauto_conversations', array( 'user_id' => (int) $user_id ), array( '%d' ) );
 		return true;
 	}
 
 	public static function touch( $id ) {
 		global $wpdb;
 		$wpdb->update(
-			$wpdb->prefix . 'tianma_conversations',
+			$wpdb->prefix . 'bokeauto_conversations',
 			array( 'updated_at' => current_time( 'mysql' ) ),
 			array( 'id' => (int) $id ),
 			array( '%s' ),
@@ -117,7 +117,7 @@ class Tianma_Conversation {
 			$title = '新对话';
 		}
 		$wpdb->update(
-			$wpdb->prefix . 'tianma_conversations',
+			$wpdb->prefix . 'bokeauto_conversations',
 			array( 'title' => $title ),
 			array( 'id' => (int) $id ),
 			array( '%s' ),
@@ -132,7 +132,7 @@ class Tianma_Conversation {
 	public static function add_message( $conversation_id, $role, $content ) {
 		global $wpdb;
 		$wpdb->insert(
-			$wpdb->prefix . 'tianma_messages',
+			$wpdb->prefix . 'bokeauto_messages',
 			array(
 				'conversation_id' => (int) $conversation_id,
 				'role'            => in_array( $role, array( 'user', 'assistant' ), true ) ? $role : 'user',
@@ -152,7 +152,7 @@ class Tianma_Conversation {
 			return null;
 		}
 		return $wpdb->get_results( $wpdb->prepare(
-			"SELECT id, role, content, created_at FROM {$wpdb->prefix}tianma_messages
+			"SELECT id, role, content, created_at FROM {$wpdb->prefix}bokeauto_messages
 			 WHERE conversation_id = %d ORDER BY id ASC LIMIT %d",
 			(int) $conversation_id,
 			$limit

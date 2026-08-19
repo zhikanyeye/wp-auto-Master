@@ -1,10 +1,10 @@
 (function () {
 	'use strict';
 
-	var API = TIANMA.api;
-	var NONCE = TIANMA.nonce;
-	var ALL_TOOLS = TIANMA.all_tools || [];
-	var I18N = TIANMA.i18n;
+	var API = BOKEAUTO.api;
+	var NONCE = BOKEAUTO.nonce;
+	var ALL_TOOLS = BOKEAUTO.all_tools || [];
+	var I18N = BOKEAUTO.i18n;
 
 	function apiUrl( path, params ) {
 		var u = new URL( API + path, window.location.origin );
@@ -34,7 +34,7 @@
 	/* ---------------- 角色 ---------------- */
 
 	function loadRoles() {
-		var tbody = document.querySelector( '#tianma-roles-table tbody' );
+		var tbody = document.querySelector( '#bokeauto-roles-table tbody' );
 		req( 'roles' ).then( function ( d ) {
 			var items = d.items || [];
 			if ( ! items.length ) {
@@ -66,38 +66,38 @@
 	}
 
 	function applyRoleTypeUI() {
-		var type = document.getElementById( 'tianma-role-type' ).value;
+		var type = document.getElementById( 'bokeauto-role-type' ).value;
 		var isFn = type === 'functional';
-		document.getElementById( 'tianma-role-bind-box' ).style.display = isFn ? 'block' : 'none';
-		document.getElementById( 'tianma-role-tools-row' ).style.display = isFn ? 'none' : '';
+		document.getElementById( 'bokeauto-role-bind-box' ).style.display = isFn ? 'block' : 'none';
+		document.getElementById( 'bokeauto-role-tools-row' ).style.display = isFn ? 'none' : '';
 		// 功能性角色直接执行工具，不需要行为风格提示词（不对话）
-		document.getElementById( 'tianma-role-prompt-row' ).style.display = isFn ? 'none' : '';
+		document.getElementById( 'bokeauto-role-prompt-row' ).style.display = isFn ? 'none' : '';
 		// 功能性角色保留"单独配置模型/执行凭据"（绑定工具用它调用 API）；切换类型时折叠配置区
 		if ( isFn ) {
-			document.getElementById( 'tianma-role-llm-box' ).style.display = 'none';
+			document.getElementById( 'bokeauto-role-llm-box' ).style.display = 'none';
 		} else {
-			document.getElementById( 'tianma-role-llm-box' ).style.display =
-				document.getElementById( 'tianma-role-ownllm' ).checked ? 'block' : 'none';
+			document.getElementById( 'bokeauto-role-llm-box' ).style.display =
+				document.getElementById( 'bokeauto-role-ownllm' ).checked ? 'block' : 'none';
 		}
 	}
 
 	function openRoleModal( role ) {
-		document.getElementById( 'tianma-role-id' ).value = role ? role.id : '';
-		document.getElementById( 'tianma-role-modal-title' ).textContent = role ? '编辑角色：' + role.name : '新建角色';
-		document.getElementById( 'tianma-role-name' ).value = role ? role.name : '';
-		document.getElementById( 'tianma-role-desc' ).value = role ? role.description : '';
-		document.getElementById( 'tianma-role-prompt' ).value = role ? ( role.system_prompt || '' ) : '';
-		document.getElementById( 'tianma-role-status' ).checked = ! role || role.status === 'active';
+		document.getElementById( 'bokeauto-role-id' ).value = role ? role.id : '';
+		document.getElementById( 'bokeauto-role-modal-title' ).textContent = role ? '编辑角色：' + role.name : '新建角色';
+		document.getElementById( 'bokeauto-role-name' ).value = role ? role.name : '';
+		document.getElementById( 'bokeauto-role-desc' ).value = role ? role.description : '';
+		document.getElementById( 'bokeauto-role-prompt' ).value = role ? ( role.system_prompt || '' ) : '';
+		document.getElementById( 'bokeauto-role-status' ).checked = ! role || role.status === 'active';
 
 		// 角色类型 + 绑定工具
-		document.getElementById( 'tianma-role-type' ).value = role && role.role_type === 'functional' ? 'functional' : 'chat';
-		var bindSel = document.getElementById( 'tianma-role-bindtool' );
+		document.getElementById( 'bokeauto-role-type' ).value = role && role.role_type === 'functional' ? 'functional' : 'chat';
+		var bindSel = document.getElementById( 'bokeauto-role-bindtool' );
 		bindSel.innerHTML = ALL_TOOLS.map( function ( t ) {
 			return '<option value="' + esc( t ) + '"' + ( role && role.bind_tool === t ? ' selected' : '' ) + '>' + esc( t ) + '</option>';
 		} ).join( '' );
 		applyRoleTypeUI();
 
-		var sel = document.getElementById( 'tianma-role-tools' );
+		var sel = document.getElementById( 'bokeauto-role-tools' );
 		var allowed = role && role.tools && role.tools.length ? role.tools : [];
 		sel.innerHTML = ALL_TOOLS.map( function ( t ) {
 			return '<option value="' + esc( t ) + '"' + ( allowed.indexOf( t ) >= 0 ? ' selected' : '' ) + '>' + esc( t ) + '</option>';
@@ -106,92 +106,92 @@
 		// 独立模型配置
 		var llm = ( role && role.llm ) || {};
 		var hasOwn = !!( llm.api_key );
-		document.getElementById( 'tianma-role-ownllm' ).checked = hasOwn;
-		document.getElementById( 'tianma-role-llm-box' ).style.display = hasOwn ? 'block' : 'none';
-		document.getElementById( 'tianma-role-llm-provider' ).value = llm.provider || 'custom';
-		document.getElementById( 'tianma-role-llm-baseurl' ).value = llm.base_url || '';
-		document.getElementById( 'tianma-role-llm-apikey' ).value = llm.api_key || '';
-		document.getElementById( 'tianma-role-llm-model' ).value = llm.model || '';
-		document.getElementById( 'tianma-role-llm-result' ).textContent = '';
+		document.getElementById( 'bokeauto-role-ownllm' ).checked = hasOwn;
+		document.getElementById( 'bokeauto-role-llm-box' ).style.display = hasOwn ? 'block' : 'none';
+		document.getElementById( 'bokeauto-role-llm-provider' ).value = llm.provider || 'custom';
+		document.getElementById( 'bokeauto-role-llm-baseurl' ).value = llm.base_url || '';
+		document.getElementById( 'bokeauto-role-llm-apikey' ).value = llm.api_key || '';
+		document.getElementById( 'bokeauto-role-llm-model' ).value = llm.model || '';
+		document.getElementById( 'bokeauto-role-llm-result' ).textContent = '';
 
-		document.getElementById( 'tianma-role-modal' ).style.display = 'flex';
+		document.getElementById( 'bokeauto-role-modal' ).style.display = 'flex';
 	}
 
 	function saveRole() {
-		var id = document.getElementById( 'tianma-role-id' ).value;
-		var type = document.getElementById( 'tianma-role-type' ).value;
-		var tools = Array.prototype.slice.call( document.getElementById( 'tianma-role-tools' ).selectedOptions ).map( function ( o ) { return o.value; } );
+		var id = document.getElementById( 'bokeauto-role-id' ).value;
+		var type = document.getElementById( 'bokeauto-role-type' ).value;
+		var tools = Array.prototype.slice.call( document.getElementById( 'bokeauto-role-tools' ).selectedOptions ).map( function ( o ) { return o.value; } );
 		var data = {
-			name: document.getElementById( 'tianma-role-name' ).value.trim(),
-			description: document.getElementById( 'tianma-role-desc' ).value.trim(),
-			system_prompt: document.getElementById( 'tianma-role-prompt' ).value.trim(),
+			name: document.getElementById( 'bokeauto-role-name' ).value.trim(),
+			description: document.getElementById( 'bokeauto-role-desc' ).value.trim(),
+			system_prompt: document.getElementById( 'bokeauto-role-prompt' ).value.trim(),
 			role_type: type,
 			tools: tools,
-			status: document.getElementById( 'tianma-role-status' ).checked ? 'active' : 'inactive'
+			status: document.getElementById( 'bokeauto-role-status' ).checked ? 'active' : 'inactive'
 		};
 		if ( type === 'functional' ) {
 			data.tools = [];
-			data.bind_tool = document.getElementById( 'tianma-role-bindtool' ).value;
+			data.bind_tool = document.getElementById( 'bokeauto-role-bindtool' ).value;
 		}
 		if ( ! data.name || ! data.description ) {
 			alert( '角色名称与职责描述必填' );
 			return;
 		}
-		if ( document.getElementById( 'tianma-role-ownllm' ).checked ) {
+		if ( document.getElementById( 'bokeauto-role-ownllm' ).checked ) {
 			data.llm = {
-				provider: document.getElementById( 'tianma-role-llm-provider' ).value,
-				base_url: document.getElementById( 'tianma-role-llm-baseurl' ).value.trim(),
-				api_key: document.getElementById( 'tianma-role-llm-apikey' ).value.trim(),
-				model: document.getElementById( 'tianma-role-llm-model' ).value.trim()
+				provider: document.getElementById( 'bokeauto-role-llm-provider' ).value,
+				base_url: document.getElementById( 'bokeauto-role-llm-baseurl' ).value.trim(),
+				api_key: document.getElementById( 'bokeauto-role-llm-apikey' ).value.trim(),
+				model: document.getElementById( 'bokeauto-role-llm-model' ).value.trim()
 			};
 		} else {
 			data.llm = null;
 		}
 		var p = id ? req( 'roles/' + id, { json: data } ) : req( 'roles', { json: data } );
 		p.then( function () {
-			document.getElementById( 'tianma-role-modal' ).style.display = 'none';
+			document.getElementById( 'bokeauto-role-modal' ).style.display = 'none';
 			loadRoles();
 		} );
 	}
 
-	document.getElementById( 'tianma-role-new' ).addEventListener( 'click', function () { openRoleModal( null ); } );
-	document.getElementById( 'tianma-role-save' ).addEventListener( 'click', saveRole );
-	document.getElementById( 'tianma-role-type' ).addEventListener( 'change', applyRoleTypeUI );
-	document.querySelectorAll( '.tianma-modal-close' ).forEach( function ( b ) {
-		b.addEventListener( 'click', function () { document.getElementById( 'tianma-role-modal' ).style.display = 'none'; } );
+	document.getElementById( 'bokeauto-role-new' ).addEventListener( 'click', function () { openRoleModal( null ); } );
+	document.getElementById( 'bokeauto-role-save' ).addEventListener( 'click', saveRole );
+	document.getElementById( 'bokeauto-role-type' ).addEventListener( 'change', applyRoleTypeUI );
+	document.querySelectorAll( '.bokeauto-modal-close' ).forEach( function ( b ) {
+		b.addEventListener( 'click', function () { document.getElementById( 'bokeauto-role-modal' ).style.display = 'none'; } );
 	} );
 
 	/* 独立模型配置区 */
-	var llmBox = document.getElementById( 'tianma-role-llm-box' );
-	var llmProvider = document.getElementById( 'tianma-role-llm-provider' );
-	var llmBaseUrl = document.getElementById( 'tianma-role-llm-baseurl' );
+	var llmBox = document.getElementById( 'bokeauto-role-llm-box' );
+	var llmProvider = document.getElementById( 'bokeauto-role-llm-provider' );
+	var llmBaseUrl = document.getElementById( 'bokeauto-role-llm-baseurl' );
 
 	// 服务商选项（presets 去掉 mock）
-	llmProvider.innerHTML = Object.keys( TIANMA.presets || {} )
+	llmProvider.innerHTML = Object.keys( BOKEAUTO.presets || {} )
 		.filter( function ( k ) { return k !== 'mock'; } )
 		.map( function ( k ) {
-			return '<option value="' + esc( k ) + '">' + esc( TIANMA.presets[ k ].label ) + '</option>';
+			return '<option value="' + esc( k ) + '">' + esc( BOKEAUTO.presets[ k ].label ) + '</option>';
 		} ).join( '' );
 
-	document.getElementById( 'tianma-role-ownllm' ).addEventListener( 'change', function () {
+	document.getElementById( 'bokeauto-role-ownllm' ).addEventListener( 'change', function () {
 		llmBox.style.display = this.checked ? 'block' : 'none';
 	} );
 	llmProvider.addEventListener( 'change', function () {
-		var p = TIANMA.presets[ llmProvider.value ];
+		var p = BOKEAUTO.presets[ llmProvider.value ];
 		if ( p && p.base_url ) { llmBaseUrl.value = p.base_url; }
-		if ( p && p.model ) { document.getElementById( 'tianma-role-llm-model' ).value = p.model; }
+		if ( p && p.model ) { document.getElementById( 'bokeauto-role-llm-model' ).value = p.model; }
 	} );
-	document.getElementById( 'tianma-role-llm-test' ).addEventListener( 'click', function () {
+	document.getElementById( 'bokeauto-role-llm-test' ).addEventListener( 'click', function () {
 		var btn = this;
-		var out = document.getElementById( 'tianma-role-llm-result' );
+		var out = document.getElementById( 'bokeauto-role-llm-result' );
 		btn.disabled = true;
 		out.textContent = '测试中…';
 		req( 'test-llm', {
 			json: {
 				provider: llmProvider.value,
 				base_url: llmBaseUrl.value,
-				api_key: document.getElementById( 'tianma-role-llm-apikey' ).value,
-				model: document.getElementById( 'tianma-role-llm-model' ).value
+				api_key: document.getElementById( 'bokeauto-role-llm-apikey' ).value,
+				model: document.getElementById( 'bokeauto-role-llm-model' ).value
 			}
 		} ).then( function ( d ) {
 			out.textContent = d.ok ? '✅ ' + d.message : '❌ ' + d.message;
@@ -232,7 +232,7 @@
 	/* ---------------- 技能 ---------------- */
 
 	function loadSkills() {
-		var tbody = document.querySelector( '#tianma-skills-table tbody' );
+		var tbody = document.querySelector( '#bokeauto-skills-table tbody' );
 		req( 'skills' ).then( function ( d ) {
 			var items = d.items || [];
 			if ( ! items.length ) {

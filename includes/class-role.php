@@ -5,12 +5,12 @@
  * 每个角色：名称 + 职责描述 + 行为风格（system prompt）+ 工具白名单。
  * 多角色协作时，每个角色在自己的上下文中独立执行子任务。
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_Role {
+class Bokeauto_Role {
 
 	/** 内置角色模板 */
 	public static function builtins() {
@@ -69,19 +69,19 @@ class Tianma_Role {
 
 		$name = mb_substr( sanitize_text_field( $name ), 0, 60 );
 		if ( '' === $name ) {
-			return new WP_Error( 'tianma_role', '角色名称不能为空' );
+			return new WP_Error( 'bokeauto_role', '角色名称不能为空' );
 		}
 
 		$role_type = isset( $meta['role_type'] ) && 'functional' === $meta['role_type'] ? 'functional' : 'chat';
 		$bind_tool = isset( $meta['bind_tool'] ) ? sanitize_key( $meta['bind_tool'] ) : '';
 
-		$exists = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}tianma_roles WHERE name = %s", $name ) );
+		$exists = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}bokeauto_roles WHERE name = %s", $name ) );
 		if ( $exists ) {
-			return new WP_Error( 'tianma_role', '角色「' . $name . '」已存在' );
+			return new WP_Error( 'bokeauto_role', '角色「' . $name . '」已存在' );
 		}
 
 		$wpdb->insert(
-			$wpdb->prefix . 'tianma_roles',
+			$wpdb->prefix . 'bokeauto_roles',
 			array(
 				'name'          => $name,
 				'description'   => mb_substr( sanitize_textarea_field( $description ), 0, 500 ),
@@ -137,17 +137,17 @@ class Tianma_Role {
 		if ( ! $clean ) {
 			return false;
 		}
-		return $wpdb->update( $wpdb->prefix . 'tianma_roles', $clean, array( 'id' => (int) $id ) );
+		return $wpdb->update( $wpdb->prefix . 'bokeauto_roles', $clean, array( 'id' => (int) $id ) );
 	}
 
 	public static function delete( $id ) {
 		global $wpdb;
-		return $wpdb->delete( $wpdb->prefix . 'tianma_roles', array( 'id' => (int) $id ), array( '%d' ) );
+		return $wpdb->delete( $wpdb->prefix . 'bokeauto_roles', array( 'id' => (int) $id ), array( '%d' ) );
 	}
 
 	public static function get( $id ) {
 		global $wpdb;
-		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}tianma_roles WHERE id = %d", $id ) );
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}bokeauto_roles WHERE id = %d", $id ) );
 		if ( $row ) {
 			self::hydrate( $row );
 		}
@@ -156,7 +156,7 @@ class Tianma_Role {
 
 	public static function get_by_name( $name ) {
 		global $wpdb;
-		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}tianma_roles WHERE name = %s", $name ) );
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}bokeauto_roles WHERE name = %s", $name ) );
 		if ( $row ) {
 			self::hydrate( $row );
 		}
@@ -165,7 +165,7 @@ class Tianma_Role {
 
 	public static function list_all( $status = 'active' ) {
 		global $wpdb;
-		$sql = "SELECT * FROM {$wpdb->prefix}tianma_roles";
+		$sql = "SELECT * FROM {$wpdb->prefix}bokeauto_roles";
 		if ( $status ) {
 			$sql .= $wpdb->prepare( ' WHERE status = %s', $status );
 		}
@@ -201,7 +201,7 @@ class Tianma_Role {
 	/** 初始化内置角色（安装/升级时调用） */
 	public static function seed_builtins() {
 		global $wpdb;
-		$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}tianma_roles" );
+		$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}bokeauto_roles" );
 		if ( $count > 0 ) {
 			return;
 		}

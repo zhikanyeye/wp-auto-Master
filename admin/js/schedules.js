@@ -2,9 +2,9 @@
 ( function () {
 	'use strict';
 
-	var API = TIANMA.api;
-	var NONCE = TIANMA.nonce;
-	var I18N = TIANMA.i18n || {};
+	var API = BOKEAUTO.api;
+	var NONCE = BOKEAUTO.nonce;
+	var I18N = BOKEAUTO.i18n || {};
 
 	function esc( s ) {
 		return String( s == null ? '' : s )
@@ -27,47 +27,47 @@
 		return '请求失败';
 	}
 
-	var table = document.getElementById( 'tianma-sched-table' );
+	var table = document.getElementById( 'bokeauto-sched-table' );
 	var tbody = table.querySelector( 'tbody' );
 
 	function intervalRows() {
-		var v = document.getElementById( 'tianma-sched-interval' ).value;
-		document.getElementById( 'tianma-sched-minutes-row' ).style.display = ( v === 'minutes' ) ? '' : 'none';
-		document.getElementById( 'tianma-sched-time-row' ).style.display = ( v === 'daily' || v === 'weekly' || v === 'monthly' ) ? '' : 'none';
-		document.getElementById( 'tianma-sched-dow-row' ).style.display = ( v === 'weekly' ) ? '' : 'none';
+		var v = document.getElementById( 'bokeauto-sched-interval' ).value;
+		document.getElementById( 'bokeauto-sched-minutes-row' ).style.display = ( v === 'minutes' ) ? '' : 'none';
+		document.getElementById( 'bokeauto-sched-time-row' ).style.display = ( v === 'daily' || v === 'weekly' || v === 'monthly' ) ? '' : 'none';
+		document.getElementById( 'bokeauto-sched-dow-row' ).style.display = ( v === 'weekly' ) ? '' : 'none';
 	}
 
 	function openModal( item ) {
-		var modal = document.getElementById( 'tianma-sched-modal' );
-		document.getElementById( 'tianma-sched-modal-title' ).textContent = item ? '编辑定时任务' : '新建定时任务';
-		document.getElementById( 'tianma-sched-id' ).value = item ? item.id : '';
-		document.getElementById( 'tianma-sched-name' ).value = item ? item.name : '';
-		document.getElementById( 'tianma-sched-prompt' ).value = item ? item.prompt : '';
-		document.getElementById( 'tianma-sched-interval' ).value = item ? item.interval_type : 'daily';
-		document.getElementById( 'tianma-sched-minutes' ).value = item ? item.interval_minutes : 60;
-		document.getElementById( 'tianma-sched-time' ).value = item ? ( item.at_time || '09:00' ) : '09:00';
-		document.getElementById( 'tianma-sched-dow' ).value = item ? String( item.day_of_week ) : '1';
-		document.getElementById( 'tianma-sched-auto-high' ).checked = ! ! ( item && item.auto_high );
-		document.getElementById( 'tianma-sched-active' ).checked = ! item || item.status === 'active';
+		var modal = document.getElementById( 'bokeauto-sched-modal' );
+		document.getElementById( 'bokeauto-sched-modal-title' ).textContent = item ? '编辑定时任务' : '新建定时任务';
+		document.getElementById( 'bokeauto-sched-id' ).value = item ? item.id : '';
+		document.getElementById( 'bokeauto-sched-name' ).value = item ? item.name : '';
+		document.getElementById( 'bokeauto-sched-prompt' ).value = item ? item.prompt : '';
+		document.getElementById( 'bokeauto-sched-interval' ).value = item ? item.interval_type : 'daily';
+		document.getElementById( 'bokeauto-sched-minutes' ).value = item ? item.interval_minutes : 60;
+		document.getElementById( 'bokeauto-sched-time' ).value = item ? ( item.at_time || '09:00' ) : '09:00';
+		document.getElementById( 'bokeauto-sched-dow' ).value = item ? String( item.day_of_week ) : '1';
+		document.getElementById( 'bokeauto-sched-auto-high' ).checked = ! ! ( item && item.auto_high );
+		document.getElementById( 'bokeauto-sched-active' ).checked = ! item || item.status === 'active';
 		intervalRows();
 		modal.style.display = 'flex';
 	}
 
 	function closeModal() {
-		document.getElementById( 'tianma-sched-modal' ).style.display = 'none';
+		document.getElementById( 'bokeauto-sched-modal' ).style.display = 'none';
 	}
 
 	function saveSchedule() {
-		var id = document.getElementById( 'tianma-sched-id' ).value;
+		var id = document.getElementById( 'bokeauto-sched-id' ).value;
 		var data = {
-			name: document.getElementById( 'tianma-sched-name' ).value.trim(),
-			prompt: document.getElementById( 'tianma-sched-prompt' ).value.trim(),
-			interval_type: document.getElementById( 'tianma-sched-interval' ).value,
-			at_time: document.getElementById( 'tianma-sched-time' ).value || '09:00',
-			day_of_week: parseInt( document.getElementById( 'tianma-sched-dow' ).value, 10 ),
-			interval_minutes: parseInt( document.getElementById( 'tianma-sched-minutes' ).value, 10 ) || 60,
-			auto_high: document.getElementById( 'tianma-sched-auto-high' ).checked ? 1 : 0,
-			status: document.getElementById( 'tianma-sched-active' ).checked ? 'active' : 'paused'
+			name: document.getElementById( 'bokeauto-sched-name' ).value.trim(),
+			prompt: document.getElementById( 'bokeauto-sched-prompt' ).value.trim(),
+			interval_type: document.getElementById( 'bokeauto-sched-interval' ).value,
+			at_time: document.getElementById( 'bokeauto-sched-time' ).value || '09:00',
+			day_of_week: parseInt( document.getElementById( 'bokeauto-sched-dow' ).value, 10 ),
+			interval_minutes: parseInt( document.getElementById( 'bokeauto-sched-minutes' ).value, 10 ) || 60,
+			auto_high: document.getElementById( 'bokeauto-sched-auto-high' ).checked ? 1 : 0,
+			status: document.getElementById( 'bokeauto-sched-active' ).checked ? 'active' : 'paused'
 		};
 		if ( ! data.name || ! data.prompt ) {
 			alert( '任务名称与执行指令必填' );
@@ -82,8 +82,8 @@
 	}
 
 	function renderResult( item ) {
-		var box = document.getElementById( 'tianma-sched-detail' );
-		var out = document.getElementById( 'tianma-sched-result' );
+		var box = document.getElementById( 'bokeauto-sched-detail' );
+		var out = document.getElementById( 'bokeauto-sched-result' );
 		var r = item.last_result;
 		if ( ! r ) {
 			box.style.display = 'none';
@@ -112,7 +112,7 @@
 	function load() {
 		req( 'schedules' ).then( function ( d ) {
 			var items = d.items || [];
-			document.getElementById( 'tianma-sched-tip' ).textContent = '共 ' + items.length + ' 个任务';
+			document.getElementById( 'bokeauto-sched-tip' ).textContent = '共 ' + items.length + ' 个任务';
 			if ( ! items.length ) {
 				tbody.innerHTML = '<tr><td colspan="8">还没有定时任务。点「新建定时任务」创建，或直接对波克wpAI说：<em>“每天凌晨 2 点备份数据库”</em>、<em>“每周一发布一篇技术文章”</em>。</td></tr>';
 				return;
@@ -137,7 +137,7 @@
 			} ).join( '' );
 
 			// 若当前展示的结果属于某个任务，刷新后保持展示
-			var shown = document.getElementById( 'tianma-sched-detail' );
+			var shown = document.getElementById( 'bokeauto-sched-detail' );
 			if ( shown.style.display === 'block' ) {
 				var first = items[ 0 ];
 				if ( first ) { renderResult( first ); }
@@ -149,10 +149,10 @@
 
 	/* ---------------- 事件绑定 ---------------- */
 
-	document.getElementById( 'tianma-sched-new' ).addEventListener( 'click', function () { openModal( null ); } );
-	document.getElementById( 'tianma-sched-save' ).addEventListener( 'click', saveSchedule );
-	document.getElementById( 'tianma-sched-interval' ).addEventListener( 'change', intervalRows );
-	document.querySelectorAll( '.tianma-modal-close' ).forEach( function ( b ) {
+	document.getElementById( 'bokeauto-sched-new' ).addEventListener( 'click', function () { openModal( null ); } );
+	document.getElementById( 'bokeauto-sched-save' ).addEventListener( 'click', saveSchedule );
+	document.getElementById( 'bokeauto-sched-interval' ).addEventListener( 'change', intervalRows );
+	document.querySelectorAll( '.bokeauto-modal-close' ).forEach( function ( b ) {
 		b.addEventListener( 'click', closeModal );
 	} );
 

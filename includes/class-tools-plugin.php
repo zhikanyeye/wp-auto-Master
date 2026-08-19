@@ -2,12 +2,12 @@
 /**
  * 主题与插件工具：安装 / 启用 / 停用 / 删除 / 创建骨架
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_Tools_Plugin {
+class Bokeauto_Tools_Plugin {
 
 	public static function plugin_list( $args ) {
 		if ( ! function_exists( 'get_plugins' ) ) {
@@ -104,7 +104,7 @@ class Tianma_Tools_Plugin {
 		}
 
 		// SSRF 防护：禁止下载本机/内网地址
-		$safe = Tianma_Tools::validate_download_url( $url );
+		$safe = Bokeauto_Tools::validate_download_url( $url );
 		if ( true !== $safe ) {
 			return array( 'ok' => false, 'message' => $safe );
 		}
@@ -160,7 +160,7 @@ class Tianma_Tools_Plugin {
 		$dir = $theme->get_stylesheet_directory();
 
 		// 备份后删除
-		$backup_dir = wp_upload_dir()['basedir'] . '/tianma-backups/themes';
+		$backup_dir = wp_upload_dir()['basedir'] . '/bokeauto-backups/themes';
 		wp_mkdir_p( $backup_dir );
 		self::copy_dir( $dir, $backup_dir . '/' . $slug . '-' . date( 'Ymd-His' ) );
 

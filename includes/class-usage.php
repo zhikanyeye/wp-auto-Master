@@ -4,12 +4,12 @@
  *
  * 记录每次 LLM 调用的 token 消耗，支持累计 / 今日 / 会话维度统计。
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_Usage {
+class Bokeauto_Usage {
 
 	public static function log( $user_id, $conv_id, $prompt_tokens, $completion_tokens ) {
 		global $wpdb;
@@ -19,7 +19,7 @@ class Tianma_Usage {
 			return;
 		}
 		$wpdb->insert(
-			$wpdb->prefix . 'tianma_usage',
+			$wpdb->prefix . 'bokeauto_usage',
 			array(
 				'user_id'           => (int) $user_id,
 				'conversation_id'   => (int) $conv_id,
@@ -35,7 +35,7 @@ class Tianma_Usage {
 	/** 汇总统计 */
 	public static function stats( $user_id, $conv_id = 0 ) {
 		global $wpdb;
-		$t = $wpdb->prefix . 'tianma_usage';
+		$t = $wpdb->prefix . 'bokeauto_usage';
 
 		$total = $wpdb->get_row( $wpdb->prepare(
 			"SELECT COALESCE(SUM(prompt_tokens),0) AS prompt_tokens,

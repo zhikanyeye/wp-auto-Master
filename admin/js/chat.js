@@ -1,17 +1,17 @@
 (function () {
 	'use strict';
 
-	var API = TIANMA.api;
-	var NONCE = TIANMA.nonce;
-	var I18N = TIANMA.i18n;
+	var API = BOKEAUTO.api;
+	var NONCE = BOKEAUTO.nonce;
+	var I18N = BOKEAUTO.i18n;
 
-	var messagesEl = document.getElementById( 'tianma-messages' );
-	var inputEl = document.getElementById( 'tianma-input' );
-	var sendBtn = document.getElementById( 'tianma-send' );
-	var newBtn = document.getElementById( 'tianma-new-chat' );
-	var convListEl = document.getElementById( 'tianma-conv-list' );
-	var memoryCountEl = document.getElementById( 'tianma-memory-count' );
-	var memoriesBtn = document.getElementById( 'tianma-btn-memories' );
+	var messagesEl = document.getElementById( 'bokeauto-messages' );
+	var inputEl = document.getElementById( 'bokeauto-input' );
+	var sendBtn = document.getElementById( 'bokeauto-send' );
+	var newBtn = document.getElementById( 'bokeauto-new-chat' );
+	var convListEl = document.getElementById( 'bokeauto-conv-list' );
+	var memoryCountEl = document.getElementById( 'bokeauto-memory-count' );
+	var memoriesBtn = document.getElementById( 'bokeauto-btn-memories' );
 
 	var currentConv = null;   // 当前会话 ID
 	var convMsgs = [];        // 当前会话上下文（user/assistant 文本）
@@ -40,7 +40,7 @@
 
 	function addMsg( cls, html ) {
 		var div = document.createElement( 'div' );
-		div.className = 'tianma-msg ' + cls;
+		div.className = 'bokeauto-msg ' + cls;
 		div.innerHTML = html;
 		messagesEl.appendChild( div );
 		scrollBottom();
@@ -256,21 +256,21 @@
 
 	function streamUI() {
 		var el = addMsg( 'assistant', ''
-			+ '<div class="tianma-stream">'
-			+ '<div class="tianma-think"><span class="dot"></span><span class="dot"></span><span class="dot"></span>'
+			+ '<div class="bokeauto-stream">'
+			+ '<div class="bokeauto-think"><span class="dot"></span><span class="dot"></span><span class="dot"></span>'
 			+ '<span class="think-text">' + esc( I18N.thinking ) + '</span></div>'
-			+ '<div class="tianma-reasoning" style="display:none;"><span class="reasoning-head">深度思考中…</span><div class="reasoning-body"></div></div>'
-			+ '<div class="tianma-tools"></div>'
-			+ '<div class="tianma-out"></div>'
+			+ '<div class="bokeauto-reasoning" style="display:none;"><span class="reasoning-head">深度思考中…</span><div class="reasoning-body"></div></div>'
+			+ '<div class="bokeauto-tools"></div>'
+			+ '<div class="bokeauto-out"></div>'
 			+ '</div>'
 		);
 		return {
 			el: el,
 			thinkText: el.querySelector( '.think-text' ),
-			reasoningBox: el.querySelector( '.tianma-reasoning' ),
+			reasoningBox: el.querySelector( '.bokeauto-reasoning' ),
 			reasoningBody: el.querySelector( '.reasoning-body' ),
-			toolsBox: el.querySelector( '.tianma-tools' ),
-			outBox: el.querySelector( '.tianma-out' ),
+			toolsBox: el.querySelector( '.bokeauto-tools' ),
+			outBox: el.querySelector( '.bokeauto-out' ),
 
 			appendReasoning: function ( text ) {
 				this.reasoningBox.style.display = 'block';
@@ -286,7 +286,7 @@
 
 			addTool: function ( name, args ) {
 				var card = document.createElement( 'div' );
-				card.className = 'tianma-tool-card running';
+				card.className = 'bokeauto-tool-card running';
 				card.dataset.tool = name;
 				card.innerHTML = '<span class="tc-spin"></span><span class="tc-name">' + esc( name ) + '</span>'
 					+ '<span class="tc-args">' + esc( JSON.stringify( args || {} ) ) + '</span>';
@@ -295,7 +295,7 @@
 			},
 
 			updateTool: function ( d ) {
-				var cards = this.toolsBox.querySelectorAll( '.tianma-tool-card' );
+				var cards = this.toolsBox.querySelectorAll( '.bokeauto-tool-card' );
 				var card = null;
 				for ( var i = cards.length - 1; i >= 0; i-- ) {
 					if ( cards[ i ].dataset.tool === d.tool ) { card = cards[ i ]; break; }
@@ -326,9 +326,9 @@
 					this.addDirCard( v.path, v.items || [] );
 				} else if ( 'result' === v.type ) {
 					var r = document.createElement( 'div' );
-					r.className = 'tianma-visual-result';
-					r.innerHTML = '<span class="tianma-visual-icon">' + esc( v.icon || '✅' ) + '</span>'
-						+ '<span class="tianma-visual-title">' + esc( v.title || '' ) + '</span>';
+					r.className = 'bokeauto-visual-result';
+					r.innerHTML = '<span class="bokeauto-visual-icon">' + esc( v.icon || '✅' ) + '</span>'
+						+ '<span class="bokeauto-visual-title">' + esc( v.title || '' ) + '</span>';
 					this.el.appendChild( r );
 					scrollBottom();
 				} else if ( 'worklog' === v.type ) {
@@ -338,12 +338,12 @@
 
 			addWorklogCard: function ( day, content ) {
 				var card = document.createElement( 'div' );
-				card.className = 'tianma-file-card tianma-worklog-card';
-				card.innerHTML = '<div class="tianma-file-head">'
-					+ '<span class="tianma-file-icon">📓</span>'
-					+ '<code class="tianma-file-path">工作日志' + ( day ? ' · ' + esc( day ) : '' ) + '</code>'
+				card.className = 'bokeauto-file-card bokeauto-worklog-card';
+				card.innerHTML = '<div class="bokeauto-file-head">'
+					+ '<span class="bokeauto-file-icon">📓</span>'
+					+ '<code class="bokeauto-file-path">工作日志' + ( day ? ' · ' + esc( day ) : '' ) + '</code>'
 					+ '</div>'
-					+ '<pre class="tianma-file-preview tianma-worklog-preview">' + esc( ( content || '' ).slice( 0, 1500 ) )
+					+ '<pre class="bokeauto-file-preview bokeauto-worklog-preview">' + esc( ( content || '' ).slice( 0, 1500 ) )
 					+ ( ( content || '' ).length > 1500 ? '…' : '' ) + '</pre>';
 				this.el.appendChild( card );
 				scrollBottom();
@@ -351,30 +351,30 @@
 
 			addImageCard: function ( url, prompt ) {
 				var card = document.createElement( 'div' );
-				card.className = 'tianma-image-card';
-				card.innerHTML = '<div class="tianma-file-head">'
-					+ '<span class="tianma-file-icon">🖼</span>'
-					+ '<span class="tianma-image-prompt">' + esc( prompt || 'AI 生成的图片' ) + '</span>'
+				card.className = 'bokeauto-image-card';
+				card.innerHTML = '<div class="bokeauto-file-head">'
+					+ '<span class="bokeauto-file-icon">🖼</span>'
+					+ '<span class="bokeauto-image-prompt">' + esc( prompt || 'AI 生成的图片' ) + '</span>'
 					+ '<a class="button button-small" href="' + esc( url ) + '" target="_blank" rel="noopener">打开原图</a>'
 					+ '</div>'
-					+ '<img class="tianma-image-preview" src="' + esc( url ) + '" alt="' + esc( prompt || '' ) + '" loading="lazy">';
+					+ '<img class="bokeauto-image-preview" src="' + esc( url ) + '" alt="' + esc( prompt || '' ) + '" loading="lazy">';
 				this.el.appendChild( card );
 				scrollBottom();
 			},
 
 			addFileCard: function ( path, content, label ) {
 				var card = document.createElement( 'div' );
-				card.className = 'tianma-file-card';
-				card.innerHTML = '<div class="tianma-file-head">'
-					+ '<span class="tianma-file-icon">📄</span>'
-					+ '<code class="tianma-file-path">' + esc( path ) + '</code>'
-					+ '<button type="button" class="button button-small tianma-file-edit">打开编辑器修改</button>'
+				card.className = 'bokeauto-file-card';
+				card.innerHTML = '<div class="bokeauto-file-head">'
+					+ '<span class="bokeauto-file-icon">📄</span>'
+					+ '<code class="bokeauto-file-path">' + esc( path ) + '</code>'
+					+ '<button type="button" class="button button-small bokeauto-file-edit">打开编辑器修改</button>'
 					+ '</div>'
-					+ '<div class="tianma-file-label">' + esc( label || '' ) + '</div>'
-					+ '<pre class="tianma-file-preview">' + esc( ( content || '' ).slice( 0, 600 ) )
+					+ '<div class="bokeauto-file-label">' + esc( label || '' ) + '</div>'
+					+ '<pre class="bokeauto-file-preview">' + esc( ( content || '' ).slice( 0, 600 ) )
 					+ ( ( content || '' ).length > 600 ? '…' : '' ) + '</pre>';
 				this.el.appendChild( card );
-				card.querySelector( '.tianma-file-edit' ).addEventListener( 'click', function () {
+				card.querySelector( '.bokeauto-file-edit' ).addEventListener( 'click', function () {
 					openEditor( path, content || '' );
 				} );
 				scrollBottom();
@@ -382,49 +382,49 @@
 
 			addDirCard: function ( path, items ) {
 				var card = document.createElement( 'div' );
-				card.className = 'tianma-dir-card';
+				card.className = 'bokeauto-dir-card';
 				var rows = items.slice( 0, 50 ).map( function ( it ) {
 					var isDir = it['类型'] === '目录';
-					return '<div class="tianma-dir-row"><span class="tianma-dir-icon">' + ( isDir ? '📁' : '📄' ) + '</span>'
-						+ '<span class="tianma-dir-name">' + esc( it['名称'] ) + '</span>'
-						+ '<span class="tianma-dir-meta">' + ( isDir ? '目录' : ( it['大小'] || '' ) ) + '</span></div>';
+					return '<div class="bokeauto-dir-row"><span class="bokeauto-dir-icon">' + ( isDir ? '📁' : '📄' ) + '</span>'
+						+ '<span class="bokeauto-dir-name">' + esc( it['名称'] ) + '</span>'
+						+ '<span class="bokeauto-dir-meta">' + ( isDir ? '目录' : ( it['大小'] || '' ) ) + '</span></div>';
 				} ).join( '' );
-				card.innerHTML = '<div class="tianma-file-head">'
-					+ '<span class="tianma-file-icon">📂</span>'
-					+ '<code class="tianma-file-path">' + esc( path || '(站点根目录)' ) + '</code>'
-					+ '<span class="tianma-dir-count">' + items.length + ' 项</span>'
+				card.innerHTML = '<div class="bokeauto-file-head">'
+					+ '<span class="bokeauto-file-icon">📂</span>'
+					+ '<code class="bokeauto-file-path">' + esc( path || '(站点根目录)' ) + '</code>'
+					+ '<span class="bokeauto-dir-count">' + items.length + ' 项</span>'
 					+ '</div>'
-					+ '<div class="tianma-dir-list">' + rows + '</div>';
+					+ '<div class="bokeauto-dir-list">' + rows + '</div>';
 				this.el.appendChild( card );
 				scrollBottom();
 			},
 
 			showConfirm: function ( d ) {
 				var confirm = d.confirm || {};
-				this.el.querySelector( '.tianma-think' ).style.display = 'none';
+				this.el.querySelector( '.bokeauto-think' ).style.display = 'none';
 				pendingConfirm = { id: confirm.confirm_id, taskId: d.task_id };
 				var box = document.createElement( 'div' );
-				box.className = 'tianma-confirm';
-				box.innerHTML = '<div class="tianma-confirm-title">⚠ ' + esc( I18N.confirm ) + '</div>'
-					+ '<div class="tianma-confirm-tool">工具：<code>' + esc( confirm.tool_name ) + '</code></div>'
-					+ '<div class="tianma-confirm-desc">' + esc( confirm.summary ) + '</div>'
-					+ '<pre class="tianma-confirm-args">' + esc( JSON.stringify( confirm.args || {}, null, 2 ) ) + '</pre>'
-					+ '<div class="tianma-confirm-btns">'
-					+ '<button class="button button-primary tianma-confirm-approve">' + esc( I18N.approve ) + '</button> '
-					+ '<button class="button tianma-confirm-reject">' + esc( I18N.reject ) + '</button></div>';
+				box.className = 'bokeauto-confirm';
+				box.innerHTML = '<div class="bokeauto-confirm-title">⚠ ' + esc( I18N.confirm ) + '</div>'
+					+ '<div class="bokeauto-confirm-tool">工具：<code>' + esc( confirm.tool_name ) + '</code></div>'
+					+ '<div class="bokeauto-confirm-desc">' + esc( confirm.summary ) + '</div>'
+					+ '<pre class="bokeauto-confirm-args">' + esc( JSON.stringify( confirm.args || {}, null, 2 ) ) + '</pre>'
+					+ '<div class="bokeauto-confirm-btns">'
+					+ '<button class="button button-primary bokeauto-confirm-approve">' + esc( I18N.approve ) + '</button> '
+					+ '<button class="button bokeauto-confirm-reject">' + esc( I18N.reject ) + '</button></div>';
 				this.el.appendChild( box );
 				var self = this;
-				box.querySelector( '.tianma-confirm-approve' ).addEventListener( 'click', function () {
+				box.querySelector( '.bokeauto-confirm-approve' ).addEventListener( 'click', function () {
 					submitConfirm( true, self );
 				} );
-				box.querySelector( '.tianma-confirm-reject' ).addEventListener( 'click', function () {
+				box.querySelector( '.bokeauto-confirm-reject' ).addEventListener( 'click', function () {
 					submitConfirm( false, self );
 				} );
 				scrollBottom();
 			},
 
 			finish: function ( d ) {
-				this.el.querySelector( '.tianma-think' ).style.display = 'none';
+				this.el.querySelector( '.bokeauto-think' ).style.display = 'none';
 				if ( d.text && this.outBox.innerHTML === '' ) {
 					this.outBox.innerHTML = textToHtml( d.text );
 				}
@@ -432,7 +432,7 @@
 					this.outBox.style.display = 'none';
 				}
 				var fb = document.createElement( 'div' );
-				fb.className = 'tianma-feedback';
+				fb.className = 'bokeauto-feedback';
 				fb.dataset.task = d.task_id || 0;
 				fb.innerHTML = '这次任务满意吗？<button class="btn-fb up" title="满意">👍</button><button class="btn-fb down" title="不满意">👎</button>';
 				this.el.appendChild( fb );
@@ -443,9 +443,9 @@
 			},
 
 			showError: function ( msg ) {
-				this.el.querySelector( '.tianma-think' ).style.display = 'none';
-				this.el.querySelector( '.tianma-stream' ).insertAdjacentHTML( 'beforeend',
-					'<div class="bubble tianma-err">⚠ ' + esc( msg ) + '</div>' );
+				this.el.querySelector( '.bokeauto-think' ).style.display = 'none';
+				this.el.querySelector( '.bokeauto-stream' ).insertAdjacentHTML( 'beforeend',
+					'<div class="bubble bokeauto-err">⚠ ' + esc( msg ) + '</div>' );
 				scrollBottom();
 			}
 		};
@@ -459,7 +459,7 @@
 
 		var doSend = function ( convId ) {
 			currentConv = convId;
-			localStorage.setItem( 'tianma_conv_id', String( convId ) );
+			localStorage.setItem( 'bokeauto_conv_id', String( convId ) );
 			convMsgs.push( { role: 'user', content: text } );
 			inputEl.value = '';
 			inputEl.style.height = 'auto';
@@ -502,11 +502,11 @@
 		var id = pendingConfirm.id;
 		pendingConfirm = null;
 
-		var box = ui.el.querySelector( '.tianma-confirm' );
+		var box = ui.el.querySelector( '.bokeauto-confirm' );
 		if ( box ) { box.remove(); }
 
 		ui.outBox.style.display = 'block';
-		ui.outBox.innerHTML = '<div class="tianma-think"><span class="dot"></span><span class="dot"></span><span class="dot"></span>'
+		ui.outBox.innerHTML = '<div class="bokeauto-think"><span class="dot"></span><span class="dot"></span><span class="dot"></span>'
 			+ '<span class="think-text">' + esc( I18N.thinking ) + '</span></div>';
 
 		busy = true;
@@ -515,7 +515,7 @@
 		post( 'confirm', { confirm_id: id, approve: approve } )
 			.then( function ( d ) {
 				var data = d && d.data ? d.data : d;
-				ui.el.querySelector( '.tianma-think' ).style.display = 'none';
+				ui.el.querySelector( '.bokeauto-think' ).style.display = 'none';
 				if ( data && data.status === 'needs_confirmation' ) {
 					ui.showConfirm( data );
 					return;
@@ -526,7 +526,7 @@
 				}
 				ui.outBox.innerHTML = data.text ? textToHtml( data.text ) : '';
 				var fb = document.createElement( 'div' );
-				fb.className = 'tianma-feedback';
+				fb.className = 'bokeauto-feedback';
 				fb.dataset.task = data.task_id || 0;
 				fb.innerHTML = '这次任务满意吗？<button class="btn-fb up" title="满意">👍</button><button class="btn-fb down" title="不满意">👎</button>';
 				ui.el.appendChild( fb );
@@ -577,7 +577,7 @@
 	function setConv( id ) {
 		if ( busy ) { return; }
 		currentConv = id;
-		localStorage.setItem( 'tianma_conv_id', String( id ) );
+		localStorage.setItem( 'bokeauto_conv_id', String( id ) );
 		convMsgs = [];
 		pendingConfirm = null;
 		messagesEl.innerHTML = '';
@@ -606,7 +606,7 @@
 					currentConv = null;
 					convMsgs = [];
 					messagesEl.innerHTML = '';
-					localStorage.removeItem( 'tianma_conv_id' );
+					localStorage.removeItem( 'bokeauto_conv_id' );
 				}
 				loadConversations();
 			} );
@@ -627,8 +627,8 @@
 
 	/* ---------------- 清空聊天 ---------------- */
 
-	var clearBtn = document.getElementById( 'tianma-btn-clear' );
-	var clearMenu = document.getElementById( 'tianma-clear-menu' );
+	var clearBtn = document.getElementById( 'bokeauto-btn-clear' );
+	var clearMenu = document.getElementById( 'bokeauto-clear-menu' );
 
 	clearBtn.addEventListener( 'click', function ( e ) {
 		e.stopPropagation();
@@ -665,7 +665,7 @@
 				convMsgs = [];
 				pendingConfirm = null;
 				messagesEl.innerHTML = '';
-				localStorage.removeItem( 'tianma_conv_id' );
+				localStorage.removeItem( 'bokeauto_conv_id' );
 				loadConversations();
 				loadUsage();
 				inputEl.focus();
@@ -700,14 +700,14 @@
 
 	/* ---------------- 模型切换条 + 免授权开关 ---------------- */
 
-	var barProvider = document.getElementById( 'tianma-bar-provider' );
-	var barModel = document.getElementById( 'tianma-bar-model' );
-	var barSwitch = document.getElementById( 'tianma-bar-switch' );
-	var barCurrent = document.getElementById( 'tianma-bar-current' );
-	var barRole = document.getElementById( 'tianma-bar-role' );
-	var autoConfirmEl = document.getElementById( 'tianma-auto-confirm' );
-	var maxStepsEl = document.getElementById( 'tianma-max-steps' );
-	var phpTimeoutEl = document.getElementById( 'tianma-php-timeout' );
+	var barProvider = document.getElementById( 'bokeauto-bar-provider' );
+	var barModel = document.getElementById( 'bokeauto-bar-model' );
+	var barSwitch = document.getElementById( 'bokeauto-bar-switch' );
+	var barCurrent = document.getElementById( 'bokeauto-bar-current' );
+	var barRole = document.getElementById( 'bokeauto-bar-role' );
+	var autoConfirmEl = document.getElementById( 'bokeauto-auto-confirm' );
+	var maxStepsEl = document.getElementById( 'bokeauto-max-steps' );
+	var phpTimeoutEl = document.getElementById( 'bokeauto-php-timeout' );
 	var presetsData = null;
 	var barSettings = null;
 
@@ -730,7 +730,7 @@
 
 	function updateRoleTip() {
 		var rid = parseInt( barRole.value, 10 ) || 0;
-		localStorage.setItem( 'tianma_role_id', String( rid ) );
+		localStorage.setItem( 'bokeauto_role_id', String( rid ) );
 		if ( rid && barRole.selectedOptions[ 0 ] ) {
 			barCurrent.textContent = '当前角色：' + barRole.selectedOptions[ 0 ].text;
 		} else {
@@ -738,18 +738,18 @@
 		}
 	}
 
-	var currentRoleId = parseInt( localStorage.getItem( 'tianma_role_id' ) || '0', 10 ) || 0;
+	var currentRoleId = parseInt( localStorage.getItem( 'bokeauto_role_id' ) || '0', 10 ) || 0;
 	if ( barRole ) {
 		barRole.addEventListener( 'change', updateRoleTip );
 	}
 
 	// 恢复上次的免授权状态 + 持久化
 	if ( autoConfirmEl ) {
-		autoConfirmEl.checked = localStorage.getItem( 'tianma_auto_confirm' ) === '1';
+		autoConfirmEl.checked = localStorage.getItem( 'bokeauto_auto_confirm' ) === '1';
 		autoConfirmEl.addEventListener( 'change', function () {
-			localStorage.setItem( 'tianma_auto_confirm', autoConfirmEl.checked ? '1' : '0' );
-			autoConfirmEl.closest( '.tianma-auto-confirm' ).classList.toggle( 'on', autoConfirmEl.checked );
-			var tip = autoConfirmEl.closest( '.tianma-model-bar' ).querySelector( '.auto-confirm-tip' );
+			localStorage.setItem( 'bokeauto_auto_confirm', autoConfirmEl.checked ? '1' : '0' );
+			autoConfirmEl.closest( '.bokeauto-auto-confirm' ).classList.toggle( 'on', autoConfirmEl.checked );
+			var tip = autoConfirmEl.closest( '.bokeauto-model-bar' ).querySelector( '.auto-confirm-tip' );
 			if ( tip ) {
 				tip.textContent = autoConfirmEl.checked ? '⚠ 高危操作将直接执行' : '';
 			}
@@ -759,17 +759,17 @@
 
 	// 恢复上次的执行参数（最大工具步数 / PHP 超时）并持久化
 	if ( maxStepsEl ) {
-		var savedMs = parseInt( localStorage.getItem( 'tianma_max_steps' ), 10 );
+		var savedMs = parseInt( localStorage.getItem( 'bokeauto_max_steps' ), 10 );
 		if ( ! isNaN( savedMs ) ) { maxStepsEl.value = savedMs; }
 		maxStepsEl.addEventListener( 'change', function () {
-			localStorage.setItem( 'tianma_max_steps', String( parseInt( maxStepsEl.value, 10 ) || 0 ) );
+			localStorage.setItem( 'bokeauto_max_steps', String( parseInt( maxStepsEl.value, 10 ) || 0 ) );
 		} );
 	}
 	if ( phpTimeoutEl ) {
-		var savedPt = parseInt( localStorage.getItem( 'tianma_php_timeout' ), 10 );
+		var savedPt = parseInt( localStorage.getItem( 'bokeauto_php_timeout' ), 10 );
 		if ( ! isNaN( savedPt ) ) { phpTimeoutEl.value = savedPt; }
 		phpTimeoutEl.addEventListener( 'change', function () {
-			localStorage.setItem( 'tianma_php_timeout', String( parseInt( phpTimeoutEl.value, 10 ) || 0 ) );
+			localStorage.setItem( 'bokeauto_php_timeout', String( parseInt( phpTimeoutEl.value, 10 ) || 0 ) );
 		} );
 	}
 
@@ -845,7 +845,7 @@
 	document.addEventListener( 'click', function ( e ) {
 		var btn = e.target.closest && e.target.closest( '.btn-fb' );
 		if ( ! btn ) { return; }
-		var box = btn.closest( '.tianma-feedback' );
+		var box = btn.closest( '.bokeauto-feedback' );
 		if ( ! box || box.dataset.done ) { return; }
 		box.dataset.done = '1';
 		var rating = btn.classList.contains( 'up' ) ? 5 : 1;
@@ -876,7 +876,7 @@
 		convMsgs = [];
 		pendingConfirm = null;
 		messagesEl.innerHTML = '';
-		localStorage.removeItem( 'tianma_conv_id' );
+		localStorage.removeItem( 'bokeauto_conv_id' );
 		highlightConv( null );
 		inputEl.focus();
 	} );
@@ -896,7 +896,7 @@
 			.then( function ( r ) { return r.json(); } )
 			.then( function ( d ) {
 				var items = d.items || [];
-				var html = '<div class="tianma-memories-modal">'
+				var html = '<div class="bokeauto-memories-modal">'
 					+ '<div class="modal-inner"><h2>记忆库（' + items.length + ' 条）</h2>'
 					+ '<button class="button modal-close">关闭</button>';
 				if ( ! items.length ) {
@@ -922,10 +922,10 @@
 
 	/* ---------------- 可视化文件编辑器 ---------------- */
 
-	var editorModal = document.getElementById( 'tianma-editor-modal' );
-	var editorPath = document.getElementById( 'tianma-editor-path' );
-	var editorContent = document.getElementById( 'tianma-editor-content' );
-	var editorMsg = document.getElementById( 'tianma-editor-msg' );
+	var editorModal = document.getElementById( 'bokeauto-editor-modal' );
+	var editorPath = document.getElementById( 'bokeauto-editor-path' );
+	var editorContent = document.getElementById( 'bokeauto-editor-content' );
+	var editorMsg = document.getElementById( 'bokeauto-editor-msg' );
 
 	function openEditor( path, content ) {
 		editorPath.textContent = path;
@@ -944,7 +944,7 @@
 		var path = editorPath.textContent;
 		var content = editorContent.value;
 		if ( ! path ) { return; }
-		var btn = document.getElementById( 'tianma-editor-save' );
+		var btn = document.getElementById( 'bokeauto-editor-save' );
 		btn.disabled = true;
 		editorMsg.textContent = '保存中…';
 		editorMsg.style.color = '#888';
@@ -966,8 +966,8 @@
 		} ).finally( function () { btn.disabled = false; } );
 	}
 
-	document.getElementById( 'tianma-editor-save' ).addEventListener( 'click', saveEditor );
-	document.getElementById( 'tianma-editor-close' ).addEventListener( 'click', closeEditor );
+	document.getElementById( 'bokeauto-editor-save' ).addEventListener( 'click', saveEditor );
+	document.getElementById( 'bokeauto-editor-close' ).addEventListener( 'click', closeEditor );
 	editorModal.addEventListener( 'click', function ( e ) { if ( e.target === editorModal ) { closeEditor(); } } );
 	editorContent.addEventListener( 'keydown', function ( e ) {
 		if ( ( e.ctrlKey || e.metaKey ) && 's' === e.key.toLowerCase() ) { e.preventDefault(); saveEditor(); }
@@ -981,7 +981,7 @@
 	loadModelBar();
 	loadRoles();
 
-	var savedConv = localStorage.getItem( 'tianma_conv_id' );
+	var savedConv = localStorage.getItem( 'bokeauto_conv_id' );
 	if ( savedConv ) {
 		fetch( apiUrl( 'conversations' ), { headers: { 'X-WP-Nonce': NONCE } } )
 			.then( function ( r ) { return r.json(); } )

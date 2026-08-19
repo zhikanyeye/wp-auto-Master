@@ -2,19 +2,19 @@
 (function () {
 	'use strict';
 
-	var listEl = document.getElementById( 'tianma-wl-list' );
-	var statusEl = document.querySelector( '.tianma-wl-status' );
-	var editor = document.getElementById( 'tianma-wl-editor' );
-	var dayInput = document.getElementById( 'tianma-wl-day' );
-	var contentInput = document.getElementById( 'tianma-wl-content' );
-	var newBtn = document.getElementById( 'tianma-wl-new' );
-	var saveBtn = document.getElementById( 'tianma-wl-save' );
-	var cancelBtn = document.getElementById( 'tianma-wl-cancel' );
+	var listEl = document.getElementById( 'bokeauto-wl-list' );
+	var statusEl = document.querySelector( '.bokeauto-wl-status' );
+	var editor = document.getElementById( 'bokeauto-wl-editor' );
+	var dayInput = document.getElementById( 'bokeauto-wl-day' );
+	var contentInput = document.getElementById( 'bokeauto-wl-content' );
+	var newBtn = document.getElementById( 'bokeauto-wl-new' );
+	var saveBtn = document.getElementById( 'bokeauto-wl-save' );
+	var cancelBtn = document.getElementById( 'bokeauto-wl-cancel' );
 	var editingDay = null; // 当前编辑器对应的日期（新增模式为 null）
 
-	var api = TIANMA.api;
-	var nonce = TIANMA.nonce;
-	var i18n = TIANMA.i18n || {};
+	var api = BOKEAUTO.api;
+	var nonce = BOKEAUTO.nonce;
+	var i18n = BOKEAUTO.i18n || {};
 
 	function esc( s ) {
 		var d = document.createElement( 'div' );
@@ -25,7 +25,7 @@
 	function setStatus( msg, isErr ) {
 		if ( ! statusEl ) { return; }
 		statusEl.textContent = msg || '';
-		statusEl.className = 'tianma-wl-status' + ( isErr ? ' err' : '' );
+		statusEl.className = 'bokeauto-wl-status' + ( isErr ? ' err' : '' );
 	}
 
 	function apiCall( path, opts ) {
@@ -42,32 +42,32 @@
 	function renderList( items ) {
 		if ( ! listEl ) { return; }
 		if ( ! items || ! items.length ) {
-			listEl.innerHTML = '<div class="tianma-wl-empty">暂无工作日志。完成任务后会自动记录，或点「新增日志」手动添加。</div>';
+			listEl.innerHTML = '<div class="bokeauto-wl-empty">暂无工作日志。完成任务后会自动记录，或点「新增日志」手动添加。</div>';
 			return;
 		}
 		listEl.innerHTML = '';
 		items.forEach( function ( item ) {
 			var div = document.createElement( 'div' );
-			div.className = 'tianma-wl-item';
+			div.className = 'bokeauto-wl-item';
 			div.dataset.day = item.log_date;
 
 			var head = document.createElement( 'div' );
-			head.className = 'tianma-wl-head';
+			head.className = 'bokeauto-wl-head';
 
 			var date = document.createElement( 'span' );
-			date.className = 'tianma-wl-date';
+			date.className = 'bokeauto-wl-date';
 			date.textContent = item.log_date;
 
 			var preview = document.createElement( 'span' );
-			preview.className = 'tianma-wl-preview';
+			preview.className = 'bokeauto-wl-preview';
 			preview.textContent = item.preview || '（空）';
 
 			var meta = document.createElement( 'span' );
-			meta.className = 'tianma-wl-meta';
+			meta.className = 'bokeauto-wl-meta';
 			meta.textContent = item.line_count + ' 行 · ' + ( item.updated_at || '' );
 
 			var actions = document.createElement( 'span' );
-			actions.className = 'tianma-wl-actions';
+			actions.className = 'bokeauto-wl-actions';
 			var editBtn = document.createElement( 'button' );
 			editBtn.type = 'button';
 			editBtn.className = 'button button-small';
@@ -86,12 +86,12 @@
 			div.appendChild( head );
 
 			var body = document.createElement( 'div' );
-			body.className = 'tianma-wl-body';
+			body.className = 'bokeauto-wl-body';
 			var ta = document.createElement( 'textarea' );
 			ta.rows = 8;
 			ta.value = item.content || '';
 			var rowBtns = document.createElement( 'div' );
-			rowBtns.className = 'tianma-wl-actions-row';
+			rowBtns.className = 'bokeauto-wl-actions-row';
 			var saveEdit = document.createElement( 'button' );
 			saveEdit.type = 'button';
 			saveEdit.className = 'button button-primary button-small';
@@ -110,7 +110,7 @@
 
 			// 展开/收起
 			head.addEventListener( 'click', function ( e ) {
-				if ( e.target.closest( '.tianma-wl-actions' ) ) { return; }
+				if ( e.target.closest( '.bokeauto-wl-actions' ) ) { return; }
 				div.classList.toggle( 'active' );
 			} );
 
@@ -170,7 +170,7 @@
 	function showNewEditor() {
 		if ( ! editor ) { return; }
 		editingDay = null;
-		dayInput.value = TIANMA.today;
+		dayInput.value = BOKEAUTO.today;
 		contentInput.value = '';
 		editor.style.display = 'block';
 		contentInput.focus();
@@ -184,7 +184,7 @@
 	}
 	if ( saveBtn ) {
 		saveBtn.addEventListener( 'click', function () {
-			var day = dayInput.value || TIANMA.today;
+			var day = dayInput.value || BOKEAUTO.today;
 			var content = contentInput.value;
 			if ( ! content.trim() && ! window.confirm( i18n.empty_confirm || '内容为空将清空该天日志，确定保存？' ) ) {
 				return;

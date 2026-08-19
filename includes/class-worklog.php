@@ -7,19 +7,19 @@
  * - AI 可通过 worklog_read / worklog_append / worklog_update / worklog_delete 读取与调整
  * - 用户可在「模型设置 → 工作日志」区块手动编辑
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_Worklog {
+class Bokeauto_Worklog {
 
 	/** 读取某天日志内容（默认今天）。无记录返回空字符串 */
 	public static function get( $day = null ) {
 		global $wpdb;
 		$day = self::normalize_day( $day );
 		$row = $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM {$wpdb->prefix}tianma_worklogs WHERE log_date = %s",
+			"SELECT * FROM {$wpdb->prefix}bokeauto_worklogs WHERE log_date = %s",
 			$day
 		) );
 		return $row ? $row->content : '';
@@ -31,7 +31,7 @@ class Tianma_Worklog {
 		$limit = max( 1, min( 200, (int) $limit ) );
 		$rows  = $wpdb->get_results( $wpdb->prepare(
 			"SELECT id, log_date, content, updated_at, created_at
-			 FROM {$wpdb->prefix}tianma_worklogs
+			 FROM {$wpdb->prefix}bokeauto_worklogs
 			 ORDER BY log_date DESC LIMIT %d",
 			$limit
 		) );
@@ -81,13 +81,13 @@ class Tianma_Worklog {
 	public static function delete( $day ) {
 		global $wpdb;
 		$day = self::normalize_day( $day );
-		$res = $wpdb->delete( $wpdb->prefix . 'tianma_worklogs', array( 'log_date' => $day ), array( '%s' ) );
+		$res = $wpdb->delete( $wpdb->prefix . 'bokeauto_worklogs', array( 'log_date' => $day ), array( '%s' ) );
 		return array( 'ok' => true, 'message' => ( $res ? '已删除 ' . $day . ' 的工作日志' : $day . ' 没有工作日志' ) );
 	}
 
 	/** Agent 任务结束自动沉淀一行摘要（仅执行过工具的任务才记，纯聊天不记；演示模式不记） */
 	public static function auto_log( $summary, $status, $steps ) {
-		$settings = Tianma_Settings::get();
+		$settings = Bokeauto_Settings::get();
 		if ( ! empty( $settings['mock_mode'] ) ) {
 			return null;
 		}
@@ -120,7 +120,7 @@ class Tianma_Worklog {
 	public static function latest_text( $days = 7 ) {
 		global $wpdb;
 		$rows = $wpdb->get_results( $wpdb->prepare(
-			"SELECT log_date, content FROM {$wpdb->prefix}tianma_worklogs
+			"SELECT log_date, content FROM {$wpdb->prefix}bokeauto_worklogs
 			 WHERE log_date >= %s ORDER BY log_date DESC",
 			gmdate( 'Y-m-d', strtotime( '-' . (int) $days . ' days', current_time( 'timestamp' ) ) )
 		) );
@@ -142,7 +142,7 @@ class Tianma_Worklog {
 		global $wpdb;
 		if ( $is_new ) {
 			return (bool) $wpdb->insert(
-				$wpdb->prefix . 'tianma_worklogs',
+				$wpdb->prefix . 'bokeauto_worklogs',
 				array(
 					'log_date'   => $day,
 					'content'    => $content,
@@ -153,7 +153,7 @@ class Tianma_Worklog {
 			);
 		}
 		return (bool) $wpdb->update(
-			$wpdb->prefix . 'tianma_worklogs',
+			$wpdb->prefix . 'bokeauto_worklogs',
 			array(
 				'content'    => $content,
 				'updated_at' => current_time( 'mysql' ),

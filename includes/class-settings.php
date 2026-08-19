@@ -2,14 +2,14 @@
 /**
  * 设置管理与存取
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_Settings {
+class Bokeauto_Settings {
 
-	const OPTION = 'tianma_settings';
+	const OPTION = 'bokeauto_settings';
 
 	/** 默认设置 */
 	public static function defaults() {

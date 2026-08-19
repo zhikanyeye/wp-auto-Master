@@ -1,6 +1,6 @@
 /* 波克wpAI自动化插件 - 对话界面 */
 
-.tianma-wrap .tianma-title {
+.bokeauto-wrap .bokeauto-title {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -8,7 +8,7 @@
 	font-weight: 500;
 }
 
-.tianma-chat-layout {
+.bokeauto-chat-layout {
 	display: flex;
 	gap: 16px;
 	margin-top: 12px;
@@ -17,7 +17,7 @@
 
 /* ---------- 侧栏 ---------- */
 
-.tianma-sidebar {
+.bokeauto-sidebar {
 	width: 240px;
 	flex: 0 0 240px;
 	background: #fff;
@@ -32,19 +32,19 @@
 	top: 50px;
 }
 
-.tianma-side-block h3 {
+.bokeauto-side-block h3 {
 	margin: 0 0 4px;
 	font-size: 13px;
 	font-weight: 500;
 }
 
-.tianma-side-desc {
+.bokeauto-side-desc {
 	margin: 0 0 8px;
 	color: #646970;
 	font-size: 12px;
 }
 
-.tianma-task-list {
+.bokeauto-task-list {
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -52,35 +52,35 @@
 	overflow-y: auto;
 }
 
-.tianma-task-list li {
+.bokeauto-task-list li {
 	padding: 6px 0;
 	border-bottom: 1px solid #f0f0f1;
 }
 
-.tianma-task-list .tianma-task-summary {
+.bokeauto-task-list .bokeauto-task-summary {
 	display: block;
 	font-size: 12px;
 	line-height: 1.4;
 }
 
-.tianma-task-list .tianma-task-meta {
+.bokeauto-task-list .bokeauto-task-meta {
 	display: block;
 	color: #8c8f94;
 	font-size: 11px;
 	margin-top: 2px;
 }
 
-.tianma-task-list .empty {
+.bokeauto-task-list .empty {
 	color: #8c8f94;
 }
 
-.tianma-side-foot {
+.bokeauto-side-foot {
 	margin-top: auto;
 }
 
 /* ---------- 对话区 ---------- */
 
-.tianma-chat-main {
+.bokeauto-chat-main {
 	flex: 1;
 	min-width: 0;
 	display: flex;
@@ -92,7 +92,7 @@
 	min-height: 480px;
 }
 
-.tianma-messages {
+.bokeauto-messages {
 	flex: 1;
 	overflow-y: auto;
 	padding: 20px;
@@ -101,17 +101,17 @@
 	gap: 14px;
 }
 
-.tianma-msg.user {
+.bokeauto-msg.user {
 	align-self: flex-end;
 	max-width: 78%;
 }
 
-.tianma-msg.assistant {
+.bokeauto-msg.assistant {
 	align-self: flex-start;
 	max-width: 100%;
 }
 
-.tianma-msg .bubble {
+.bokeauto-msg .bubble {
 	background: #f6f7f7;
 	border: 1px solid #e2e4e7;
 	border-radius: 12px;
@@ -121,17 +121,17 @@
 	word-break: break-word;
 }
 
-.tianma-msg.user .bubble {
+.bokeauto-msg.user .bubble {
 	background: #eef3fd;
 	border-color: #d0d9ea;
 }
 
-.tianma-msg.thinking .bubble {
+.bokeauto-msg.thinking .bubble {
 	color: #8c8f94;
 	font-style: italic;
 }
 
-.tianma-msg.error .bubble {
+.bokeauto-msg.error .bubble {
 	background: #fbeaea;
 	border-color: #f0c1c1;
 	color: #791f1f;
@@ -139,14 +139,14 @@
 
 /* ---------- 步骤列表 ---------- */
 
-.tianma-steps {
+.bokeauto-steps {
 	border: 1px solid #e2e4e7;
 	border-radius: 12px;
 	margin-bottom: 10px;
 	background: #fbfbfc;
 }
 
-.tianma-steps-head {
+.bokeauto-steps-head {
 	padding: 8px 14px;
 	font-size: 12px;
 	font-weight: 500;
@@ -154,33 +154,33 @@
 	border-bottom: 1px solid #eee;
 }
 
-.tianma-steps ol {
+.bokeauto-steps ol {
 	margin: 0;
 	padding: 8px 14px 8px 34px;
 	font-size: 12px;
 }
 
-.tianma-steps li {
+.bokeauto-steps li {
 	margin: 4px 0;
 	line-height: 1.5;
 }
 
-.tianma-steps .step-icon {
+.bokeauto-steps .step-icon {
 	margin-right: 6px;
 	font-weight: 500;
 }
 
-.tianma-steps li.ok .step-icon { color: #0f6e56; }
-.tianma-steps li.fail .step-icon { color: #a32d2d; }
-.tianma-steps .step-name {
+.bokeauto-steps li.ok .step-icon { color: #0f6e56; }
+.bokeauto-steps li.fail .step-icon { color: #a32d2d; }
+.bokeauto-steps .step-name {
 	font-weight: 500;
 	margin-right: 8px;
 }
-.tianma-steps .step-msg { color: #646970; }
+.bokeauto-steps .step-msg { color: #646970; }
 
 /* ---------- 确认卡片 ---------- */
 
-.tianma-confirm {
+.bokeauto-confirm {
 	border: 1px solid #f0c1c1;
 	border-radius: 12px;
 	background: #fff8f8;
@@ -188,16 +188,16 @@
 	margin-bottom: 10px;
 }
 
-.tianma-confirm-title {
+.bokeauto-confirm-title {
 	font-weight: 500;
 	color: #a32d2d;
 	margin-bottom: 8px;
 }
 
-.tianma-confirm-tool { font-size: 13px; margin-bottom: 6px; }
-.tianma-confirm-desc { color: #646970; font-size: 13px; margin-bottom: 8px; }
+.bokeauto-confirm-tool { font-size: 13px; margin-bottom: 6px; }
+.bokeauto-confirm-desc { color: #646970; font-size: 13px; margin-bottom: 8px; }
 
-.tianma-confirm-args {
+.bokeauto-confirm-args {
 	background: #f6f7f7;
 	border: 1px solid #e2e4e7;
 	border-radius: 8px;
@@ -207,17 +207,17 @@
 	max-height: 160px;
 }
 
-.tianma-confirm-btns { margin-top: 10px; }
+.bokeauto-confirm-btns { margin-top: 10px; }
 
 /* ---------- 反馈 ---------- */
 
-.tianma-feedback {
+.bokeauto-feedback {
 	font-size: 12px;
 	color: #8c8f94;
 	margin-top: 8px;
 }
 
-.tianma-feedback .btn-fb {
+.bokeauto-feedback .btn-fb {
 	background: none;
 	border: 1px solid #dcdcde;
 	border-radius: 6px;
@@ -227,11 +227,11 @@
 	font-size: 13px;
 }
 
-.tianma-feedback .btn-fb:hover { background: #f0f0f1; }
+.bokeauto-feedback .btn-fb:hover { background: #f0f0f1; }
 
 /* ---------- 输入区 ---------- */
 
-.tianma-composer {
+.bokeauto-composer {
 	display: flex;
 	gap: 10px;
 	padding: 14px;
@@ -239,7 +239,7 @@
 	align-items: flex-end;
 }
 
-.tianma-composer textarea {
+.bokeauto-composer textarea {
 	flex: 1;
 	min-height: 42px;
 	max-height: 160px;
@@ -250,7 +250,7 @@
 	line-height: 1.5;
 }
 
-.tianma-composer .button {
+.bokeauto-composer .button {
 	height: 42px;
 	padding: 0 20px;
 	font-size: 13px;
@@ -258,7 +258,7 @@
 
 /* ---------- 记忆弹窗 ---------- */
 
-.tianma-memories-modal {
+.bokeauto-memories-modal {
 	position: fixed;
 	inset: 0;
 	background: rgba(0, 0, 0, 0.45);
@@ -268,7 +268,7 @@
 	justify-content: center;
 }
 
-.tianma-memories-modal .modal-inner {
+.bokeauto-memories-modal .modal-inner {
 	background: #fff;
 	border-radius: 12px;
 	padding: 20px 24px;
@@ -279,32 +279,32 @@
 	position: relative;
 }
 
-.tianma-memories-modal h2 {
+.bokeauto-memories-modal h2 {
 	margin: 0 0 12px;
 	font-size: 16px;
 	font-weight: 500;
 }
 
-.tianma-memories-modal .modal-close {
+.bokeauto-memories-modal .modal-close {
 	position: absolute;
 	top: 16px;
 	right: 16px;
 }
 
-.tianma-memories-modal .mem-list {
+.bokeauto-memories-modal .mem-list {
 	list-style: none;
 	margin: 12px 0 0;
 	padding: 0;
 }
 
-.tianma-memories-modal .mem-list li {
+.bokeauto-memories-modal .mem-list li {
 	border: 1px solid #eee;
 	border-radius: 8px;
 	padding: 10px 12px;
 	margin-bottom: 8px;
 }
 
-.tianma-memories-modal .mem-list .tag {
+.bokeauto-memories-modal .mem-list .tag {
 	display: inline-block;
 	background: #eef3fd;
 	color: #185fa5;
@@ -314,13 +314,13 @@
 	margin-right: 8px;
 }
 
-.tianma-memories-modal .mem-list .meta {
+.bokeauto-memories-modal .mem-list .meta {
 	font-size: 11px;
 	color: #8c8f94;
 	margin-top: 4px;
 }
 
-.tianma-memories-modal .mem-list .preview {
+.bokeauto-memories-modal .mem-list .preview {
 	font-size: 12px;
 	color: #646970;
 	margin-top: 4px;
@@ -332,14 +332,14 @@
 
 /* 窄屏适配 */
 @media (max-width: 960px) {
-	.tianma-chat-layout { flex-direction: column; }
-	.tianma-sidebar { width: 100%; flex-basis: auto; position: static; }
-	.tianma-chat-main { height: 560px; }
+	.bokeauto-chat-layout { flex-direction: column; }
+	.bokeauto-sidebar { width: 100%; flex-basis: auto; position: static; }
+	.bokeauto-chat-main { height: 560px; }
 }
 
 /* ---------- 模型切换条 ---------- */
 
-.tianma-model-bar {
+.bokeauto-model-bar {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -349,20 +349,20 @@
 	flex-wrap: wrap;
 }
 
-.tianma-model-bar .model-bar-label {
+.bokeauto-model-bar .model-bar-label {
 	font-size: 12px;
 	color: #646970;
 	font-weight: 500;
 }
 
-.tianma-model-bar select {
+.bokeauto-model-bar select {
 	max-width: 220px;
 	font-size: 12px;
 	height: 28px;
 	border-radius: 6px;
 }
 
-.tianma-model-bar .model-bar-current {
+.bokeauto-model-bar .model-bar-current {
 	font-size: 12px;
 	color: #0f6e56;
 	margin-left: auto;
@@ -371,7 +371,7 @@
 
 /* ---------- 免授权执行开关 ---------- */
 
-.tianma-auto-confirm {
+.bokeauto-auto-confirm {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
@@ -383,11 +383,11 @@
 	white-space: nowrap;
 }
 
-.tianma-auto-confirm input {
+.bokeauto-auto-confirm input {
 	display: none;
 }
 
-.tianma-auto-confirm .auto-confirm-switch {
+.bokeauto-auto-confirm .auto-confirm-switch {
 	width: 32px;
 	height: 18px;
 	border-radius: 10px;
@@ -397,7 +397,7 @@
 	flex-shrink: 0;
 }
 
-.tianma-auto-confirm .auto-confirm-switch::after {
+.bokeauto-auto-confirm .auto-confirm-switch::after {
 	content: '';
 	position: absolute;
 	top: 2px;
@@ -409,16 +409,16 @@
 	transition: left .2s;
 }
 
-.tianma-auto-confirm.on {
+.bokeauto-auto-confirm.on {
 	color: #b32d2e;
 	font-weight: 600;
 }
 
-.tianma-auto-confirm.on .auto-confirm-switch {
+.bokeauto-auto-confirm.on .auto-confirm-switch {
 	background: #d63638;
 }
 
-.tianma-auto-confirm.on .auto-confirm-switch::after {
+.bokeauto-auto-confirm.on .auto-confirm-switch::after {
 	left: 16px;
 }
 
@@ -431,7 +431,7 @@
 
 /* ---------- 执行参数（最大工具步数 / PHP 超时） ---------- */
 
-.tianma-run-opts {
+.bokeauto-run-opts {
 	display: inline-flex;
 	align-items: center;
 	gap: 12px;
@@ -439,14 +439,14 @@
 	color: #646970;
 }
 
-.tianma-run-opts label {
+.bokeauto-run-opts label {
 	display: inline-flex;
 	align-items: center;
 	gap: 4px;
 	white-space: nowrap;
 }
 
-.tianma-run-opts input {
+.bokeauto-run-opts input {
 	width: 64px;
 	height: 26px;
 	font-size: 12px;
@@ -457,7 +457,7 @@
 
 /* ---------- 流式思考动画 ---------- */
 
-.tianma-stream .tianma-think {
+.bokeauto-stream .bokeauto-think {
 	display: flex;
 	align-items: center;
 	gap: 6px;
@@ -466,25 +466,25 @@
 	font-size: 13px;
 }
 
-.tianma-think .dot {
+.bokeauto-think .dot {
 	width: 7px;
 	height: 7px;
 	border-radius: 50%;
 	background: #7f77dd;
-	animation: tianma-bounce 1.2s infinite ease-in-out;
+	animation: bokeauto-bounce 1.2s infinite ease-in-out;
 }
 
-.tianma-think .dot:nth-child(2) { animation-delay: 0.15s; background: #1d9e75; }
-.tianma-think .dot:nth-child(3) { animation-delay: 0.3s; background: #d85a30; }
+.bokeauto-think .dot:nth-child(2) { animation-delay: 0.15s; background: #1d9e75; }
+.bokeauto-think .dot:nth-child(3) { animation-delay: 0.3s; background: #d85a30; }
 
-@keyframes tianma-bounce {
+@keyframes bokeauto-bounce {
 	0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
 	30% { transform: translateY(-5px); opacity: 1; }
 }
 
 /* ---------- 深度思考过程 ---------- */
 
-.tianma-reasoning {
+.bokeauto-reasoning {
 	background: #fbfbfc;
 	border-left: 3px solid #c8c4ea;
 	border-radius: 0 8px 8px 0;
@@ -492,14 +492,14 @@
 	margin-bottom: 8px;
 }
 
-.tianma-reasoning .reasoning-head {
+.bokeauto-reasoning .reasoning-head {
 	font-size: 11px;
 	color: #8c8f94;
 	margin-bottom: 4px;
 	display: block;
 }
 
-.tianma-reasoning .reasoning-body {
+.bokeauto-reasoning .reasoning-body {
 	font-size: 12px;
 	color: #a0a0a0;
 	font-style: italic;
@@ -511,14 +511,14 @@
 
 /* ---------- 工具实时卡片 ---------- */
 
-.tianma-tools {
+.bokeauto-tools {
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
 	margin-bottom: 8px;
 }
 
-.tianma-tool-card {
+.bokeauto-tool-card {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -529,34 +529,34 @@
 	padding: 6px 10px;
 }
 
-.tianma-tool-card .tc-name { font-weight: 500; }
-.tianma-tool-card .tc-args { color: #8c8f94; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; }
-.tianma-tool-card .tc-msg { color: #646970; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; display: block; flex-basis: 100%; }
+.bokeauto-tool-card .tc-name { font-weight: 500; }
+.bokeauto-tool-card .tc-args { color: #8c8f94; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; }
+.bokeauto-tool-card .tc-msg { color: #646970; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; display: block; flex-basis: 100%; }
 
-.tianma-tool-card .tc-spin {
+.bokeauto-tool-card .tc-spin {
 	width: 12px;
 	height: 12px;
 	border: 2px solid #e2e4e7;
 	border-top-color: #7f77dd;
 	border-radius: 50%;
-	animation: tianma-spin 0.8s linear infinite;
+	animation: bokeauto-spin 0.8s linear infinite;
 	flex: 0 0 12px;
 }
 
-@keyframes tianma-spin {
+@keyframes bokeauto-spin {
 	to { transform: rotate(360deg); }
 }
 
-.tianma-tool-card.ok { border-color: #b8dcc9; background: #f2faf6; }
-.tianma-tool-card.ok .tc-name { color: #0f6e56; }
-.tianma-tool-card.fail { border-color: #f0c1c1; background: #fdf6f6; }
-.tianma-tool-card.fail .tc-name { color: #a32d2d; }
+.bokeauto-tool-card.ok { border-color: #b8dcc9; background: #f2faf6; }
+.bokeauto-tool-card.ok .tc-name { color: #0f6e56; }
+.bokeauto-tool-card.fail { border-color: #f0c1c1; background: #fdf6f6; }
+.bokeauto-tool-card.fail .tc-name { color: #a32d2d; }
 
-.tianma-tool-card.running { border-color: #d5d0f2; background: #f7f6fd; }
+.bokeauto-tool-card.running { border-color: #d5d0f2; background: #f7f6fd; }
 
 /* ---------- 流式输出区 ---------- */
 
-.tianma-stream .tianma-out {
+.bokeauto-stream .bokeauto-out {
 	display: none;
 	background: #f6f7f7;
 	border: 1px solid #e2e4e7;
@@ -568,7 +568,7 @@
 	margin-bottom: 8px;
 }
 
-.tianma-stream .tianma-err {
+.bokeauto-stream .bokeauto-err {
 	display: inline-block;
 	background: #fbeaea;
 	border: 1px solid #f0c1c1;
@@ -581,7 +581,7 @@
 
 /* ---------- 会话列表（微信式） ---------- */
 
-.tianma-conv-block {
+.bokeauto-conv-block {
 	display: flex;
 	flex-direction: column;
 	min-height: 0;
@@ -589,20 +589,20 @@
 	position: relative;
 }
 
-.tianma-conv-head {
+.bokeauto-conv-head {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	margin-bottom: 6px;
 }
 
-.tianma-conv-head h3 {
+.bokeauto-conv-head h3 {
 	margin: 0;
 	font-size: 13px;
 	font-weight: 500;
 }
 
-.tianma-btn-clear {
+.bokeauto-btn-clear {
 	background: none;
 	border: 1px solid #dcdcde;
 	border-radius: 6px;
@@ -612,13 +612,13 @@
 	cursor: pointer;
 }
 
-.tianma-btn-clear:hover {
+.bokeauto-btn-clear:hover {
 	color: #a32d2d;
 	border-color: #f0c1c1;
 	background: #fdf6f6;
 }
 
-.tianma-clear-menu {
+.bokeauto-clear-menu {
 	position: absolute;
 	top: 26px;
 	right: 0;
@@ -631,7 +631,7 @@
 	min-width: 130px;
 }
 
-.tianma-clear-menu button {
+.bokeauto-clear-menu button {
 	display: block;
 	width: 100%;
 	background: none;
@@ -643,10 +643,10 @@
 	border-radius: 5px;
 }
 
-.tianma-clear-menu button:hover { background: #f0f0f1; }
-.tianma-clear-menu button:last-child { color: #a32d2d; }
+.bokeauto-clear-menu button:hover { background: #f0f0f1; }
+.bokeauto-clear-menu button:last-child { color: #a32d2d; }
 
-.tianma-conv-list {
+.bokeauto-conv-list {
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -655,7 +655,7 @@
 	max-height: 46vh;
 }
 
-.tianma-conv-list li {
+.bokeauto-conv-list li {
 	position: relative;
 	padding: 9px 10px;
 	border-radius: 8px;
@@ -665,10 +665,10 @@
 	transition: background 0.15s;
 }
 
-.tianma-conv-list li:hover { background: #f0f0f1; }
-.tianma-conv-list li.active { background: #eef3fd; border-color: #d0d9ea; }
+.bokeauto-conv-list li:hover { background: #f0f0f1; }
+.bokeauto-conv-list li.active { background: #eef3fd; border-color: #d0d9ea; }
 
-.tianma-conv-list .conv-title {
+.bokeauto-conv-list .conv-title {
 	font-size: 13px;
 	font-weight: 500;
 	overflow: hidden;
@@ -677,7 +677,7 @@
 	padding-right: 18px;
 }
 
-.tianma-conv-list .conv-preview {
+.bokeauto-conv-list .conv-preview {
 	font-size: 11px;
 	color: #8c8f94;
 	overflow: hidden;
@@ -686,7 +686,7 @@
 	margin-top: 2px;
 }
 
-.tianma-conv-list .conv-del {
+.bokeauto-conv-list .conv-del {
 	position: absolute;
 	top: 6px;
 	right: 6px;
@@ -700,15 +700,15 @@
 	display: none;
 }
 
-.tianma-conv-list li:hover .conv-del { display: block; }
-.tianma-conv-list .conv-del:hover { background: #e2e4e7; color: #a32d2d; }
+.bokeauto-conv-list li:hover .conv-del { display: block; }
+.bokeauto-conv-list .conv-del:hover { background: #e2e4e7; color: #a32d2d; }
 
-.tianma-conv-list .empty { color: #8c8f94; font-size: 12px; cursor: default; }
-.tianma-conv-list .empty:hover { background: transparent; }
+.bokeauto-conv-list .empty { color: #8c8f94; font-size: 12px; cursor: default; }
+.bokeauto-conv-list .empty:hover { background: transparent; }
 
 /* ---------- Token 用量 ---------- */
 
-.tianma-usage {
+.bokeauto-usage {
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -717,12 +717,12 @@
 	color: #646970;
 }
 
-.tianma-usage strong { color: #2c2c2a; font-weight: 500; }
-.tianma-usage .desc { color: #8c8f94; font-size: 11px; }
+.bokeauto-usage strong { color: #2c2c2a; font-weight: 500; }
+.bokeauto-usage .desc { color: #8c8f94; font-size: 11px; }
 
 /* ---------- 角色/技能管理弹窗 ---------- */
 
-.tianma-modal {
+.bokeauto-modal {
 	position: fixed;
 	inset: 0;
 	background: rgba(0, 0, 0, 0.45);
@@ -732,7 +732,7 @@
 	justify-content: center;
 }
 
-.tianma-modal-inner {
+.bokeauto-modal-inner {
 	background: #fff;
 	border-radius: 12px;
 	padding: 20px 24px;
@@ -742,25 +742,25 @@
 	overflow-y: auto;
 }
 
-.tianma-modal-inner h3 {
+.bokeauto-modal-inner h3 {
 	margin: 0 0 14px;
 	font-size: 15px;
 	font-weight: 500;
 }
 
-.tianma-modal-inner textarea,
-.tianma-modal-inner select {
+.bokeauto-modal-inner textarea,
+.bokeauto-modal-inner select {
 	width: 100%;
 	margin-top: 4px;
 }
 
-.tianma-roles-table code {
+.bokeauto-roles-table code {
 	font-size: 11px;
 }
 
 /* ---------- 可视化文件卡片与编辑器 ---------- */
 
-.tianma-file-card {
+.bokeauto-file-card {
 	margin: 8px 0;
 	border: 1px solid #e2e4e7;
 	border-radius: 8px;
@@ -769,7 +769,7 @@
 	max-width: 720px;
 }
 
-.tianma-file-head {
+.bokeauto-file-head {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -778,16 +778,16 @@
 	border-bottom: 1px solid #e2e4e7;
 }
 
-.tianma-file-icon { font-size: 15px; }
+.bokeauto-file-icon { font-size: 15px; }
 
-.tianma-file-path {
+.bokeauto-file-path {
 	flex: 1;
 	font-size: 12px;
 	word-break: break-all;
 	color: #2271b1;
 }
 
-.tianma-file-preview {
+.bokeauto-file-preview {
 	margin: 0;
 	padding: 10px 12px;
 	font-size: 11px;
@@ -799,9 +799,9 @@
 	word-break: break-all;
 }
 
-.tianma-editor-inner { width: 780px; }
+.bokeauto-editor-inner { width: 780px; }
 
-.tianma-editor-path {
+.bokeauto-editor-path {
 	background: #f0f0f1;
 	padding: 2px 8px;
 	border-radius: 4px;
@@ -809,7 +809,7 @@
 	word-break: break-all;
 }
 
-.tianma-editor-ta {
+.bokeauto-editor-ta {
 	width: 100%;
 	height: 46vh;
 	font-family: Consolas, Monaco, "Courier New", monospace;
@@ -824,13 +824,13 @@
 	tab-size: 4;
 }
 
-.tianma-editor-ta:focus {
+.bokeauto-editor-ta:focus {
 	border-color: #2271b1;
 	box-shadow: 0 0 0 1px #2271b1;
 	outline: none;
 }
 
-.tianma-editor-msg {
+.bokeauto-editor-msg {
 	min-height: 18px;
 	font-size: 12px;
 	margin: 6px 0 0;
@@ -838,13 +838,13 @@
 
 /* ---------- 目录卡片 / 结果卡片 / 文件标签 ---------- */
 
-.tianma-file-label {
+.bokeauto-file-label {
 	padding: 4px 12px 0;
 	font-size: 11px;
 	color: #8c8f94;
 }
 
-.tianma-dir-card {
+.bokeauto-dir-card {
 	margin: 8px 0;
 	border: 1px solid #e2e4e7;
 	border-radius: 8px;
@@ -853,19 +853,19 @@
 	max-width: 720px;
 }
 
-.tianma-dir-count {
+.bokeauto-dir-count {
 	font-size: 11px;
 	color: #8c8f94;
 	white-space: nowrap;
 }
 
-.tianma-dir-list {
+.bokeauto-dir-list {
 	max-height: 240px;
 	overflow: auto;
 	padding: 4px 0;
 }
 
-.tianma-dir-row {
+.bokeauto-dir-row {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -874,24 +874,24 @@
 	border-bottom: 1px solid #f0f0f1;
 }
 
-.tianma-dir-row:last-child { border-bottom: none; }
+.bokeauto-dir-row:last-child { border-bottom: none; }
 
-.tianma-dir-icon { font-size: 13px; }
+.bokeauto-dir-icon { font-size: 13px; }
 
-.tianma-dir-name {
+.bokeauto-dir-name {
 	flex: 1;
 	font-family: Consolas, Monaco, monospace;
 	color: #1d2327;
 	word-break: break-all;
 }
 
-.tianma-dir-meta {
+.bokeauto-dir-meta {
 	font-size: 11px;
 	color: #8c8f94;
 	white-space: nowrap;
 }
 
-.tianma-visual-result {
+.bokeauto-visual-result {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -905,13 +905,13 @@
 	color: #1d2327;
 }
 
-.tianma-visual-icon { font-size: 14px; }
+.bokeauto-visual-icon { font-size: 14px; }
 
-.tianma-visual-title { word-break: break-all; }
+.bokeauto-visual-title { word-break: break-all; }
 
 /* ---------- AI 生成图片卡片 ---------- */
 
-.tianma-image-card {
+.bokeauto-image-card {
 	margin: 8px 0;
 	border: 1px solid #e2e4e7;
 	border-radius: 8px;
@@ -920,14 +920,14 @@
 	max-width: 720px;
 }
 
-.tianma-image-prompt {
+.bokeauto-image-prompt {
 	flex: 1;
 	font-size: 12px;
 	color: #1d2327;
 	word-break: break-all;
 }
 
-.tianma-image-preview {
+.bokeauto-image-preview {
 	display: block;
 	width: 100%;
 	max-height: 340px;
@@ -937,21 +937,21 @@
 
 /* ---------- 聊天页标题下的描述与关于信息 ---------- */
 
-.tianma-sub { margin: 2px 0 12px; }
+.bokeauto-sub { margin: 2px 0 12px; }
 
-.tianma-desc { margin: 0 0 4px; color: #50575e; font-size: 12px; }
+.bokeauto-desc { margin: 0 0 4px; color: #50575e; font-size: 12px; }
 
-.tianma-about-line { margin: 0; color: #646970; font-size: 11px; line-height: 1.7; }
+.bokeauto-about-line { margin: 0; color: #646970; font-size: 11px; line-height: 1.7; }
 
-.tianma-about-line a { color: #2271b1; text-decoration: none; }
+.bokeauto-about-line a { color: #2271b1; text-decoration: none; }
 
-.tianma-about-line a:hover { text-decoration: underline; }
+.bokeauto-about-line a:hover { text-decoration: underline; }
 
 /* ---------- 标题版本徽章与开源说明 ---------- */
 
-.tianma-title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.bokeauto-title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-.tianma-ver {
+.bokeauto-ver {
 	display: inline-block;
 	background: #e8f0fe;
 	color: #1e63f0;
@@ -963,4 +963,4 @@
 	vertical-align: middle;
 }
 
-.tianma-open-note { margin: 0 0 4px; color: #50575e; font-size: 12px; line-height: 1.7; }
+.bokeauto-open-note { margin: 0 0 4px; color: #50575e; font-size: 12px; line-height: 1.7; }

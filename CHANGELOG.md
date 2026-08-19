@@ -21,13 +21,13 @@
 
 ### 已知部署前提（生产环境）
 - 主机需提供可用的 PHP CLI（通常在 `php` / `/usr/bin/php`），且未将 `exec` / `proc_open` 列入 `disable_functions`；否则自动降级为同步流式（仍有完整功能，但长任务会占用 Web 进程）。
-- `wp-content/uploads` 目录需 Web 用户可写（异步流文件写在 `uploads/tianma-stream/`）。
+- `wp-content/uploads` 目录需 Web 用户可写（异步流文件写在 `uploads/bokeauto-stream/`）。
 
 ---
 
 ## [1.6.0] - 2026-08-11
 - 新增 Gitee 国内镜像链接（README / 设置页双仓库地址）。
-- 新增演示 GIF（assets/tianma-demo.gif）。
+- 新增演示 GIF（assets/bokeauto-demo.gif）。
 
 ## [1.5.9] - 2026-08-11
 - 波克wpAI自动化插件核心能力补强与若干细节修复。

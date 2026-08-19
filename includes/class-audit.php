@@ -2,19 +2,19 @@
 /**
  * 审计日志：记录所有工具操作
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_Audit {
+class Bokeauto_Audit {
 
 	public static function log( $action, $detail = array(), $user_id = 0 ) {
 		global $wpdb;
 		$user_id = $user_id ? (int) $user_id : get_current_user_id();
 
 		$wpdb->insert(
-			$wpdb->prefix . 'tianma_audit',
+			$wpdb->prefix . 'bokeauto_audit',
 			array(
 				'user_id'    => $user_id,
 				'action'     => sanitize_text_field( $action ),
@@ -29,7 +29,7 @@ class Tianma_Audit {
 		global $wpdb;
 		return $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT * FROM {$wpdb->prefix}tianma_audit ORDER BY id DESC LIMIT %d",
+				"SELECT * FROM {$wpdb->prefix}bokeauto_audit ORDER BY id DESC LIMIT %d",
 				$limit
 			)
 		);

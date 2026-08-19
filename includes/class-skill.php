@@ -8,12 +8,12 @@
  *   - 手动传授：用户让 Agent 记住某个流程（create_skill 工具）
  * 技能注入 system prompt，模型自主判断是否采用。
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_Skill {
+class Bokeauto_Skill {
 
 	/* ---------------------------------------------------------------------
 	 * 基础 CRUD
@@ -24,13 +24,13 @@ class Tianma_Skill {
 
 		$tools = array_values( array_unique( array_filter( (array) $tools, 'is_string' ) ) );
 		if ( ! $name || ! $tools ) {
-			return new WP_Error( 'tianma_skill', '技能名称与工具序列不能为空' );
+			return new WP_Error( 'bokeauto_skill', '技能名称与工具序列不能为空' );
 		}
 
 		// 查重：同名或相同工具序列
 		$exists = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT id FROM {$wpdb->prefix}tianma_skills WHERE name = %s OR tools = %s LIMIT 1",
+				"SELECT id FROM {$wpdb->prefix}bokeauto_skills WHERE name = %s OR tools = %s LIMIT 1",
 				$name,
 				wp_json_encode( $tools )
 			)
@@ -38,7 +38,7 @@ class Tianma_Skill {
 		if ( $exists ) {
 			// 已存在则更新使用描述，避免重复
 			$wpdb->update(
-				$wpdb->prefix . 'tianma_skills',
+				$wpdb->prefix . 'bokeauto_skills',
 				array( 'description' => $description, 'trigger_text' => $trigger, 'status' => 'active' ),
 				array( 'id' => $exists ),
 				array( '%s', '%s', '%s' ),
@@ -48,18 +48,18 @@ class Tianma_Skill {
 		}
 
 		// 技能数量上限
-		$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}tianma_skills" );
+		$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}bokeauto_skills" );
 		if ( $count >= 60 ) {
 			// 删除最不常用且非手动的旧技能
 			$wpdb->query(
-				"DELETE FROM {$wpdb->prefix}tianma_skills
+				"DELETE FROM {$wpdb->prefix}bokeauto_skills
 				 WHERE source = 'auto' AND status = 'disabled'
 				 ORDER BY usage_count ASC LIMIT 10"
 			);
 		}
 
 		$wpdb->insert(
-			$wpdb->prefix . 'tianma_skills',
+			$wpdb->prefix . 'bokeauto_skills',
 			array(
 				'name'         => mb_substr( $name, 0, 120 ),
 				'description'  => $description,
@@ -96,18 +96,18 @@ class Tianma_Skill {
 		if ( ! $clean ) {
 			return false;
 		}
-		return $wpdb->update( $wpdb->prefix . 'tianma_skills', $clean, array( 'id' => (int) $id ) );
+		return $wpdb->update( $wpdb->prefix . 'bokeauto_skills', $clean, array( 'id' => (int) $id ) );
 	}
 
 	public static function delete( $id ) {
 		global $wpdb;
-		return $wpdb->delete( $wpdb->prefix . 'tianma_skills', array( 'id' => (int) $id ), array( '%d' ) );
+		return $wpdb->delete( $wpdb->prefix . 'bokeauto_skills', array( 'id' => (int) $id ), array( '%d' ) );
 	}
 
 	public static function get( $id ) {
 		global $wpdb;
 		$row = $wpdb->get_row(
-			$wpdb->prepare( "SELECT * FROM {$wpdb->prefix}tianma_skills WHERE id = %d", $id )
+			$wpdb->prepare( "SELECT * FROM {$wpdb->prefix}bokeauto_skills WHERE id = %d", $id )
 		);
 		if ( $row ) {
 			$row->tools = json_decode( $row->tools, true );
@@ -117,7 +117,7 @@ class Tianma_Skill {
 
 	public static function list_all( $status = '' ) {
 		global $wpdb;
-		$sql = "SELECT * FROM {$wpdb->prefix}tianma_skills";
+		$sql = "SELECT * FROM {$wpdb->prefix}bokeauto_skills";
 		if ( $status ) {
 			$sql .= $wpdb->prepare( ' WHERE status = %s', $status );
 		}
@@ -135,7 +135,7 @@ class Tianma_Skill {
 	/** 技能使用计数 */
 	public static function bump_usage( $id ) {
 		global $wpdb;
-		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}tianma_skills SET usage_count = usage_count + 1 WHERE id = %d", $id ) );
+		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}bokeauto_skills SET usage_count = usage_count + 1 WHERE id = %d", $id ) );
 	}
 
 	/* ---------------------------------------------------------------------

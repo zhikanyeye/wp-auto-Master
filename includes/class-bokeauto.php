@@ -2,12 +2,12 @@
 /**
  * 波克wpAI自动化插件 - 核心类
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_Core {
+class Bokeauto_Core {
 
 	private static $instance = null;
 
@@ -26,8 +26,8 @@ class Tianma_Core {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 
 		// 定时任务：wp-cron 回调 + 启动时同步调度
-		add_action( 'tianma_schedule_run', array( 'Tianma_Schedule', 'cron_hook' ), 10, 1 );
-		add_action( 'init', array( 'Tianma_Schedule', 'sync_cron' ), 20 );
+		add_action( 'bokeauto_schedule_run', array( 'Bokeauto_Schedule', 'cron_hook' ), 10, 1 );
+		add_action( 'init', array( 'Bokeauto_Schedule', 'sync_cron' ), 20 );
 	}
 
 	/* ---------------------------------------------------------------------
@@ -36,12 +36,12 @@ class Tianma_Core {
 
 	public static function activate() {
 		self::create_tables();
-		update_option( 'tianma_db_version', TIANMA_DB_VERSION );
+		update_option( 'bokeauto_db_version', BOKEAUTO_DB_VERSION );
 		flush_rewrite_rules();
 	}
 
 	public static function deactivate() {
-		wp_clear_scheduled_hook( 'tianma_daily_distill' );
+		wp_clear_scheduled_hook( 'bokeauto_daily_distill' );
 	}
 
 	private static function create_tables() {
@@ -53,7 +53,7 @@ class Tianma_Core {
 
 		$tables = array();
 
-		$tables[] = "CREATE TABLE {$prefix}tianma_tasks (
+		$tables[] = "CREATE TABLE {$prefix}bokeauto_tasks (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			user_id BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
 			summary TEXT NOT NULL,
@@ -65,7 +65,7 @@ class Tianma_Core {
 			KEY user_id (user_id)
 		) $charset;";
 
-		$tables[] = "CREATE TABLE {$prefix}tianma_memories (
+		$tables[] = "CREATE TABLE {$prefix}bokeauto_memories (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			m_type VARCHAR(20) NOT NULL DEFAULT 'semantic',
 			title VARCHAR(255) NOT NULL,
@@ -79,7 +79,7 @@ class Tianma_Core {
 			KEY m_type (m_type)
 		) $charset;";
 
-		$tables[] = "CREATE TABLE {$prefix}tianma_feedback (
+		$tables[] = "CREATE TABLE {$prefix}bokeauto_feedback (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			task_id BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
 			user_id BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
@@ -89,7 +89,7 @@ class Tianma_Core {
 			PRIMARY KEY  (id)
 		) $charset;";
 
-		$tables[] = "CREATE TABLE {$prefix}tianma_confirmations (
+		$tables[] = "CREATE TABLE {$prefix}bokeauto_confirmations (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			confirm_hash VARCHAR(64) NOT NULL,
 			payload LONGTEXT NOT NULL,
@@ -99,7 +99,7 @@ class Tianma_Core {
 			KEY confirm_hash (confirm_hash)
 		) $charset;";
 
-		$tables[] = "CREATE TABLE {$prefix}tianma_audit (
+		$tables[] = "CREATE TABLE {$prefix}bokeauto_audit (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			user_id BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
 			action VARCHAR(100) NOT NULL,
@@ -109,7 +109,7 @@ class Tianma_Core {
 			KEY user_id (user_id)
 		) $charset;";
 
-		$tables[] = "CREATE TABLE {$prefix}tianma_skills (
+		$tables[] = "CREATE TABLE {$prefix}bokeauto_skills (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			name VARCHAR(120) NOT NULL,
 			description TEXT NULL,
@@ -123,7 +123,7 @@ class Tianma_Core {
 			KEY status (status)
 		) $charset;";
 
-		$tables[] = "CREATE TABLE {$prefix}tianma_roles (
+		$tables[] = "CREATE TABLE {$prefix}bokeauto_roles (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			name VARCHAR(60) NOT NULL,
 			description TEXT NULL,
@@ -142,7 +142,7 @@ class Tianma_Core {
 			KEY status (status)
 		) $charset;";
 
-		$tables[] = "CREATE TABLE {$prefix}tianma_conversations (
+		$tables[] = "CREATE TABLE {$prefix}bokeauto_conversations (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			user_id BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
 			title VARCHAR(120) NOT NULL DEFAULT '新对话',
@@ -152,7 +152,7 @@ class Tianma_Core {
 			KEY user_id (user_id)
 		) $charset;";
 
-		$tables[] = "CREATE TABLE {$prefix}tianma_messages (
+		$tables[] = "CREATE TABLE {$prefix}bokeauto_messages (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			conversation_id BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
 			role VARCHAR(20) NOT NULL DEFAULT 'user',
@@ -162,7 +162,7 @@ class Tianma_Core {
 			KEY conversation_id (conversation_id)
 		) $charset;";
 
-		$tables[] = "CREATE TABLE {$prefix}tianma_usage (
+		$tables[] = "CREATE TABLE {$prefix}bokeauto_usage (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			user_id BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
 			conversation_id BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
@@ -175,7 +175,7 @@ class Tianma_Core {
 			KEY conversation_id (conversation_id)
 		) $charset;";
 
-		$tables[] = "CREATE TABLE {$prefix}tianma_schedules (
+		$tables[] = "CREATE TABLE {$prefix}bokeauto_schedules (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			name VARCHAR(120) NOT NULL,
 			prompt TEXT NOT NULL,
@@ -196,7 +196,7 @@ class Tianma_Core {
 			KEY status (status)
 		) $charset;";
 
-		$tables[] = "CREATE TABLE {$prefix}tianma_custom_tools (
+		$tables[] = "CREATE TABLE {$prefix}bokeauto_custom_tools (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			name VARCHAR(60) NOT NULL,
 			description TEXT NULL,
@@ -210,7 +210,7 @@ class Tianma_Core {
 			UNIQUE KEY name (name)
 		) $charset;";
 
-		$tables[] = "CREATE TABLE {$prefix}tianma_worklogs (
+		$tables[] = "CREATE TABLE {$prefix}bokeauto_worklogs (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			log_date DATE NOT NULL,
 			content LONGTEXT NOT NULL,
@@ -225,29 +225,29 @@ class Tianma_Core {
 		}
 
 		// 内置角色种子
-		if ( class_exists( 'Tianma_Role' ) ) {
-			Tianma_Role::seed_builtins();
+		if ( class_exists( 'Bokeauto_Role' ) ) {
+			Bokeauto_Role::seed_builtins();
 		}
 	}
 
 	/** 版本升级：补建新表 / 新增列 / 种子数据（dbDelta 幂等） */
 	public function maybe_upgrade() {
-		if ( get_option( 'tianma_db_version' ) === TIANMA_DB_VERSION ) {
+		if ( get_option( 'bokeauto_db_version' ) === BOKEAUTO_DB_VERSION ) {
 			return;
 		}
 		self::create_tables();
 		self::upgrade_columns();
-		update_option( 'tianma_db_version', TIANMA_DB_VERSION );
+		update_option( 'bokeauto_db_version', BOKEAUTO_DB_VERSION );
 	}
 
 	/** 为已存在的表补充新增列（dbDelta 不支持加列，需手动 ALTER） */
 	private static function upgrade_columns() {
 		global $wpdb;
 
-		$cols = $wpdb->get_col( "DESC {$wpdb->prefix}tianma_roles" );
+		$cols = $wpdb->get_col( "DESC {$wpdb->prefix}bokeauto_roles" );
 		if ( $cols && ! in_array( 'llm_provider', $cols, true ) ) {
 			$wpdb->query(
-				"ALTER TABLE {$wpdb->prefix}tianma_roles
+				"ALTER TABLE {$wpdb->prefix}bokeauto_roles
 				 ADD llm_provider VARCHAR(20) NOT NULL DEFAULT '' AFTER tools,
 				 ADD llm_base_url VARCHAR(255) NOT NULL DEFAULT '' AFTER llm_provider,
 				 ADD llm_api_key VARCHAR(255) NOT NULL DEFAULT '' AFTER llm_base_url,
@@ -255,10 +255,10 @@ class Tianma_Core {
 			);
 		}
 		// 角色类型（chat 聊天型 / functional 功能性）与绑定输出工具
-		$cols = $wpdb->get_col( "DESC {$wpdb->prefix}tianma_roles" );
+		$cols = $wpdb->get_col( "DESC {$wpdb->prefix}bokeauto_roles" );
 		if ( $cols && ! in_array( 'role_type', $cols, true ) ) {
 			$wpdb->query(
-				"ALTER TABLE {$wpdb->prefix}tianma_roles
+				"ALTER TABLE {$wpdb->prefix}bokeauto_roles
 				 ADD role_type VARCHAR(10) NOT NULL DEFAULT 'chat' AFTER tools,
 				 ADD bind_tool VARCHAR(60) NOT NULL DEFAULT '' AFTER role_type"
 			);
@@ -270,7 +270,7 @@ class Tianma_Core {
 	 * ------------------------------------------------------------------- */
 
 	public function init() {
-		load_plugin_textdomain( 'tianma', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+		load_plugin_textdomain( 'bokeauto', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 	}
 
 	/* ---------------------------------------------------------------------
@@ -281,66 +281,66 @@ class Tianma_Core {
 		$cap = 'manage_options';
 
 		add_menu_page(
-			__( '波克wpAI自动化插件', 'tianma' ),
-			__( '波克wpAI', 'tianma' ),
+			__( '波克wpAI自动化插件', 'bokeauto' ),
+			__( '波克wpAI', 'bokeauto' ),
 			$cap,
-			'tianma-chat',
+			'bokeauto-chat',
 			array( $this, 'render_chat_page' ),
 			'dashicons-superhero',
 			3
 		);
 
 		add_submenu_page(
-			'tianma-chat',
-			__( '智能体对话', 'tianma' ),
-			__( '对话', 'tianma' ),
+			'bokeauto-chat',
+			__( '智能体对话', 'bokeauto' ),
+			__( '对话', 'bokeauto' ),
 			$cap,
-			'tianma-chat',
+			'bokeauto-chat',
 			array( $this, 'render_chat_page' )
 		);
 
 		add_submenu_page(
-			'tianma-chat',
-			__( '模型设置', 'tianma' ),
-			__( '模型设置', 'tianma' ),
+			'bokeauto-chat',
+			__( '模型设置', 'bokeauto' ),
+			__( '模型设置', 'bokeauto' ),
 			$cap,
-			'tianma-settings',
+			'bokeauto-settings',
 			array( $this, 'render_settings_page' )
 		);
 
 		add_submenu_page(
-			'tianma-chat',
-			__( '角色与技能', 'tianma' ),
-			__( '角色与技能', 'tianma' ),
+			'bokeauto-chat',
+			__( '角色与技能', 'bokeauto' ),
+			__( '角色与技能', 'bokeauto' ),
 			$cap,
-			'tianma-roles',
+			'bokeauto-roles',
 			array( $this, 'render_roles_page' )
 		);
 
 		add_submenu_page(
-			'tianma-chat',
-			__( '定时任务', 'tianma' ),
-			__( '定时任务', 'tianma' ),
+			'bokeauto-chat',
+			__( '定时任务', 'bokeauto' ),
+			__( '定时任务', 'bokeauto' ),
 			$cap,
-			'tianma-schedules',
+			'bokeauto-schedules',
 			array( $this, 'render_schedules_page' )
 		);
 	}
 
 	public function render_chat_page() {
-		include TIANMA_PATH . 'admin/templates/page-chat.php';
+		include BOKEAUTO_PATH . 'admin/templates/page-chat.php';
 	}
 
 	public function render_settings_page() {
-		include TIANMA_PATH . 'admin/templates/page-settings.php';
+		include BOKEAUTO_PATH . 'admin/templates/page-settings.php';
 	}
 
 	public function render_roles_page() {
-		include TIANMA_PATH . 'admin/templates/page-roles.php';
+		include BOKEAUTO_PATH . 'admin/templates/page-roles.php';
 	}
 
 	public function render_schedules_page() {
-		include TIANMA_PATH . 'admin/templates/page-schedules.php';
+		include BOKEAUTO_PATH . 'admin/templates/page-schedules.php';
 	}
 
 	/* ---------------------------------------------------------------------
@@ -348,72 +348,72 @@ class Tianma_Core {
 	 * ------------------------------------------------------------------- */
 
 	public function enqueue_assets( $hook ) {
-		if ( false === strpos( $hook, 'tianma' ) ) {
+		if ( false === strpos( $hook, 'bokeauto' ) ) {
 			return;
 		}
 		$screen = get_current_screen();
 		$page   = $screen ? $screen->id : '';
 
-		wp_enqueue_style( 'tianma-chat', TIANMA_URL . 'admin/css/chat.css', array(), TIANMA_VERSION );
+		wp_enqueue_style( 'bokeauto-chat', BOKEAUTO_URL . 'admin/css/chat.css', array(), BOKEAUTO_VERSION );
 
-		if ( false !== strpos( $page, 'tianma-roles' ) ) {
-			wp_enqueue_script( 'tianma-roles', TIANMA_URL . 'admin/js/roles.js', array(), TIANMA_VERSION, true );
-			wp_localize_script( 'tianma-roles', 'TIANMA', array(
-				'api'        => esc_url_raw( rest_url( 'tianma/v1/' ) ),
+		if ( false !== strpos( $page, 'bokeauto-roles' ) ) {
+			wp_enqueue_script( 'bokeauto-roles', BOKEAUTO_URL . 'admin/js/roles.js', array(), BOKEAUTO_VERSION, true );
+			wp_localize_script( 'bokeauto-roles', 'BOKEAUTO', array(
+				'api'        => esc_url_raw( rest_url( 'bokeauto/v1/' ) ),
 				'nonce'      => wp_create_nonce( 'wp_rest' ),
-				'all_tools'  => Tianma_Tools::names(),
-				'presets'    => Tianma_Settings::presets(),
+				'all_tools'  => Bokeauto_Tools::names(),
+				'presets'    => Bokeauto_Settings::presets(),
 				'i18n'       => array(
-					'confirm_delete_role'   => __( '确定删除该角色？', 'tianma' ),
-					'confirm_delete_skill'  => __( '确定删除该技能？', 'tianma' ),
-					'saved'                 => __( '已保存', 'tianma' ),
+					'confirm_delete_role'   => __( '确定删除该角色？', 'bokeauto' ),
+					'confirm_delete_skill'  => __( '确定删除该技能？', 'bokeauto' ),
+					'saved'                 => __( '已保存', 'bokeauto' ),
 				),
 			) );
 		}
 
-		if ( false !== strpos( $page, 'tianma-schedules' ) ) {
-			wp_enqueue_script( 'tianma-schedules', TIANMA_URL . 'admin/js/schedules.js', array(), TIANMA_VERSION, true );
-			wp_localize_script( 'tianma-schedules', 'TIANMA', array(
-				'api'   => esc_url_raw( rest_url( 'tianma/v1/' ) ),
+		if ( false !== strpos( $page, 'bokeauto-schedules' ) ) {
+			wp_enqueue_script( 'bokeauto-schedules', BOKEAUTO_URL . 'admin/js/schedules.js', array(), BOKEAUTO_VERSION, true );
+			wp_localize_script( 'bokeauto-schedules', 'BOKEAUTO', array(
+				'api'   => esc_url_raw( rest_url( 'bokeauto/v1/' ) ),
 				'nonce' => wp_create_nonce( 'wp_rest' ),
 				'i18n'  => array(
-					'confirm_delete' => __( '确定删除该定时任务？删除后不可恢复。', 'tianma' ),
-					'confirm_run'    => __( '立即执行该任务？将真实执行任务指令（可能产生实际效果）。', 'tianma' ),
-					'saved'          => __( '已保存', 'tianma' ),
-					'running'        => __( '执行中，请稍候…', 'tianma' ),
+					'confirm_delete' => __( '确定删除该定时任务？删除后不可恢复。', 'bokeauto' ),
+					'confirm_run'    => __( '立即执行该任务？将真实执行任务指令（可能产生实际效果）。', 'bokeauto' ),
+					'saved'          => __( '已保存', 'bokeauto' ),
+					'running'        => __( '执行中，请稍候…', 'bokeauto' ),
 				),
 			) );
 		}
 
-		if ( false !== strpos( $page, 'tianma-settings' ) ) {
-			wp_enqueue_script( 'tianma-settings', TIANMA_URL . 'admin/js/settings.js', array(), TIANMA_VERSION, true );
-			wp_localize_script( 'tianma-settings', 'TIANMA', array(
-				'api'   => esc_url_raw( rest_url( 'tianma/v1/' ) ),
+		if ( false !== strpos( $page, 'bokeauto-settings' ) ) {
+			wp_enqueue_script( 'bokeauto-settings', BOKEAUTO_URL . 'admin/js/settings.js', array(), BOKEAUTO_VERSION, true );
+			wp_localize_script( 'bokeauto-settings', 'BOKEAUTO', array(
+				'api'   => esc_url_raw( rest_url( 'bokeauto/v1/' ) ),
 				'nonce' => wp_create_nonce( 'wp_rest' ),
 				'today' => current_time( 'Y-m-d' ),
 				'i18n'  => array(
-					'confirm_delete' => __( '确定删除这一天的工作日志？删除后不可恢复。', 'tianma' ),
-					'saved'          => __( '已保存', 'tianma' ),
-					'load_failed'    => __( '加载工作日志失败', 'tianma' ),
-					'save_failed'    => __( '保存失败，请重试', 'tianma' ),
-					'empty_confirm'  => __( '内容为空将清空该天日志，确定保存？', 'tianma' ),
+					'confirm_delete' => __( '确定删除这一天的工作日志？删除后不可恢复。', 'bokeauto' ),
+					'saved'          => __( '已保存', 'bokeauto' ),
+					'load_failed'    => __( '加载工作日志失败', 'bokeauto' ),
+					'save_failed'    => __( '保存失败，请重试', 'bokeauto' ),
+					'empty_confirm'  => __( '内容为空将清空该天日志，确定保存？', 'bokeauto' ),
 				),
 			) );
 		}
 
-		if ( false !== strpos( $page, 'tianma-chat' ) ) {
-			wp_enqueue_script( 'tianma-chat', TIANMA_URL . 'admin/js/chat.js', array(), TIANMA_VERSION, true );
-			wp_localize_script( 'tianma-chat', 'TIANMA', array(
-				'api'        => esc_url_raw( rest_url( 'tianma/v1/' ) ),
+		if ( false !== strpos( $page, 'bokeauto-chat' ) ) {
+			wp_enqueue_script( 'bokeauto-chat', BOKEAUTO_URL . 'admin/js/chat.js', array(), BOKEAUTO_VERSION, true );
+			wp_localize_script( 'bokeauto-chat', 'BOKEAUTO', array(
+				'api'        => esc_url_raw( rest_url( 'bokeauto/v1/' ) ),
 				'nonce'      => wp_create_nonce( 'wp_rest' ),
 				'i18n'       => array(
-					'thinking'  => __( '波克wpAI思考中…', 'tianma' ),
-					'error'     => __( '请求失败，请稍后重试', 'tianma' ),
-					'confirm'   => __( '此操作需要你的确认', 'tianma' ),
-					'approve'   => __( '允许执行', 'tianma' ),
-					'reject'    => __( '拒绝', 'tianma' ),
-					'new_chat'  => __( '新对话', 'tianma' ),
-					'placeholder' => __( '例如：帮我发布一篇介绍网站的文章，并创建分类「新闻」…', 'tianma' ),
+					'thinking'  => __( '波克wpAI思考中…', 'bokeauto' ),
+					'error'     => __( '请求失败，请稍后重试', 'bokeauto' ),
+					'confirm'   => __( '此操作需要你的确认', 'bokeauto' ),
+					'approve'   => __( '允许执行', 'bokeauto' ),
+					'reject'    => __( '拒绝', 'bokeauto' ),
+					'new_chat'  => __( '新对话', 'bokeauto' ),
+					'placeholder' => __( '例如：帮我发布一篇介绍网站的文章，并创建分类「新闻」…', 'bokeauto' ),
 				),
 			) );
 		}
@@ -424,151 +424,151 @@ class Tianma_Core {
 	 * ------------------------------------------------------------------- */
 
 	public function register_routes() {
-		register_rest_route( 'tianma/v1', '/chat', array(
+		register_rest_route( 'bokeauto/v1', '/chat', array(
 			'methods'             => 'POST',
 			'callback'            => array( $this, 'api_chat' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/confirm', array(
+		register_rest_route( 'bokeauto/v1', '/confirm', array(
 			'methods'             => 'POST',
 			'callback'            => array( $this, 'api_confirm' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/task-stream', array(
+		register_rest_route( 'bokeauto/v1', '/task-stream', array(
 			'methods'             => 'GET',
 			'callback'            => array( $this, 'api_task_stream' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/history', array(
+		register_rest_route( 'bokeauto/v1', '/history', array(
 			'methods'             => 'GET',
 			'callback'            => array( $this, 'api_history' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/feedback', array(
+		register_rest_route( 'bokeauto/v1', '/feedback', array(
 			'methods'             => 'POST',
 			'callback'            => array( $this, 'api_feedback' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/test-llm', array(
+		register_rest_route( 'bokeauto/v1', '/test-llm', array(
 			'methods'             => 'POST',
 			'callback'            => array( $this, 'api_test_llm' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/memories', array(
+		register_rest_route( 'bokeauto/v1', '/memories', array(
 			'methods'             => 'GET',
 			'callback'            => array( $this, 'api_memories' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/memories', array(
+		register_rest_route( 'bokeauto/v1', '/memories', array(
 			'methods'             => 'DELETE',
 			'callback'            => array( $this, 'api_memories_clear' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/roles', array(
+		register_rest_route( 'bokeauto/v1', '/roles', array(
 			'methods'             => array( 'GET', 'POST' ),
 			'callback'            => array( $this, 'api_roles' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/roles/(?P<id>\d+)', array(
+		register_rest_route( 'bokeauto/v1', '/roles/(?P<id>\d+)', array(
 			'methods'             => array( 'POST', 'DELETE' ),
 			'callback'            => array( $this, 'api_role_item' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/skills', array(
+		register_rest_route( 'bokeauto/v1', '/skills', array(
 			'methods'             => array( 'GET', 'POST' ),
 			'callback'            => array( $this, 'api_skills' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/skills/(?P<id>\d+)', array(
+		register_rest_route( 'bokeauto/v1', '/skills/(?P<id>\d+)', array(
 			'methods'             => array( 'POST', 'DELETE' ),
 			'callback'            => array( $this, 'api_skill_item' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/conversations', array(
+		register_rest_route( 'bokeauto/v1', '/conversations', array(
 			'methods'             => array( 'GET', 'POST' ),
 			'callback'            => array( $this, 'api_conversations' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/conversations/(?P<id>\d+)', array(
+		register_rest_route( 'bokeauto/v1', '/conversations/(?P<id>\d+)', array(
 			'methods'             => 'DELETE',
 			'callback'            => array( $this, 'api_conversation_delete' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/conversations/(?P<id>\d+)/messages', array(
+		register_rest_route( 'bokeauto/v1', '/conversations/(?P<id>\d+)/messages', array(
 			'methods'             => 'GET',
 			'callback'            => array( $this, 'api_conversation_messages' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/conversations/(?P<id>\d+)/clear', array(
+		register_rest_route( 'bokeauto/v1', '/conversations/(?P<id>\d+)/clear', array(
 			'methods'             => 'POST',
 			'callback'            => array( $this, 'api_conversation_clear' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/conversations/clear-all', array(
+		register_rest_route( 'bokeauto/v1', '/conversations/clear-all', array(
 			'methods'             => 'POST',
 			'callback'            => array( $this, 'api_conversations_clear_all' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/usage', array(
+		register_rest_route( 'bokeauto/v1', '/usage', array(
 			'methods'             => 'GET',
 			'callback'            => array( $this, 'api_usage' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/file-save', array(
+		register_rest_route( 'bokeauto/v1', '/file-save', array(
 			'methods'             => 'POST',
 			'callback'            => array( $this, 'api_file_save' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/settings', array(
+		register_rest_route( 'bokeauto/v1', '/settings', array(
 			'methods'             => array( 'GET', 'POST' ),
 			'callback'            => array( $this, 'api_settings' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/schedules', array(
+		register_rest_route( 'bokeauto/v1', '/schedules', array(
 			'methods'             => array( 'GET', 'POST' ),
 			'callback'            => array( $this, 'api_schedules' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/schedules/(?P<id>\d+)', array(
+		register_rest_route( 'bokeauto/v1', '/schedules/(?P<id>\d+)', array(
 			'methods'             => array( 'POST', 'DELETE' ),
 			'callback'            => array( $this, 'api_schedule_item' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/schedules/(?P<id>\d+)/run', array(
+		register_rest_route( 'bokeauto/v1', '/schedules/(?P<id>\d+)/run', array(
 			'methods'             => 'POST',
 			'callback'            => array( $this, 'api_schedule_run' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/worklogs', array(
+		register_rest_route( 'bokeauto/v1', '/worklogs', array(
 			'methods'             => array( 'GET', 'POST' ),
 			'callback'            => array( $this, 'api_worklogs' ),
 			'permission_callback' => array( $this, 'check_permission' ),
 		) );
 
-		register_rest_route( 'tianma/v1', '/worklogs/(?P<day>\d{4}-\d{2}-\d{2})', array(
+		register_rest_route( 'bokeauto/v1', '/worklogs/(?P<day>\d{4}-\d{2}-\d{2})', array(
 			'methods'             => 'DELETE',
 			'callback'            => array( $this, 'api_worklog_delete' ),
 			'permission_callback' => array( $this, 'check_permission' ),
@@ -586,24 +586,24 @@ class Tianma_Core {
 		$user_id   = get_current_user_id();
 
 		if ( '' === $message ) {
-			return new WP_Error( 'tianma_empty', '消息不能为空', array( 'status' => 400 ) );
+			return new WP_Error( 'bokeauto_empty', '消息不能为空', array( 'status' => 400 ) );
 		}
 
 		// 会话归属校验与消息入库
-		$conv = $conv_id ? Tianma_Conversation::get( $conv_id, $user_id ) : null;
+		$conv = $conv_id ? Bokeauto_Conversation::get( $conv_id, $user_id ) : null;
 		if ( $conv_id && ! $conv ) {
-			return new WP_Error( 'tianma_conv', '会话不存在或无权访问', array( 'status' => 403 ) );
+			return new WP_Error( 'bokeauto_conv', '会话不存在或无权访问', array( 'status' => 403 ) );
 		}
 		if ( $conv ) {
 			$msg_count = $conv_id;
-			Tianma_Conversation::add_message( $conv_id, 'user', $message );
+			Bokeauto_Conversation::add_message( $conv_id, 'user', $message );
 			// 首条消息自动命名
 			$first = (int) $GLOBALS['wpdb']->get_var( $GLOBALS['wpdb']->prepare(
-				"SELECT COUNT(*) FROM {$GLOBALS['wpdb']->prefix}tianma_messages WHERE conversation_id = %d",
+				"SELECT COUNT(*) FROM {$GLOBALS['wpdb']->prefix}bokeauto_messages WHERE conversation_id = %d",
 				$conv_id
 			) );
 			if ( 1 === $first ) {
-				Tianma_Conversation::autotitle( $conv_id, $message );
+				Bokeauto_Conversation::autotitle( $conv_id, $message );
 			}
 		}
 
@@ -623,19 +623,19 @@ class Tianma_Core {
 			return null; // 流式输出后已终止
 		}
 
-		$agent = new Tianma_Agent();
+		$agent = new Bokeauto_Agent();
 		$agent->auto_confirm = $this->parse_auto_confirm( $request );
 		if ( $role_id ) {
-			$agent->role = Tianma_Role::get( $role_id );
+			$agent->role = Bokeauto_Role::get( $role_id );
 		}
 		$res   = $agent->run( $message, $history, $user_id );
 
 		// 非流式：保存助手回复 + 记录 token 用量
 		if ( $conv && isset( $res['text'] ) && '' !== trim( (string) $res['text'] ) ) {
-			Tianma_Conversation::add_message( $conv_id, 'assistant', $res['text'] );
+			Bokeauto_Conversation::add_message( $conv_id, 'assistant', $res['text'] );
 		}
 		if ( isset( $res['usage'] ) && is_array( $res['usage'] ) ) {
-			Tianma_Usage::log( $user_id, $conv_id, $res['usage']['prompt_tokens'], $res['usage']['completion_tokens'] );
+			Bokeauto_Usage::log( $user_id, $conv_id, $res['usage']['prompt_tokens'], $res['usage']['completion_tokens'] );
 		}
 
 		return rest_ensure_response( $res );
@@ -712,7 +712,7 @@ class Tianma_Core {
 	 */
 	private function start_async_run( $message, $history, $user_id, $conv, $auto_confirm, $role_id, $php_timeout = 0, $max_steps = null ) {
 		$upload = wp_upload_dir();
-		$dir    = $upload['basedir'] . '/tianma-stream';
+		$dir    = $upload['basedir'] . '/bokeauto-stream';
 		if ( ! wp_mkdir_p( $dir ) ) {
 			return false;
 		}
@@ -771,19 +771,19 @@ class Tianma_Core {
 		$id     = (string) $request->get_param( 'task_id' );
 		$offset = (int) $request->get_param( 'offset' );
 		if ( ! preg_match( '/^[A-Za-z0-9_.-]+$/', $id ) ) {
-			return new WP_Error( 'tianma_bad_task', '非法的任务标识', array( 'status' => 400 ) );
+			return new WP_Error( 'bokeauto_bad_task', '非法的任务标识', array( 'status' => 400 ) );
 		}
 		$upload      = wp_upload_dir();
-		$dir         = $upload['basedir'] . '/tianma-stream';
+		$dir         = $upload['basedir'] . '/bokeauto-stream';
 		$stream_file = $dir . '/' . $id . '.stream';
 		$meta_file   = $dir . '/' . $id . '.meta';
 		if ( ! file_exists( $stream_file ) ) {
-			return new WP_Error( 'tianma_no_task', '任务不存在或已过期', array( 'status' => 404 ) );
+			return new WP_Error( 'bokeauto_no_task', '任务不存在或已过期', array( 'status' => 404 ) );
 		}
 		$meta   = file_exists( $meta_file ) ? json_decode( file_get_contents( $meta_file ), true ) : array();
 		$owner  = isset( $meta['user_id'] ) ? (int) $meta['user_id'] : 0;
 		if ( $owner && $owner !== get_current_user_id() ) {
-			return new WP_Error( 'tianma_forbidden', '无权访问该任务', array( 'status' => 403 ) );
+			return new WP_Error( 'bokeauto_forbidden', '无权访问该任务', array( 'status' => 403 ) );
 		}
 		$content = file_get_contents( $stream_file );
 		$len     = strlen( $content );
@@ -841,10 +841,10 @@ class Tianma_Core {
 			flush();
 		};
 
-		$agent = new Tianma_Agent();
+		$agent = new Bokeauto_Agent();
 		$agent->auto_confirm = $auto_confirm;
 		if ( $role_id ) {
-			$agent->role = Tianma_Role::get( $role_id );
+			$agent->role = Bokeauto_Role::get( $role_id );
 		}
 		if ( null !== $max_steps ) {
 			$agent->set_max_steps( (int) $max_steps );
@@ -853,10 +853,10 @@ class Tianma_Core {
 
 		// 流式结束：保存助手回复 + 记录 token 用量
 		if ( $conv && isset( $done['text'] ) && '' !== trim( (string) $done['text'] ) ) {
-			Tianma_Conversation::add_message( (int) $conv->id, 'assistant', $done['text'] );
+			Bokeauto_Conversation::add_message( (int) $conv->id, 'assistant', $done['text'] );
 		}
 		if ( isset( $done['usage'] ) && is_array( $done['usage'] ) ) {
-			Tianma_Usage::log( $user_id, (int) ( $conv ? $conv->id : 0 ), $done['usage']['prompt_tokens'], $done['usage']['completion_tokens'] );
+			Bokeauto_Usage::log( $user_id, (int) ( $conv ? $conv->id : 0 ), $done['usage']['prompt_tokens'], $done['usage']['completion_tokens'] );
 		}
 
 		echo "event: end\ndata: {}\n\n";
@@ -872,11 +872,11 @@ class Tianma_Core {
 		$approve = (bool) $request->get_param( 'approve' );
 
 		if ( '' === $hash ) {
-			return new WP_Error( 'tianma_bad_confirm', '缺少确认标识', array( 'status' => 400 ) );
+			return new WP_Error( 'bokeauto_bad_confirm', '缺少确认标识', array( 'status' => 400 ) );
 		}
 
-		$confirm = new Tianma_Confirm();
-		$agent   = new Tianma_Agent();
+		$confirm = new Bokeauto_Confirm();
+		$agent   = new Bokeauto_Agent();
 		$res     = $agent->resume_after_confirm( $hash, $approve, get_current_user_id() );
 
 		if ( is_wp_error( $res ) ) {
@@ -891,7 +891,7 @@ class Tianma_Core {
 		$rows  = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT id, summary, status, step_count, tool_count, created_at
-				 FROM {$wpdb->prefix}tianma_tasks
+				 FROM {$wpdb->prefix}bokeauto_tasks
 				 WHERE user_id = %d
 				 ORDER BY id DESC LIMIT %d",
 				get_current_user_id(),
@@ -907,10 +907,10 @@ class Tianma_Core {
 		$note    = sanitize_text_field( (string) $request->get_param( 'note' ) );
 
 		if ( ! $task_id || $rating < 1 || $rating > 5 ) {
-			return new WP_Error( 'tianma_bad_feedback', '参数错误', array( 'status' => 400 ) );
+			return new WP_Error( 'bokeauto_bad_feedback', '参数错误', array( 'status' => 400 ) );
 		}
 
-		$memory = new Tianma_Memory();
+		$memory = new Bokeauto_Memory();
 		$memory->apply_feedback( $task_id, get_current_user_id(), $rating, $note );
 
 		return rest_ensure_response( array( 'ok' => true ) );
@@ -924,14 +924,14 @@ class Tianma_Core {
 
 		// 掩码/空 Key → 用当前已保存的 Key 测试（设置页打码回显后也能正常测试连接）
 		if ( '' === $api_key || false !== strpos( $api_key, '•' ) ) {
-			$saved = Tianma_Settings::get();
+			$saved = Bokeauto_Settings::get();
 			$api_key = $saved['api_key'];
 			if ( '' === $base_url ) { $base_url = $saved['base_url']; }
 			if ( '' === $model ) { $model = $saved['model']; }
 			if ( '' === $provider ) { $provider = $saved['provider']; }
 		}
 
-		$llm = new Tianma_LLM();
+		$llm = new Bokeauto_LLM();
 		$ok  = $llm->test_connection( $provider, $base_url, $api_key, $model );
 
 		return rest_ensure_response( array(
@@ -941,14 +941,14 @@ class Tianma_Core {
 	}
 
 	public function api_memories() {
-		$memory = new Tianma_Memory();
+		$memory = new Bokeauto_Memory();
 		$items  = $memory->list_all( 100 );
 		return rest_ensure_response( array( 'items' => $items ) );
 	}
 
 	public function api_memories_clear() {
 		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}tianma_memories" );
+		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}bokeauto_memories" );
 		return rest_ensure_response( array( 'ok' => true ) );
 	}
 
@@ -958,12 +958,12 @@ class Tianma_Core {
 		$method = $request->get_method();
 
 		if ( 'GET' === $method ) {
-			return rest_ensure_response( array( 'items' => Tianma_Role::list_all( '' ) ) );
+			return rest_ensure_response( array( 'items' => Bokeauto_Role::list_all( '' ) ) );
 		}
 
 		// POST：新建
 		$llm = $request->get_param( 'llm' );
-		$res = Tianma_Role::create(
+		$res = Bokeauto_Role::create(
 			sanitize_text_field( (string) $request->get_param( 'name' ) ),
 			sanitize_textarea_field( (string) $request->get_param( 'description' ) ),
 			sanitize_textarea_field( (string) $request->get_param( 'system_prompt' ) ),
@@ -976,23 +976,23 @@ class Tianma_Core {
 			)
 		);
 		if ( is_wp_error( $res ) ) {
-			return new WP_Error( 'tianma_role', $res->get_error_message(), array( 'status' => 400 ) );
+			return new WP_Error( 'bokeauto_role', $res->get_error_message(), array( 'status' => 400 ) );
 		}
 		return rest_ensure_response( array( 'ok' => true, 'id' => $res ) );
 	}
 
 	public function api_role_item( $request ) {
 		$id   = (int) $request['id'];
-		$role = Tianma_Role::get( $id );
+		$role = Bokeauto_Role::get( $id );
 		if ( ! $role ) {
-			return new WP_Error( 'tianma_role', '角色不存在', array( 'status' => 404 ) );
+			return new WP_Error( 'bokeauto_role', '角色不存在', array( 'status' => 404 ) );
 		}
 
 		if ( 'DELETE' === $request->get_method() ) {
 			if ( $role->is_builtin ) {
-				return new WP_Error( 'tianma_role', '内置角色不可删除', array( 'status' => 400 ) );
+				return new WP_Error( 'bokeauto_role', '内置角色不可删除', array( 'status' => 400 ) );
 			}
-			Tianma_Role::delete( $id );
+			Bokeauto_Role::delete( $id );
 			return rest_ensure_response( array( 'ok' => true ) );
 		}
 
@@ -1006,7 +1006,7 @@ class Tianma_Core {
 		if ( null !== $request->get_param( 'bind_tool' ) ) { $fields['bind_tool'] = $request->get_param( 'bind_tool' ); }
 		if ( null !== $request->get_param( 'status' ) ) { $fields['status'] = $request->get_param( 'status' ); }
 		if ( $request->has_param( 'llm' ) ) { $fields['llm'] = $request->get_param( 'llm' ); }
-		Tianma_Role::update( $id, $fields );
+		Bokeauto_Role::update( $id, $fields );
 		return rest_ensure_response( array( 'ok' => true ) );
 	}
 
@@ -1016,11 +1016,11 @@ class Tianma_Core {
 		$method = $request->get_method();
 
 		if ( 'GET' === $method ) {
-			return rest_ensure_response( array( 'items' => Tianma_Skill::list_all( '' ) ) );
+			return rest_ensure_response( array( 'items' => Bokeauto_Skill::list_all( '' ) ) );
 		}
 
 		// POST：新建
-		$res = Tianma_Skill::create(
+		$res = Bokeauto_Skill::create(
 			sanitize_text_field( (string) $request->get_param( 'name' ) ),
 			sanitize_textarea_field( (string) $request->get_param( 'description' ) ),
 			(array) $request->get_param( 'tools' ),
@@ -1028,20 +1028,20 @@ class Tianma_Core {
 			'manual'
 		);
 		if ( is_wp_error( $res ) ) {
-			return new WP_Error( 'tianma_skill', $res->get_error_message(), array( 'status' => 400 ) );
+			return new WP_Error( 'bokeauto_skill', $res->get_error_message(), array( 'status' => 400 ) );
 		}
 		return rest_ensure_response( array( 'ok' => true, 'id' => $res ) );
 	}
 
 	public function api_skill_item( $request ) {
 		$id    = (int) $request['id'];
-		$skill = Tianma_Skill::get( $id );
+		$skill = Bokeauto_Skill::get( $id );
 		if ( ! $skill ) {
-			return new WP_Error( 'tianma_skill', '技能不存在', array( 'status' => 404 ) );
+			return new WP_Error( 'bokeauto_skill', '技能不存在', array( 'status' => 404 ) );
 		}
 
 		if ( 'DELETE' === $request->get_method() ) {
-			Tianma_Skill::delete( $id );
+			Bokeauto_Skill::delete( $id );
 			return rest_ensure_response( array( 'ok' => true ) );
 		}
 
@@ -1050,7 +1050,7 @@ class Tianma_Core {
 		if ( null !== $request->get_param( 'name' ) ) { $fields['name'] = $request->get_param( 'name' ); }
 		if ( null !== $request->get_param( 'description' ) ) { $fields['description'] = $request->get_param( 'description' ); }
 		if ( null !== $request->get_param( 'tools' ) ) { $fields['tools'] = (array) $request->get_param( 'tools' ); }
-		Tianma_Skill::update( $id, $fields );
+		Bokeauto_Skill::update( $id, $fields );
 		return rest_ensure_response( array( 'ok' => true ) );
 	}
 
@@ -1060,41 +1060,41 @@ class Tianma_Core {
 		$user_id = get_current_user_id();
 
 		if ( 'GET' === $request->get_method() ) {
-			return rest_ensure_response( array( 'items' => Tianma_Conversation::list_all( $user_id ) ) );
+			return rest_ensure_response( array( 'items' => Bokeauto_Conversation::list_all( $user_id ) ) );
 		}
 
 		// POST：新建会话
 		$title = (string) $request->get_param( 'title' );
-		$id    = Tianma_Conversation::create( $user_id, $title );
+		$id    = Bokeauto_Conversation::create( $user_id, $title );
 		return rest_ensure_response( array( 'ok' => true, 'id' => $id, 'title' => '新对话' ) );
 	}
 
 	public function api_conversation_messages( $request ) {
-		$msgs = Tianma_Conversation::get_messages( (int) $request['id'], get_current_user_id() );
+		$msgs = Bokeauto_Conversation::get_messages( (int) $request['id'], get_current_user_id() );
 		if ( null === $msgs ) {
-			return new WP_Error( 'tianma_conv', '会话不存在或无权访问', array( 'status' => 403 ) );
+			return new WP_Error( 'bokeauto_conv', '会话不存在或无权访问', array( 'status' => 403 ) );
 		}
 		return rest_ensure_response( array( 'items' => $msgs ) );
 	}
 
 	public function api_conversation_delete( $request ) {
-		$ok = Tianma_Conversation::delete( (int) $request['id'], get_current_user_id() );
+		$ok = Bokeauto_Conversation::delete( (int) $request['id'], get_current_user_id() );
 		if ( ! $ok ) {
-			return new WP_Error( 'tianma_conv', '会话不存在或无权访问', array( 'status' => 403 ) );
+			return new WP_Error( 'bokeauto_conv', '会话不存在或无权访问', array( 'status' => 403 ) );
 		}
 		return rest_ensure_response( array( 'ok' => true ) );
 	}
 
 	public function api_conversation_clear( $request ) {
-		$ok = Tianma_Conversation::clear_messages( (int) $request['id'], get_current_user_id() );
+		$ok = Bokeauto_Conversation::clear_messages( (int) $request['id'], get_current_user_id() );
 		if ( ! $ok ) {
-			return new WP_Error( 'tianma_conv', '会话不存在或无权访问', array( 'status' => 403 ) );
+			return new WP_Error( 'bokeauto_conv', '会话不存在或无权访问', array( 'status' => 403 ) );
 		}
 		return rest_ensure_response( array( 'ok' => true ) );
 	}
 
 	public function api_conversations_clear_all( $request ) {
-		Tianma_Conversation::clear_all( get_current_user_id() );
+		Bokeauto_Conversation::clear_all( get_current_user_id() );
 		return rest_ensure_response( array( 'ok' => true ) );
 	}
 
@@ -1103,7 +1103,7 @@ class Tianma_Core {
 	public function api_usage( $request ) {
 		$user_id = get_current_user_id();
 		$conv_id = (int) $request->get_param( 'conversation_id' );
-		return rest_ensure_response( Tianma_Usage::stats( $user_id, $conv_id ) );
+		return rest_ensure_response( Bokeauto_Usage::stats( $user_id, $conv_id ) );
 	}
 
 	/** 可视化编辑保存：用户在前端编辑器手动保存文件（站点内路径 + 备份 + 审计） */
@@ -1111,37 +1111,37 @@ class Tianma_Core {
 		$path    = sanitize_text_field( (string) $request->get_param( 'path' ) );
 		$content = (string) $request->get_param( 'content' );
 		if ( '' === $path ) {
-			return new WP_Error( 'tianma_file', '缺少文件路径', array( 'status' => 400 ) );
+			return new WP_Error( 'bokeauto_file', '缺少文件路径', array( 'status' => 400 ) );
 		}
 
-		$real = Tianma_Tools::resolve_safe_path( $path ); // 写路径：必须位于站点根目录内
+		$real = Bokeauto_Tools::resolve_safe_path( $path ); // 写路径：必须位于站点根目录内
 		if ( false === $real ) {
-			return new WP_Error( 'tianma_file', '路径非法或超出站点根目录', array( 'status' => 400 ) );
+			return new WP_Error( 'bokeauto_file', '路径非法或超出站点根目录', array( 'status' => 400 ) );
 		}
 		if ( ! is_file( $real ) ) {
-			return new WP_Error( 'tianma_file', '文件不存在：' . $real, array( 'status' => 400 ) );
+			return new WP_Error( 'bokeauto_file', '文件不存在：' . $real, array( 'status' => 400 ) );
 		}
 		if ( ! is_writable( $real ) && ! is_writable( dirname( $real ) ) ) {
-			return new WP_Error( 'tianma_file', '文件不可写（检查权限）', array( 'status' => 400 ) );
+			return new WP_Error( 'bokeauto_file', '文件不可写（检查权限）', array( 'status' => 400 ) );
 		}
 
 		// 备份原文件
-		$backup_dir = wp_upload_dir()['basedir'] . '/tianma-backups/files';
+		$backup_dir = wp_upload_dir()['basedir'] . '/bokeauto-backups/files';
 		wp_mkdir_p( $backup_dir );
 		$stamp = date( 'Ymd-His' );
 		copy( $real, $backup_dir . '/' . basename( $real ) . '.' . $stamp . '.bak' );
 
 		$ok = file_put_contents( $real, $content );
 		if ( false === $ok ) {
-			return new WP_Error( 'tianma_file', '保存失败（检查文件权限）', array( 'status' => 500 ) );
+			return new WP_Error( 'bokeauto_file', '保存失败（检查文件权限）', array( 'status' => 500 ) );
 		}
 
-		Tianma_Audit::log( 'file_save_manual', array( 'path' => $real, 'bytes' => $ok ), get_current_user_id() );
+		Bokeauto_Audit::log( 'file_save_manual', array( 'path' => $real, 'bytes' => $ok ), get_current_user_id() );
 
 		// 若是 PHP 文件，顺手语法检查提示
 		$lint = '';
-		if ( preg_match( '/\.php$/i', $real ) && class_exists( 'Tianma_Tools_File' ) ) {
-			$lint_res = Tianma_Tools::execute( 'validate_php', array( 'path' => $real ) );
+		if ( preg_match( '/\.php$/i', $real ) && class_exists( 'Bokeauto_Tools_File' ) ) {
+			$lint_res = Bokeauto_Tools::execute( 'validate_php', array( 'path' => $real ) );
 			if ( ! $lint_res['ok'] ) {
 				$lint = ' ⚠ PHP 语法检查未通过：' . mb_substr( $lint_res['message'], 0, 200 );
 			}
@@ -1158,7 +1158,7 @@ class Tianma_Core {
 
 	public function api_settings( $request ) {
 		if ( 'GET' === $request->get_method() ) {
-			$s = Tianma_Settings::get();
+			$s = Bokeauto_Settings::get();
 			return rest_ensure_response( array(
 				'settings' => array(
 					'provider'      => $s['provider'],
@@ -1170,7 +1170,7 @@ class Tianma_Core {
 					'confirm_mode'  => $s['confirm_mode'],
 					'mock_mode'     => $s['mock_mode'],
 				),
-				'presets' => Tianma_Settings::presets(),
+				'presets' => Bokeauto_Settings::presets(),
 			) );
 		}
 
@@ -1179,7 +1179,7 @@ class Tianma_Core {
 
 		// 切换 provider 时【不】自动改写 base_url：用户手动设置的地址原样保留（持久化优先），
 		// 只有用户显式传 base_url 才会更新，防止预设信息覆盖用户自定义配置
-		$saved = Tianma_Settings::update( $data );
+		$saved = Bokeauto_Settings::update( $data );
 		return rest_ensure_response( array(
 			'ok'       => true,
 			'settings' => array(
@@ -1196,29 +1196,29 @@ class Tianma_Core {
 	public function api_schedules( $request ) {
 		if ( 'GET' === $request->get_method() ) {
 			$items = array();
-			foreach ( Tianma_Schedule::list_all() as $t ) {
+			foreach ( Bokeauto_Schedule::list_all() as $t ) {
 				$items[] = self::schedule_row( $t );
 			}
-			return rest_ensure_response( array( 'items' => $items, 'intervals' => Tianma_Schedule::interval_labels() ) );
+			return rest_ensure_response( array( 'items' => $items, 'intervals' => Bokeauto_Schedule::interval_labels() ) );
 		}
 
 		// POST：创建
-		$id = Tianma_Schedule::create( $request->get_params(), get_current_user_id() );
+		$id = Bokeauto_Schedule::create( $request->get_params(), get_current_user_id() );
 		if ( is_wp_error( $id ) ) {
-			return new WP_Error( 'tianma_schedule', $id->get_error_message(), array( 'status' => 400 ) );
+			return new WP_Error( 'bokeauto_schedule', $id->get_error_message(), array( 'status' => 400 ) );
 		}
-		return rest_ensure_response( array( 'ok' => true, 'id' => $id, 'item' => self::schedule_row( Tianma_Schedule::get( $id ) ) ) );
+		return rest_ensure_response( array( 'ok' => true, 'id' => $id, 'item' => self::schedule_row( Bokeauto_Schedule::get( $id ) ) ) );
 	}
 
 	public function api_schedule_item( $request ) {
 		$id = (int) $request['id'];
-		$t  = Tianma_Schedule::get( $id );
+		$t  = Bokeauto_Schedule::get( $id );
 		if ( ! $t ) {
-			return new WP_Error( 'tianma_schedule', '定时任务不存在', array( 'status' => 404 ) );
+			return new WP_Error( 'bokeauto_schedule', '定时任务不存在', array( 'status' => 404 ) );
 		}
 
 		if ( 'DELETE' === $request->get_method() ) {
-			Tianma_Schedule::delete( $id );
+			Bokeauto_Schedule::delete( $id );
 			return rest_ensure_response( array( 'ok' => true ) );
 		}
 
@@ -1230,38 +1230,38 @@ class Tianma_Core {
 				$fields[ $k ] = $v;
 			}
 		}
-		Tianma_Schedule::update( $id, $fields );
-		return rest_ensure_response( array( 'ok' => true, 'item' => self::schedule_row( Tianma_Schedule::get( $id ) ) ) );
+		Bokeauto_Schedule::update( $id, $fields );
+		return rest_ensure_response( array( 'ok' => true, 'item' => self::schedule_row( Bokeauto_Schedule::get( $id ) ) ) );
 	}
 
 	public function api_schedule_run( $request ) {
 		$id = (int) $request['id'];
-		$t  = Tianma_Schedule::get( $id );
+		$t  = Bokeauto_Schedule::get( $id );
 		if ( ! $t ) {
-			return new WP_Error( 'tianma_schedule', '定时任务不存在', array( 'status' => 404 ) );
+			return new WP_Error( 'bokeauto_schedule', '定时任务不存在', array( 'status' => 404 ) );
 		}
-		$res = Tianma_Schedule::run( $id, 'manual' );
-		return rest_ensure_response( array( 'ok' => true, 'result' => $res, 'item' => self::schedule_row( Tianma_Schedule::get( $id ) ) ) );
+		$res = Bokeauto_Schedule::run( $id, 'manual' );
+		return rest_ensure_response( array( 'ok' => true, 'result' => $res, 'item' => self::schedule_row( Bokeauto_Schedule::get( $id ) ) ) );
 	}
 
 	/** 工作日志：GET 列表 / POST 保存（day 日期 YYYY-MM-DD；mode=append 追加 / save 整体覆盖） */
 	public function api_worklogs( $request ) {
 		if ( 'GET' === $request->get_method() ) {
 			$limit = min( 200, max( 1, (int) $request->get_param( 'limit' ) ?: 30 ) );
-			return rest_ensure_response( array( 'items' => Tianma_Worklog::list( $limit ) ) );
+			return rest_ensure_response( array( 'items' => Bokeauto_Worklog::list( $limit ) ) );
 		}
 
-		$day     = Tianma_Worklog::normalize_day( (string) $request->get_param( 'day' ) );
+		$day     = Bokeauto_Worklog::normalize_day( (string) $request->get_param( 'day' ) );
 		$content = (string) $request->get_param( 'content' );
 		$mode    = 'append' === (string) $request->get_param( 'mode' ) ? 'append' : 'save';
 
 		if ( 'append' === $mode ) {
-			$res = Tianma_Worklog::append( $content, $day );
+			$res = Bokeauto_Worklog::append( $content, $day );
 		} else {
-			$res = Tianma_Worklog::update( $day, $content );
+			$res = Bokeauto_Worklog::update( $day, $content );
 		}
 		$res['item'] = null;
-		foreach ( Tianma_Worklog::list( 30 ) as $row ) {
+		foreach ( Bokeauto_Worklog::list( 30 ) as $row ) {
 			if ( $row['log_date'] === $day ) {
 				$res['item'] = $row;
 				break;
@@ -1271,7 +1271,7 @@ class Tianma_Core {
 	}
 
 	public function api_worklog_delete( $request ) {
-		$day = Tianma_Worklog::normalize_day( (string) $request['day'] );
-		return rest_ensure_response( Tianma_Worklog::delete( $day ) );
+		$day = Bokeauto_Worklog::normalize_day( (string) $request['day'] );
+		return rest_ensure_response( Bokeauto_Worklog::delete( $day ) );
 	}
 }

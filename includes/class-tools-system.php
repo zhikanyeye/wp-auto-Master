@@ -2,12 +2,12 @@
 /**
  * 系统与维护工具：设置 / 用户 / 备份 / 缓存 / 更新 / 日志 / 只读查询
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_Tools_System {
+class Bokeauto_Tools_System {
 
 	public static function get_current_time( $args ) {
 		$dt = current_datetime();
@@ -124,7 +124,7 @@ class Tianma_Tools_System {
 
 	public static function site_backup( $args ) {
 		global $wpdb;
-		$backup_dir = wp_upload_dir()['basedir'] . '/tianma-backups/db';
+		$backup_dir = wp_upload_dir()['basedir'] . '/bokeauto-backups/db';
 		wp_mkdir_p( $backup_dir );
 		$stamp = date( 'Ymd-His' );
 		$note  = isset( $args['note'] ) ? sanitize_text_field( $args['note'] ) : '';
@@ -135,7 +135,7 @@ class Tianma_Tools_System {
 			return array( 'ok' => false, 'message' => '无法创建备份文件' );
 		}
 
-		fwrite( $fp, "-- Tianma backup {$stamp} {$note}\n-- Host: {$wpdb->dbhost} DB: {$wpdb->dbname}\n\n" );
+		fwrite( $fp, "-- Bokeauto backup {$stamp} {$note}\n-- Host: {$wpdb->dbhost} DB: {$wpdb->dbname}\n\n" );
 
 		$tables = $wpdb->get_col( "SHOW TABLES" );
 		foreach ( $tables as $table ) {
@@ -315,7 +315,7 @@ class Tianma_Tools_System {
 		// 覆盖前备份旧值
 		$old = get_option( $name );
 		if ( false !== $old ) {
-			set_transient( 'tianma_opt_backup_' . md5( $name ), $old, DAY_IN_SECONDS );
+			set_transient( 'bokeauto_opt_backup_' . md5( $name ), $old, DAY_IN_SECONDS );
 		}
 
 		update_option( $name, $value );

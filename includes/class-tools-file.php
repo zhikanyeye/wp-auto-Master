@@ -1,14 +1,14 @@
 <?php
 /**
  * 文件与代码工具：读写 / 删除 / 重命名 / 语法检查
- * 所有路径必须位于站点根目录内（Tianma_Tools::resolve_safe_path 校验）
+ * 所有路径必须位于站点根目录内（Bokeauto_Tools::resolve_safe_path 校验）
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_Tools_File {
+class Bokeauto_Tools_File {
 
 	public static function file_list( $args ) {
 		$raw  = isset( $args['path'] ) ? $args['path'] : '';
@@ -17,7 +17,7 @@ class Tianma_Tools_File {
 		if ( '' === $raw ) {
 			$path = wp_normalize_path( ABSPATH );
 		} else {
-			$path = Tianma_Tools::resolve_read_path( $raw );
+			$path = Bokeauto_Tools::resolve_read_path( $raw );
 			if ( false === $path ) {
 				return array( 'ok' => false, 'message' => '路径无效。请提供 path 参数，如 wp-content/plugins 或 C:/Users' );
 			}
@@ -49,14 +49,14 @@ class Tianma_Tools_File {
 		$raw = isset( $args['path'] ) ? $args['path'] : '';
 		$raw = trim( (string) $raw );
 		if ( '' === $raw ) {
-			return array( 'ok' => false, 'message' => '请提供要读取的文件 path，如 wp-config.php、wp-content/plugins/tianma/tianma.php，或绝对路径 C:/xxx/file.txt' );
+			return array( 'ok' => false, 'message' => '请提供要读取的文件 path，如 wp-config.php、wp-content/plugins/bokeauto/bokeauto.php，或绝对路径 C:/xxx/file.txt' );
 		}
-		$path = Tianma_Tools::resolve_read_path( $raw );
+		$path = Bokeauto_Tools::resolve_read_path( $raw );
 		if ( false === $path ) {
-			return array( 'ok' => false, 'message' => '路径无效。请提供 path 参数，如 wp-content/plugins/tianma/tianma.php' );
+			return array( 'ok' => false, 'message' => '路径无效。请提供 path 参数，如 wp-content/plugins/bokeauto/bokeauto.php' );
 		}
 		if ( ! is_file( $path ) ) {
-			return array( 'ok' => false, 'message' => '文件不存在：' . $path . '（可用 file_list 列出目录查看实际文件名，注意路径分段，如 wp-content/plugins/tianma/includes/class-settings.php）' );
+			return array( 'ok' => false, 'message' => '文件不存在：' . $path . '（可用 file_list 列出目录查看实际文件名，注意路径分段，如 wp-content/plugins/bokeauto/includes/class-settings.php）' );
 		}
 		if ( filesize( $path ) > 512 * 1024 ) {
 			return array( 'ok' => false, 'message' => '文件超过 512KB，拒绝读取' );
@@ -70,7 +70,7 @@ class Tianma_Tools_File {
 	}
 
 	public static function file_write( $args ) {
-		$path = Tianma_Tools::resolve_safe_path( isset( $args['path'] ) ? $args['path'] : '' );
+		$path = Bokeauto_Tools::resolve_safe_path( isset( $args['path'] ) ? $args['path'] : '' );
 		if ( false === $path ) {
 			return array( 'ok' => false, 'message' => '路径非法或超出站点根目录' );
 		}
@@ -85,7 +85,7 @@ class Tianma_Tools_File {
 
 		// 覆盖已有文件前先备份
 		if ( 'write' === $mode && is_file( $path ) ) {
-			$backup_dir = wp_upload_dir()['basedir'] . '/tianma-backups/files';
+			$backup_dir = wp_upload_dir()['basedir'] . '/bokeauto-backups/files';
 			wp_mkdir_p( $backup_dir );
 			$stamp = date( 'Ymd-His' );
 			copy( $path, $backup_dir . '/' . basename( $path ) . '.' . $stamp . '.bak' );
@@ -113,7 +113,7 @@ class Tianma_Tools_File {
 	}
 
 	public static function file_delete( $args ) {
-		$path = Tianma_Tools::resolve_safe_path( isset( $args['path'] ) ? $args['path'] : '' );
+		$path = Bokeauto_Tools::resolve_safe_path( isset( $args['path'] ) ? $args['path'] : '' );
 		if ( false === $path ) {
 			return array( 'ok' => false, 'message' => '路径非法或超出站点根目录' );
 		}
@@ -121,7 +121,7 @@ class Tianma_Tools_File {
 			return array( 'ok' => false, 'message' => '文件不存在' );
 		}
 		// 删除前备份
-		$backup_dir = wp_upload_dir()['basedir'] . '/tianma-backups/files';
+		$backup_dir = wp_upload_dir()['basedir'] . '/bokeauto-backups/files';
 		wp_mkdir_p( $backup_dir );
 		$stamp = date( 'Ymd-His' );
 		copy( $path, $backup_dir . '/' . basename( $path ) . '.' . $stamp . '.del.bak' );
@@ -130,11 +130,11 @@ class Tianma_Tools_File {
 		if ( ! $ok ) {
 			return array( 'ok' => false, 'message' => '删除失败（检查文件权限）' );
 		}
-		return array( 'ok' => true, 'message' => '文件已删除（原文件已备份至 tianma-backups/files/）' );
+		return array( 'ok' => true, 'message' => '文件已删除（原文件已备份至 bokeauto-backups/files/）' );
 	}
 
 	public static function file_rename( $args ) {
-		$path    = Tianma_Tools::resolve_safe_path( isset( $args['path'] ) ? $args['path'] : '' );
+		$path    = Bokeauto_Tools::resolve_safe_path( isset( $args['path'] ) ? $args['path'] : '' );
 		$new_name = isset( $args['new_name'] ) ? trim( $args['new_name'] ) : '';
 		if ( false === $path ) {
 			return array( 'ok' => false, 'message' => '路径非法或超出站点根目录' );
@@ -159,7 +159,7 @@ class Tianma_Tools_File {
 	}
 
 	public static function file_create_dir( $args ) {
-		$path = Tianma_Tools::resolve_safe_path( isset( $args['path'] ) ? $args['path'] : '' );
+		$path = Bokeauto_Tools::resolve_safe_path( isset( $args['path'] ) ? $args['path'] : '' );
 		if ( false === $path ) {
 			return array( 'ok' => false, 'message' => '路径非法或超出站点根目录' );
 		}
@@ -174,7 +174,7 @@ class Tianma_Tools_File {
 	}
 
 	public static function validate_php( $args ) {
-		$path = Tianma_Tools::resolve_safe_path( isset( $args['path'] ) ? $args['path'] : '' );
+		$path = Bokeauto_Tools::resolve_safe_path( isset( $args['path'] ) ? $args['path'] : '' );
 		if ( false === $path ) {
 			return array( 'ok' => false, 'message' => '路径非法或超出站点根目录' );
 		}

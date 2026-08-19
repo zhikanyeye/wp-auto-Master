@@ -6,17 +6,17 @@
  * - semantic  ：提炼的知识要点（向量检索）
  * - procedural：高频成功操作序列（技能）
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_Memory {
+class Bokeauto_Memory {
 
 	private $llm;
 
 	public function __construct() {
-		$this->llm = new Tianma_LLM();
+		$this->llm = new Bokeauto_LLM();
 	}
 
 	/* ---------------------------------------------------------------------
@@ -33,7 +33,7 @@ class Tianma_Memory {
 		}
 
 		$wpdb->insert(
-			$wpdb->prefix . 'tianma_memories',
+			$wpdb->prefix . 'bokeauto_memories',
 			array(
 				'm_type'     => $type,
 				'title'      => mb_substr( $title, 0, 255 ),
@@ -55,12 +55,12 @@ class Tianma_Memory {
 
 	public function retrieve( $text, $k = 5 ) {
 		global $wpdb;
-		$settings = Tianma_Settings::get();
+		$settings = Bokeauto_Settings::get();
 		if ( empty( $settings['memory_enabled'] ) ) {
 			return array();
 		}
 
-		$query = "SELECT * FROM {$wpdb->prefix}tianma_memories ORDER BY id DESC LIMIT 600";
+		$query = "SELECT * FROM {$wpdb->prefix}bokeauto_memories ORDER BY id DESC LIMIT 600";
 		$rows = $wpdb->get_results( $query, ARRAY_A );
 		if ( ! $rows ) {
 			return array();
@@ -152,7 +152,7 @@ class Tianma_Memory {
 		}
 		global $wpdb;
 		$ids = array_map( 'intval', $ids );
-		$wpdb->query( "UPDATE {$wpdb->prefix}tianma_memories SET hit_count = hit_count + 1 WHERE id IN (" . implode( ',', $ids ) . ')' );
+		$wpdb->query( "UPDATE {$wpdb->prefix}bokeauto_memories SET hit_count = hit_count + 1 WHERE id IN (" . implode( ',', $ids ) . ')' );
 	}
 
 	/* ---------------------------------------------------------------------
@@ -160,7 +160,7 @@ class Tianma_Memory {
 	 * ------------------------------------------------------------------- */
 
 	public function learn( $task ) {
-		$settings = Tianma_Settings::get();
+		$settings = Bokeauto_Settings::get();
 		if ( empty( $settings['memory_enabled'] ) ) {
 			return;
 		}
@@ -181,7 +181,7 @@ class Tianma_Memory {
 		}
 
 		// 每日学习上限（防止记忆与嵌入调用无限膨胀）
-		$key   = 'tianma_learn_' . gmdate( 'Y-m-d' );
+		$key   = 'bokeauto_learn_' . gmdate( 'Y-m-d' );
 		$count = (int) get_transient( $key );
 		if ( $count >= 30 ) {
 			return;
@@ -235,7 +235,7 @@ class Tianma_Memory {
 		global $wpdb;
 
 		$wpdb->insert(
-			$wpdb->prefix . 'tianma_feedback',
+			$wpdb->prefix . 'bokeauto_feedback',
 			array(
 				'task_id'    => $task_id,
 				'user_id'    => $user_id,
@@ -249,7 +249,7 @@ class Tianma_Memory {
 		// 找到该任务关联的最新记忆并加权
 		$task = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT summary FROM {$wpdb->prefix}tianma_tasks WHERE id = %d",
+				"SELECT summary FROM {$wpdb->prefix}bokeauto_tasks WHERE id = %d",
 				$task_id
 			)
 		);
@@ -258,7 +258,7 @@ class Tianma_Memory {
 		}
 		$mem = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT * FROM {$wpdb->prefix}tianma_memories WHERE title LIKE %s AND m_type IN ('semantic','procedural') ORDER BY id DESC LIMIT 1",
+				"SELECT * FROM {$wpdb->prefix}bokeauto_memories WHERE title LIKE %s AND m_type IN ('semantic','procedural') ORDER BY id DESC LIMIT 1",
 				'%' . $wpdb->esc_like( mb_substr( $task->summary, 0, 30 ) ) . '%'
 			)
 		);
@@ -278,7 +278,7 @@ class Tianma_Memory {
 		if ( 0.0 !== $delta ) {
 			$new_weight = max( 0.1, (float) $mem->weight + $delta );
 			$wpdb->update(
-				$wpdb->prefix . 'tianma_memories',
+				$wpdb->prefix . 'bokeauto_memories',
 				array( 'weight' => $new_weight ),
 				array( 'id' => $mem->id ),
 				array( '%f' ),
@@ -296,7 +296,7 @@ class Tianma_Memory {
 		return $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT id, m_type, title, meta, weight, hit_count, created_at, LEFT(content, 200) AS preview
-				 FROM {$wpdb->prefix}tianma_memories ORDER BY id DESC LIMIT %d",
+				 FROM {$wpdb->prefix}bokeauto_memories ORDER BY id DESC LIMIT %d",
 				$limit
 			)
 		);

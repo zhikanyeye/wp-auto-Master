@@ -2,17 +2,17 @@
 /**
  * Agent 生态工具：角色 / 技能 / 多角色协作
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_Tools_Agent {
+class Bokeauto_Tools_Agent {
 
 	/* ---------------- 角色 ---------------- */
 
 	public static function list_roles( $args ) {
-		$roles = Tianma_Role::list_all( '' );
+		$roles = Bokeauto_Role::list_all( '' );
 		$items = array();
 		foreach ( $roles as $r ) {
 			$llm_label = '使用全局模型';
@@ -59,7 +59,7 @@ class Tianma_Tools_Agent {
 			'bind_tool' => isset( $args['bind_tool'] ) ? $args['bind_tool'] : '',
 		);
 
-		$role_id = Tianma_Role::create( $name, $description, $prompt, $tools, 0, $llm ? $llm : array(), $meta );
+		$role_id = Bokeauto_Role::create( $name, $description, $prompt, $tools, 0, $llm ? $llm : array(), $meta );
 		if ( is_wp_error( $role_id ) ) {
 			return array( 'ok' => false, 'message' => $role_id->get_error_message() );
 		}
@@ -106,11 +106,11 @@ class Tianma_Tools_Agent {
 			}
 		}
 
-		$ok = Tianma_Role::update( $id, $fields );
+		$ok = Bokeauto_Role::update( $id, $fields );
 		if ( false === $ok ) {
 			return array( 'ok' => false, 'message' => '更新失败或没有变化' );
 		}
-		$role = Tianma_Role::get( $id );
+		$role = Bokeauto_Role::get( $id );
 		$msg = '角色 #' . $id . ' 已更新';
 		if ( $role && ! empty( $role->llm_provider ) ) {
 			$msg .= '，独立模型：' . $role->llm_provider . ' / ' . $role->llm_model;
@@ -134,7 +134,7 @@ class Tianma_Tools_Agent {
 			return array( 'ok' => false, 'message' => '请提供 task（要该角色执行的任务描述）' );
 		}
 
-		$role = Tianma_Role::get_by_name( $role_name );
+		$role = Bokeauto_Role::get_by_name( $role_name );
 		if ( ! $role ) {
 			return array( 'ok' => false, 'message' => '角色「' . $role_name . '」不存在（可用 list_roles 查看）' );
 		}
@@ -145,18 +145,18 @@ class Tianma_Tools_Agent {
 		// 功能性角色：直接执行绑定工具
 		if ( 'functional' === $role->role_type ) {
 			$bind_tool = $role->bind_tool ? $role->bind_tool : '';
-			if ( ! $bind_tool || ! in_array( $bind_tool, Tianma_Tools::names(), true ) ) {
+			if ( ! $bind_tool || ! in_array( $bind_tool, Bokeauto_Tools::names(), true ) ) {
 				return array( 'ok' => false, 'message' => '功能性角色「' . $role->name . '」未绑定有效的输出工具（bind_tool）' );
 			}
 			$f_args = array( 'prompt' => $task );
-			if ( Tianma_Role::has_own_llm( $role ) ) {
+			if ( Bokeauto_Role::has_own_llm( $role ) ) {
 				if ( ! empty( $role->llm_base_url ) ) { $f_args['base_url'] = $role->llm_base_url; }
 				if ( ! empty( $role->llm_api_key ) )  { $f_args['api_key'] = $role->llm_api_key; }
 				if ( ! empty( $role->llm_model ) )    { $f_args['model'] = $role->llm_model; }
 			}
-			$res = Tianma_Tools::execute( $bind_tool, $f_args );
+			$res = Bokeauto_Tools::execute( $bind_tool, $f_args );
 			if ( ! $res['ok'] && false !== strpos( $res['message'], '缺少必填' ) ) {
-				$res = Tianma_Tools::execute( $bind_tool, array( $task ) );
+				$res = Bokeauto_Tools::execute( $bind_tool, array( $task ) );
 			}
 			return array(
 				'ok'      => $res['ok'],
@@ -166,7 +166,7 @@ class Tianma_Tools_Agent {
 		}
 
 		// 聊天型角色：以该角色身份执行任务（角色身份 + 工具白名单 + 独立模型）
-		$agent = new Tianma_Agent();
+		$agent = new Bokeauto_Agent();
 		$agent->role = $role;
 		$r = $agent->run( $task, array(), get_current_user_id() );
 		$text = isset( $r['text'] ) && '' !== $r['text'] ? $r['text'] : ( isset( $r['error'] ) ? $r['error'] : '执行完成' );
@@ -179,20 +179,20 @@ class Tianma_Tools_Agent {
 
 	public static function delete_role( $args ) {
 		$id = (int) ( isset( $args['role_id'] ) ? $args['role_id'] : 0 );
-		$role = $id ? Tianma_Role::get( $id ) : null;
+		$role = $id ? Bokeauto_Role::get( $id ) : null;
 		if ( ! $role ) {
 			return array( 'ok' => false, 'message' => '角色不存在' );
 		}
 		if ( $role->is_builtin ) {			return array( 'ok' => false, 'message' => '内置角色不可删除，可停用' );
 		}
-		Tianma_Role::delete( $id );
+		Bokeauto_Role::delete( $id );
 		return array( 'ok' => true, 'message' => '角色「' . $role->name . '」已删除' );
 	}
 
 	/* ---------------- 技能 ---------------- */
 
 	public static function list_skills( $args ) {
-		$skills = Tianma_Skill::list_all( '' );
+		$skills = Bokeauto_Skill::list_all( '' );
 		$items  = array();
 		foreach ( $skills as $s ) {
 			$items[] = array(
@@ -217,7 +217,7 @@ class Tianma_Tools_Agent {
 			$tools = array_map( 'trim', explode( ',', $tools ) );
 		}
 
-		$skill_id = Tianma_Skill::create( $name, $desc, $tools, $trigger, 'manual' );
+		$skill_id = Bokeauto_Skill::create( $name, $desc, $tools, $trigger, 'manual' );
 		if ( is_wp_error( $skill_id ) ) {
 			return array( 'ok' => false, 'message' => $skill_id->get_error_message() );
 		}
@@ -227,7 +227,7 @@ class Tianma_Tools_Agent {
 	public static function disable_skill( $args ) {
 		$id = (int) ( isset( $args['skill_id'] ) ? $args['skill_id'] : 0 );
 		$status = isset( $args['status'] ) && 'active' === $args['status'] ? 'active' : 'disabled';
-		$ok = Tianma_Skill::update( $id, array( 'status' => $status ) );
+		$ok = Bokeauto_Skill::update( $id, array( 'status' => $status ) );
 		if ( false === $ok ) {
 			return array( 'ok' => false, 'message' => '更新失败' );
 		}
@@ -296,7 +296,7 @@ class Tianma_Tools_Agent {
 			return array( 'ok' => false, 'message' => '协作需要角色：请提供 plan（分工数组，每项含 role 与 objective）或 roles（角色名列表，如 ["生图助手","内容运营"]）' );
 		}
 
-		$res = Tianma_Collab::run( $task, $plan, get_current_user_id() );		if ( ! $res['ok'] ) {
+		$res = Bokeauto_Collab::run( $task, $plan, get_current_user_id() );		if ( ! $res['ok'] ) {
 			return array( 'ok' => false, 'message' => $res['message'] );
 		}
 
@@ -317,7 +317,7 @@ class Tianma_Tools_Agent {
 	private static function plan_has_no_valid_role( $plan ) {
 		foreach ( (array) $plan as $p ) {
 			$role_name = is_array( $p ) && isset( $p['role'] ) ? $p['role'] : ( is_string( $p ) ? $p : '' );
-			if ( is_string( $role_name ) && '' !== trim( $role_name ) && Tianma_Role::get_by_name( trim( $role_name ) ) ) {
+			if ( is_string( $role_name ) && '' !== trim( $role_name ) && Bokeauto_Role::get_by_name( trim( $role_name ) ) ) {
 				return false;
 			}
 		}
@@ -326,7 +326,7 @@ class Tianma_Tools_Agent {
 
 	/* ---------------- 定时任务 ---------------- */
 	public static function schedule_list( $args ) {
-		$tasks = Tianma_Schedule::list_all();
+		$tasks = Bokeauto_Schedule::list_all();
 		if ( ! $tasks ) {
 			return array( 'ok' => true, 'message' => '当前没有定时任务', 'data' => array() );
 		}
@@ -336,7 +336,7 @@ class Tianma_Tools_Agent {
 				'id'          => (int) $t->id,
 				'name'        => $t->name,
 				'prompt'      => mb_substr( $t->prompt, 0, 120 ),
-				'interval'    => Tianma_Schedule::describe_interval( $t ),
+				'interval'    => Bokeauto_Schedule::describe_interval( $t ),
 				'status'      => $t->status,
 				'next_run'    => $t->next_run,
 				'last_run'    => $t->last_run,
@@ -357,21 +357,21 @@ class Tianma_Tools_Agent {
 			'interval_minutes' => isset( $args['interval_minutes'] ) ? $args['interval_minutes'] : 60,
 			'auto_high'        => empty( $args['auto_high'] ) ? 0 : 1,
 		);
-		$id = Tianma_Schedule::create( $data, isset( $args['_user_id'] ) ? (int) $args['_user_id'] : 0 );
+		$id = Bokeauto_Schedule::create( $data, isset( $args['_user_id'] ) ? (int) $args['_user_id'] : 0 );
 		if ( is_wp_error( $id ) ) {
 			return array( 'ok' => false, 'message' => $id->get_error_message() );
 		}
-		$t = Tianma_Schedule::get( $id );
+		$t = Bokeauto_Schedule::get( $id );
 		return array(
 			'ok' => true,
-			'message' => '定时任务「' . $t->name . '」已创建（' . Tianma_Schedule::describe_interval( $t ) . '，下次执行：' . $t->next_run . '）',
+			'message' => '定时任务「' . $t->name . '」已创建（' . Bokeauto_Schedule::describe_interval( $t ) . '，下次执行：' . $t->next_run . '）',
 			'data' => array( 'id' => $id, 'next_run' => $t->next_run ),
 		);
 	}
 
 	public static function schedule_update( $args ) {
 		$id = (int) ( isset( $args['schedule_id'] ) ? $args['schedule_id'] : 0 );
-		if ( ! $id || ! Tianma_Schedule::get( $id ) ) {
+		if ( ! $id || ! Bokeauto_Schedule::get( $id ) ) {
 			return array( 'ok' => false, 'message' => '定时任务不存在' );
 		}
 		$fields = array();
@@ -383,31 +383,31 @@ class Tianma_Tools_Agent {
 		if ( ! $fields ) {
 			return array( 'ok' => false, 'message' => '没有需要更新的字段' );
 		}
-		Tianma_Schedule::update( $id, $fields );
-		$t = Tianma_Schedule::get( $id );
+		Bokeauto_Schedule::update( $id, $fields );
+		$t = Bokeauto_Schedule::get( $id );
 		return array(
 			'ok' => true,
-			'message' => '定时任务「' . $t->name . '」已更新（' . Tianma_Schedule::describe_interval( $t ) . '，下次执行：' . $t->next_run . '）',
+			'message' => '定时任务「' . $t->name . '」已更新（' . Bokeauto_Schedule::describe_interval( $t ) . '，下次执行：' . $t->next_run . '）',
 		);
 	}
 
 	public static function schedule_delete( $args ) {
 		$id = (int) ( isset( $args['schedule_id'] ) ? $args['schedule_id'] : 0 );
-		$t  = Tianma_Schedule::get( $id );
+		$t  = Bokeauto_Schedule::get( $id );
 		if ( ! $t ) {
 			return array( 'ok' => false, 'message' => '定时任务不存在' );
 		}
-		Tianma_Schedule::delete( $id );
+		Bokeauto_Schedule::delete( $id );
 		return array( 'ok' => true, 'message' => '定时任务「' . $t->name . '」已删除' );
 	}
 
 	public static function schedule_run_now( $args ) {
 		$id = (int) ( isset( $args['schedule_id'] ) ? $args['schedule_id'] : 0 );
-		$t  = Tianma_Schedule::get( $id );
+		$t  = Bokeauto_Schedule::get( $id );
 		if ( ! $t ) {
 			return array( 'ok' => false, 'message' => '定时任务不存在' );
 		}
-		$res = Tianma_Schedule::run( $id, 'manual' );
+		$res = Bokeauto_Schedule::run( $id, 'manual' );
 		$lines = array();
 		$lines[] = ( $res['ok'] ? '✓' : '✗' ) . ' 执行状态：' . $res['status'];
 		if ( ! empty( $res['text'] ) ) {

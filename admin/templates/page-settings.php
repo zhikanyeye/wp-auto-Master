@@ -2,11 +2,11 @@
 	<h1>波克wpAI自动化插件 — 模型设置</h1>
 
 	<?php
-	$settings = Tianma_Settings::get();
-	$presets  = Tianma_Settings::presets();
+	$settings = Bokeauto_Settings::get();
+	$presets  = Bokeauto_Settings::presets();
 
-	if ( isset( $_POST['tianma_save_settings'] ) && check_admin_referer( 'tianma_settings' ) ) {
-		$saved = Tianma_Settings::update( $_POST );
+	if ( isset( $_POST['bokeauto_save_settings'] ) && check_admin_referer( 'bokeauto_settings' ) ) {
+		$saved = Bokeauto_Settings::update( $_POST );
 		echo '<div class="notice notice-success is-dismissible"><p>设置已保存。</p></div>';
 		$settings = $saved;
 	}
@@ -25,14 +25,14 @@
 	?>
 
 	<form method="post">
-		<?php wp_nonce_field( 'tianma_settings' ); ?>
-		<input type="hidden" name="tianma_save_settings" value="1">
+		<?php wp_nonce_field( 'bokeauto_settings' ); ?>
+		<input type="hidden" name="bokeauto_save_settings" value="1">
 
 		<table class="form-table" role="presentation">
 			<tr>
-				<th scope="row"><label for="tianma-provider">模型服务商</label></th>
+				<th scope="row"><label for="bokeauto-provider">模型服务商</label></th>
 				<td>
-					<select id="tianma-provider" name="provider">
+					<select id="bokeauto-provider" name="provider">
 						<?php foreach ( $presets as $key => $p ) : ?>
 							<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $settings['provider'], $key ); ?>>
 								<?php echo esc_html( $p['label'] ); ?>
@@ -44,46 +44,46 @@
 			</tr>
 
 			<tr>
-				<th scope="row"><label for="tianma-base-url">API 地址（Base URL）</label></th>
+				<th scope="row"><label for="bokeauto-base-url">API 地址（Base URL）</label></th>
 				<td>
-					<input type="url" class="regular-text" id="tianma-base-url" name="base_url"
+					<input type="url" class="regular-text" id="bokeauto-base-url" name="base_url"
 						value="<?php echo esc_attr( $settings['base_url'] ); ?>" placeholder="https://api.deepseek.com/v1">
 				</td>
 			</tr>
 
 			<tr>
-				<th scope="row"><label for="tianma-api-key">API Key</label></th>
+				<th scope="row"><label for="bokeauto-api-key">API Key</label></th>
 				<td>
-					<input type="password" class="regular-text" id="tianma-api-key" name="api_key"
+					<input type="password" class="regular-text" id="bokeauto-api-key" name="api_key"
 						value="<?php echo esc_attr( '' === $settings['api_key'] ? '' : substr( $settings['api_key'], 0, 4 ) . '••••••••' . substr( $settings['api_key'], -4 ) ); ?>" autocomplete="off" placeholder="填写 API Key（留空则保持原 Key；含掩码提交不会覆盖）">
-					<button type="button" class="button" id="tianma-test-llm">测试连接</button>
-					<span id="tianma-test-result"></span>
+					<button type="button" class="button" id="bokeauto-test-llm">测试连接</button>
+					<span id="bokeauto-test-result"></span>
 					<p class="description">Key 已打码显示，直接保存不会丢失原 Key；输入新 Key 即替换。</p>
 				</td>
 			</tr>
 
 			<tr>
-				<th scope="row"><label for="tianma-model">模型名称</label></th>
+				<th scope="row"><label for="bokeauto-model">模型名称</label></th>
 				<td>
-					<input type="text" class="regular-text" id="tianma-model" name="model"
-						value="<?php echo esc_attr( $settings['model'] ); ?>" list="tianma-models">
-					<datalist id="tianma-models"></datalist>
+					<input type="text" class="regular-text" id="bokeauto-model" name="model"
+						value="<?php echo esc_attr( $settings['model'] ); ?>" list="bokeauto-models">
+					<datalist id="bokeauto-models"></datalist>
 					<p class="description">可直接输入，或从该服务商的内置模型列表中选择。</p>
 				</td>
 			</tr>
 
 			<tr>
-				<th scope="row"><label for="tianma-temperature">温度（0-2）</label></th>
+				<th scope="row"><label for="bokeauto-temperature">温度（0-2）</label></th>
 				<td>
-					<input type="number" min="0" max="2" step="0.1" id="tianma-temperature" name="temperature"
+					<input type="number" min="0" max="2" step="0.1" id="bokeauto-temperature" name="temperature"
 						value="<?php echo esc_attr( $settings['temperature'] ); ?>">
 				</td>
 			</tr>
 
 			<tr>
-				<th scope="row"><label for="tianma-max-steps">最大执行步数</label></th>
+				<th scope="row"><label for="bokeauto-max-steps">最大执行步数</label></th>
 				<td>
-					<input type="number" min="3" max="40" id="tianma-max-steps" name="max_steps"
+					<input type="number" min="3" max="40" id="bokeauto-max-steps" name="max_steps"
 						value="<?php echo esc_attr( $settings['max_steps'] ); ?>">
 					<p class="description">Agent 单次任务最多可执行的工具调用步数（3-40）。</p>
 				</td>
@@ -100,9 +100,9 @@
 			</tr>
 
 			<tr>
-				<th scope="row"><label for="tianma-embedding-model">嵌入模型</label></th>
+				<th scope="row"><label for="bokeauto-embedding-model">嵌入模型</label></th>
 				<td>
-					<input type="text" class="regular-text" id="tianma-embedding-model" name="embedding_model"
+					<input type="text" class="regular-text" id="bokeauto-embedding-model" name="embedding_model"
 						value="<?php echo esc_attr( $settings['embedding_model'] ); ?>">
 					<p class="description">用于记忆向量化。DeepSeek 官方 API 未开放嵌入时，建议通义：text-embedding-v1 / text-embedding-v3。</p>
 				</td>
@@ -138,57 +138,57 @@
 		AI 可通过 worklog_read / worklog_append / worklog_update 查看与调整这份日志。
 	</p>
 
-	<div id="tianma-worklog">
-		<div class="tianma-wl-toolbar">
-			<button type="button" class="button" id="tianma-wl-new">＋ 新增日志</button>
-			<span class="tianma-wl-status"></span>
+	<div id="bokeauto-worklog">
+		<div class="bokeauto-wl-toolbar">
+			<button type="button" class="button" id="bokeauto-wl-new">＋ 新增日志</button>
+			<span class="bokeauto-wl-status"></span>
 		</div>
 
-		<div id="tianma-wl-editor" class="tianma-wl-editor" style="display:none;">
+		<div id="bokeauto-wl-editor" class="bokeauto-wl-editor" style="display:none;">
 			<p>
-				<label>日期：<input type="date" id="tianma-wl-day" value="<?php echo esc_attr( current_time( 'Y-m-d' ) ); ?>"></label>
+				<label>日期：<input type="date" id="bokeauto-wl-day" value="<?php echo esc_attr( current_time( 'Y-m-d' ) ); ?>"></label>
 			</p>
-			<textarea id="tianma-wl-content" rows="8" placeholder="记录这一天的关键进展、决策、结果…"></textarea>
+			<textarea id="bokeauto-wl-content" rows="8" placeholder="记录这一天的关键进展、决策、结果…"></textarea>
 			<p>
-				<button type="button" class="button button-primary" id="tianma-wl-save">保存</button>
-				<button type="button" class="button" id="tianma-wl-cancel">取消</button>
+				<button type="button" class="button button-primary" id="bokeauto-wl-save">保存</button>
+				<button type="button" class="button" id="bokeauto-wl-cancel">取消</button>
 			</p>
 		</div>
 
-		<div id="tianma-wl-list"></div>
+		<div id="bokeauto-wl-list"></div>
 	</div>
 
 	<hr style="margin: 28px 0;">
 
 	<h2>关于波克wpAI自动化插件</h2>
-	<div class="tianma-about">
+	<div class="bokeauto-about">
 		<p>WordPress AI 智能体与自动化管理工具。</p>
 	</div>
 
 	<style>
-		#tianma-worklog { max-width: 860px; }
-		.tianma-wl-toolbar { margin: 8px 0 12px; display: flex; align-items: center; gap: 12px; }
-		.tianma-wl-status { color: #2271b1; font-size: 13px; }
-		.tianma-wl-status.err { color: #a32d2d; }
-		.tianma-wl-editor { background: #fff; border: 1px solid #dcdcde; border-left: 4px solid #2271b1; padding: 14px 16px; margin-bottom: 14px; }
-		.tianma-wl-editor textarea { width: 100%; font-family: Consolas, Monaco, monospace; font-size: 13px; line-height: 1.6; }
-		.tianma-wl-item { background: #fff; border: 1px solid #dcdcde; border-left: 4px solid #c3c4c7; margin-bottom: 10px; }
-		.tianma-wl-item.active { border-left-color: #2271b1; }
-		.tianma-wl-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; }
-		.tianma-wl-head .tianma-wl-date { font-weight: 600; min-width: 110px; }
-		.tianma-wl-head .tianma-wl-meta { color: #646970; font-size: 12px; }
-		.tianma-wl-head .tianma-wl-actions { margin-left: auto; }
-		.tianma-wl-head .tianma-wl-actions .button { margin-left: 6px; }
-		.tianma-wl-preview { color: #50575e; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 420px; }
-		.tianma-wl-body { display: none; padding: 0 14px 14px; }
-		.tianma-wl-item.active .tianma-wl-body { display: block; }
-		.tianma-wl-body textarea { width: 100%; font-family: Consolas, Monaco, monospace; font-size: 13px; line-height: 1.6; }
-		.tianma-wl-body .tianma-wl-actions-row { margin-top: 8px; display: flex; gap: 8px; }
-		.tianma-wl-empty { color: #646970; padding: 18px 0; }
+		#bokeauto-worklog { max-width: 860px; }
+		.bokeauto-wl-toolbar { margin: 8px 0 12px; display: flex; align-items: center; gap: 12px; }
+		.bokeauto-wl-status { color: #2271b1; font-size: 13px; }
+		.bokeauto-wl-status.err { color: #a32d2d; }
+		.bokeauto-wl-editor { background: #fff; border: 1px solid #dcdcde; border-left: 4px solid #2271b1; padding: 14px 16px; margin-bottom: 14px; }
+		.bokeauto-wl-editor textarea { width: 100%; font-family: Consolas, Monaco, monospace; font-size: 13px; line-height: 1.6; }
+		.bokeauto-wl-item { background: #fff; border: 1px solid #dcdcde; border-left: 4px solid #c3c4c7; margin-bottom: 10px; }
+		.bokeauto-wl-item.active { border-left-color: #2271b1; }
+		.bokeauto-wl-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; }
+		.bokeauto-wl-head .bokeauto-wl-date { font-weight: 600; min-width: 110px; }
+		.bokeauto-wl-head .bokeauto-wl-meta { color: #646970; font-size: 12px; }
+		.bokeauto-wl-head .bokeauto-wl-actions { margin-left: auto; }
+		.bokeauto-wl-head .bokeauto-wl-actions .button { margin-left: 6px; }
+		.bokeauto-wl-preview { color: #50575e; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 420px; }
+		.bokeauto-wl-body { display: none; padding: 0 14px 14px; }
+		.bokeauto-wl-item.active .bokeauto-wl-body { display: block; }
+		.bokeauto-wl-body textarea { width: 100%; font-family: Consolas, Monaco, monospace; font-size: 13px; line-height: 1.6; }
+		.bokeauto-wl-body .bokeauto-wl-actions-row { margin-top: 8px; display: flex; gap: 8px; }
+		.bokeauto-wl-empty { color: #646970; padding: 18px 0; }
 
 		/* 关于插件 */
-		.tianma-about { max-width: 620px; background: #fff; border: 1px solid #dcdcde; border-left: 4px solid #c3c4c7; border-radius: 8px; padding: 14px 18px; }
-		.tianma-about p { margin: 6px 0; }
+		.bokeauto-about { max-width: 620px; background: #fff; border: 1px solid #dcdcde; border-left: 4px solid #c3c4c7; border-radius: 8px; padding: 14px 18px; }
+		.bokeauto-about p { margin: 6px 0; }
 	</style>
 
 	<script>
@@ -199,12 +199,12 @@
 			d.textContent = s == null ? '' : String( s );
 			return d.innerHTML;
 		}
-		var sel = document.getElementById( 'tianma-provider' );
-		var base = document.getElementById( 'tianma-base-url' );
-		var model = document.getElementById( 'tianma-model' );
-		var modelsList = document.getElementById( 'tianma-models' );
+		var sel = document.getElementById( 'bokeauto-provider' );
+		var base = document.getElementById( 'bokeauto-base-url' );
+		var model = document.getElementById( 'bokeauto-model' );
+		var modelsList = document.getElementById( 'bokeauto-models' );
 		var providerConfigs = <?php echo wp_json_encode( $provider_configs ); ?>;
-		var keyInput = document.getElementById( 'tianma-api-key' );
+		var keyInput = document.getElementById( 'bokeauto-api-key' );
 
 		function applyPreset() {
 			var p = presets[ sel.value ];
@@ -241,22 +241,22 @@
 			} ).join( '' );
 		}
 
-		document.getElementById( 'tianma-test-llm' ).addEventListener( 'click', function () {
+		document.getElementById( 'bokeauto-test-llm' ).addEventListener( 'click', function () {
 			var btn = this;
-			var out = document.getElementById( 'tianma-test-result' );
+			var out = document.getElementById( 'bokeauto-test-result' );
 			btn.disabled = true;
 			out.textContent = '测试中…';
 
-			fetch( TIANMA.api + 'test-llm', {
+			fetch( BOKEAUTO.api + 'test-llm', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					'X-WP-Nonce': TIANMA.nonce
+					'X-WP-Nonce': BOKEAUTO.nonce
 				},
 				body: JSON.stringify( {
 					provider: sel.value,
 					base_url: base.value,
-					api_key: document.getElementById( 'tianma-api-key' ).value,
+					api_key: document.getElementById( 'bokeauto-api-key' ).value,
 					model: model.value
 				} )
 			} )

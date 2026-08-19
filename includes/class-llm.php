@@ -3,12 +3,12 @@
  * LLM 客户端（OpenAI 兼容 API）
  * 支持：chat completions + function calling + embeddings + 本地演示模式
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_LLM {
+class Bokeauto_LLM {
 
 	private $settings;
 
@@ -19,7 +19,7 @@ class Tianma_LLM {
 	public $rejected_override_model = '';
 
 	public function __construct( $override = array() ) {
-		$settings = Tianma_Settings::get();
+		$settings = Bokeauto_Settings::get();
 		if ( is_array( $override ) && ! empty( $override['api_key'] ) ) {
 			$this->using_override = true;
 			// 角色级覆盖：仅覆盖明确提供的字段，其余沿用全局。
@@ -57,7 +57,7 @@ class Tianma_LLM {
 		}
 
 		if ( '' === $settings['api_key'] ) {
-			return new WP_Error( 'tianma_no_key', '尚未配置模型 API Key，请在「波克wpAI → 模型设置」中完成配置' );
+			return new WP_Error( 'bokeauto_no_key', '尚未配置模型 API Key，请在「波克wpAI → 模型设置」中完成配置' );
 		}
 
 		$body = array(
@@ -147,19 +147,19 @@ class Tianma_LLM {
 		curl_close( $ch );
 
 		if ( '' !== $err ) {
-			return new WP_Error( 'tianma_http', $err );
+			return new WP_Error( 'bokeauto_http', $err );
 		}
 		if ( $code >= 400 ) {
 			// 通用降级（不依赖模型名规则）：角色覆盖模型流式调用失败 → 自动用全局模型重试一次
 			if ( $this->using_override ) {
 				$this->rejected_override_model = $this->settings['model'];
-				$global = new Tianma_LLM();
+				$global = new Bokeauto_LLM();
 				$retry  = $global->stream_chat( $messages, $tools, $on_delta, $on_reasoning );
 				if ( ! is_wp_error( $retry ) ) {
 					return $retry;
 				}
 			}
-			return new WP_Error( 'tianma_api', '模型服务返回错误（HTTP ' . $code . '），请稍后重试或更换模型' );
+			return new WP_Error( 'bokeauto_api', '模型服务返回错误（HTTP ' . $code . '），请稍后重试或更换模型' );
 		}
 
 		// 汇总 tool_calls（流式增量已拼好）
@@ -211,7 +211,7 @@ class Tianma_LLM {
 		}
 
 		if ( '' === $settings['api_key'] ) {
-			return new WP_Error( 'tianma_no_key', '尚未配置模型 API Key，请在「波克wpAI → 模型设置」中完成配置' );
+			return new WP_Error( 'bokeauto_no_key', '尚未配置模型 API Key，请在「波克wpAI → 模型设置」中完成配置' );
 		}
 
 		$temperature = null === $temperature ? $settings['temperature'] : (float) $temperature;
@@ -240,7 +240,7 @@ class Tianma_LLM {
 		);
 
 		if ( is_wp_error( $resp ) ) {
-			return new WP_Error( 'tianma_http', $resp->get_error_message() );
+			return new WP_Error( 'bokeauto_http', $resp->get_error_message() );
 		}
 
 		$code = (int) wp_remote_retrieve_response_code( $resp );
@@ -252,13 +252,13 @@ class Tianma_LLM {
 			// 例如把生图模型当对话模型用时接口会 404，重试即可正常完成。
 			if ( $this->using_override ) {
 				$this->rejected_override_model = $this->settings['model'];
-				$global = new Tianma_LLM();
+				$global = new Bokeauto_LLM();
 				$retry  = $global->chat( $messages, $tools, $temperature );
 				if ( ! is_wp_error( $retry ) ) {
 					return $retry;
 				}
 			}
-			return new WP_Error( 'tianma_api', $msg );
+			return new WP_Error( 'bokeauto_api', $msg );
 		}
 
 		$choice  = $data['choices'][0]['message'];
@@ -440,13 +440,13 @@ class Tianma_LLM {
 			'body'    => wp_json_encode( $body ),
 		) );
 		if ( is_wp_error( $resp ) ) {
-			return new WP_Error( 'tianma_http', $resp->get_error_message() );
+			return new WP_Error( 'bokeauto_http', $resp->get_error_message() );
 		}
 		$code = (int) wp_remote_retrieve_response_code( $resp );
 		$data = json_decode( wp_remote_retrieve_body( $resp ), true );
 		if ( $code >= 400 ) {
 			$msg = isset( $data['error']['message'] ) ? $data['error']['message'] : 'HTTP ' . $code;
-			return new WP_Error( 'tianma_api', $msg );
+			return new WP_Error( 'bokeauto_api', $msg );
 		}
 		return $this->parse_claude_response( $data );
 	}
@@ -544,10 +544,10 @@ class Tianma_LLM {
 		curl_close( $ch );
 
 		if ( '' !== $err ) {
-			return new WP_Error( 'tianma_http', $err );
+			return new WP_Error( 'bokeauto_http', $err );
 		}
 		if ( $code >= 400 ) {
-			return new WP_Error( 'tianma_api', 'Claude 服务返回错误（HTTP ' . $code . '）' );
+			return new WP_Error( 'bokeauto_api', 'Claude 服务返回错误（HTTP ' . $code . '）' );
 		}
 
 		$tool_calls = array();
@@ -578,16 +578,16 @@ class Tianma_LLM {
 		$settings = $this->settings;
 
 		if ( ! empty( $settings['mock_mode'] ) || 'mock' === $settings['provider'] ) {
-			return new WP_Error( 'tianma_no_embed', '演示模式不支持向量嵌入，记忆将使用关键词检索' );
+			return new WP_Error( 'bokeauto_no_embed', '演示模式不支持向量嵌入，记忆将使用关键词检索' );
 		}
 		if ( '' === $settings['api_key'] ) {
-			return new WP_Error( 'tianma_no_key', '尚未配置模型 API Key' );
+			return new WP_Error( 'bokeauto_no_key', '尚未配置模型 API Key' );
 		}
 
 		// 嵌入接口熔断：当前服务商不支持嵌入（如 DeepSeek 无 embedding API）时，
 		// 60 分钟内直接快速降级，不再每次对话都白调一次失败请求
-		if ( get_transient( 'tianma_embed_down' ) ) {
-			return new WP_Error( 'tianma_no_embed', '当前模型服务商不支持向量嵌入（已临时停用，记忆使用关键词检索）' );
+		if ( get_transient( 'bokeauto_embed_down' ) ) {
+			return new WP_Error( 'bokeauto_no_embed', '当前模型服务商不支持向量嵌入（已临时停用，记忆使用关键词检索）' );
 		}
 
 		$texts = array_map( 'strval', (array) $texts );
@@ -598,7 +598,7 @@ class Tianma_LLM {
 		// 单条查询向量缓存（1 小时），避免重复问题重复调用嵌入 API
 		$cache_key = null;
 		if ( 1 === count( $texts ) ) {
-			$cache_key = 'tianma_embed_' . md5( $texts[0] );
+			$cache_key = 'bokeauto_embed_' . md5( $texts[0] );
 			$cached    = get_transient( $cache_key );
 			if ( is_array( $cached ) ) {
 				return array( 0 => $cached );
@@ -621,8 +621,8 @@ class Tianma_LLM {
 		);
 
 		if ( is_wp_error( $resp ) ) {
-			set_transient( 'tianma_embed_down', 1, HOUR_IN_SECONDS );
-			return new WP_Error( 'tianma_http', $resp->get_error_message() );
+			set_transient( 'bokeauto_embed_down', 1, HOUR_IN_SECONDS );
+			return new WP_Error( 'bokeauto_http', $resp->get_error_message() );
 		}
 
 		$code = (int) wp_remote_retrieve_response_code( $resp );
@@ -631,10 +631,10 @@ class Tianma_LLM {
 		if ( $code >= 400 || empty( $data['data'] ) ) {
 			// 4xx/5xx（如 DeepSeek 404 无嵌入接口）→ 熔断 1 小时，避免每次对话白调
 			if ( $code >= 400 ) {
-				set_transient( 'tianma_embed_down', 1, HOUR_IN_SECONDS );
+				set_transient( 'bokeauto_embed_down', 1, HOUR_IN_SECONDS );
 			}
 			$msg = isset( $data['error']['message'] ) ? $data['error']['message'] : 'HTTP ' . $code;
-			return new WP_Error( 'tianma_api', $msg );
+			return new WP_Error( 'bokeauto_api', $msg );
 		}
 
 		$out = array();

@@ -5,28 +5,28 @@
  * 记忆库 / 审计日志 / Token 用量 / 模型配置 / 技能删除。
  * 这些能力之前只能读源码或去后台手动操作，现在全部可被 AI 按需调用。
  *
- * @package Tianma
+ * @package Bokeauto
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class Tianma_Tools_Tianma {
+class Bokeauto_Tools_Bokeauto {
 
 	/* ---------------- 工作日志 ---------------- */
 
 	public static function worklog_read( $args ) {
 		$day  = isset( $args['day'] ) ? (string) $args['day'] : '';
 		if ( '' !== trim( $day ) ) {
-			$text = Tianma_Worklog::get( $day );
+			$text = Bokeauto_Worklog::get( $day );
 			return array(
 				'ok'      => true,
-				'message' => '【' . Tianma_Worklog::normalize_day( $day ) . '】工作日志：',
-				'data'    => array( 'day' => Tianma_Worklog::normalize_day( $day ), 'content' => $text, 'empty' => ( '' === $text ) ),
+				'message' => '【' . Bokeauto_Worklog::normalize_day( $day ) . '】工作日志：',
+				'data'    => array( 'day' => Bokeauto_Worklog::normalize_day( $day ), 'content' => $text, 'empty' => ( '' === $text ) ),
 			);
 		}
 		$days = isset( $args['days'] ) ? (int) $args['days'] : 7;
 		$days = max( 1, min( 30, $days ) );
-		$text = Tianma_Worklog::latest_text( $days );
+		$text = Bokeauto_Worklog::latest_text( $days );
 		return array(
 			'ok'      => true,
 			'message' => '最近 ' . $days . ' 天工作日志：',
@@ -37,24 +37,24 @@ class Tianma_Tools_Tianma {
 	public static function worklog_append( $args ) {
 		$content = isset( $args['content'] ) ? (string) $args['content'] : '';
 		$day     = isset( $args['day'] ) ? (string) $args['day'] : '';
-		return Tianma_Worklog::append( $content, $day );
+		return Bokeauto_Worklog::append( $content, $day );
 	}
 
 	public static function worklog_update( $args ) {
 		$day     = isset( $args['day'] ) ? (string) $args['day'] : '';
 		$content = isset( $args['content'] ) ? (string) $args['content'] : '';
-		return Tianma_Worklog::update( $day, $content );
+		return Bokeauto_Worklog::update( $day, $content );
 	}
 
 	public static function worklog_delete( $args ) {
 		$day = isset( $args['day'] ) ? (string) $args['day'] : '';
-		return Tianma_Worklog::delete( $day );
+		return Bokeauto_Worklog::delete( $day );
 	}
 
 	/* ---------------- 记忆库 ---------------- */
 
 	public static function memory_list( $args ) {
-		$memory = new Tianma_Memory();
+		$memory = new Bokeauto_Memory();
 		$rows   = $memory->list_all( 50 );
 		if ( ! $rows ) {
 			return array( 'ok' => true, 'message' => '记忆库为空', 'data' => array() );
@@ -81,8 +81,8 @@ class Tianma_Tools_Tianma {
 
 	public static function memory_clear( $args ) {
 		global $wpdb;
-		$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}tianma_memories" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}tianma_memories" );
+		$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}bokeauto_memories" );
+		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}bokeauto_memories" );
 		return array( 'ok' => true, 'message' => '记忆库已清空（共删除 ' . $count . ' 条记忆）。任务经验将从零重新积累。' );
 	}
 
@@ -90,7 +90,7 @@ class Tianma_Tools_Tianma {
 
 	public static function audit_log( $args ) {
 		$limit = min( 100, max( 1, (int) ( isset( $args['limit'] ) ? $args['limit'] : 30 ) ) );
-		$rows  = Tianma_Audit::recent( $limit );
+		$rows  = Bokeauto_Audit::recent( $limit );
 		if ( ! $rows ) {
 			return array( 'ok' => true, 'message' => '暂无审计记录', 'data' => array() );
 		}
@@ -113,7 +113,7 @@ class Tianma_Tools_Tianma {
 	/* ---------------- Token 用量 ---------------- */
 
 	public static function usage_stats( $args ) {
-		$stats = Tianma_Usage::stats( 0 );
+		$stats = Bokeauto_Usage::stats( 0 );
 		$conv  = isset( $args['conversation_id'] ) ? (int) $args['conversation_id'] : 0;
 		if ( ! is_array( $stats ) ) {
 			$stats = array();
@@ -124,7 +124,7 @@ class Tianma_Tools_Tianma {
 			'累计调用次数'  => isset( $stats['total']->calls ) ? (int) $stats['total']->calls : 0,
 		);
 		if ( $conv ) {
-			$c = Tianma_Usage::stats( 0, $conv );
+			$c = Bokeauto_Usage::stats( 0, $conv );
 			$out['该会话token'] = isset( $c['conv']->total_tokens ) ? (int) $c['conv']->total_tokens : 0;
 		}
 		return array( 'ok' => true, 'message' => 'Token 用量统计：累计 ' . $out['累计token'] . ' tok，今日 ' . $out['今日token'] . ' tok，调用 ' . $out['累计调用次数'] . ' 次', 'data' => $out );
@@ -133,8 +133,8 @@ class Tianma_Tools_Tianma {
 	/* ---------------- 模型配置 ---------------- */
 
 	public static function llm_info( $args ) {
-		$s = Tianma_Settings::get();
-		$presets = Tianma_Settings::presets();
+		$s = Bokeauto_Settings::get();
+		$presets = Bokeauto_Settings::presets();
 		$label   = isset( $presets[ $s['provider'] ]['label'] ) ? $presets[ $s['provider'] ]['label'] : $s['provider'];
 		return array(
 			'ok' => true,
@@ -154,7 +154,7 @@ class Tianma_Tools_Tianma {
 	}
 
 	public static function llm_switch( $args ) {
-		$s = Tianma_Settings::get();
+		$s = Bokeauto_Settings::get();
 		$fields = array();
 		if ( isset( $args['provider'] ) ) {
 			$fields['provider'] = sanitize_key( $args['provider'] );
@@ -171,10 +171,10 @@ class Tianma_Tools_Tianma {
 		if ( ! $fields ) {
 			return array( 'ok' => false, 'message' => '没有需要更新的模型配置字段（provider/base_url/model/api_key）' );
 		}
-		// 切换服务商由 Tianma_Settings::update 统一处理：
+		// 切换服务商由 Bokeauto_Settings::update 统一处理：
 		// 自动归档当前服务商配置、加载目标服务商已保存的配置（无则预设填充），用户保存的配置永不被覆盖
-		Tianma_Settings::update( $fields );
-		$s2 = Tianma_Settings::get();
+		Bokeauto_Settings::update( $fields );
+		$s2 = Bokeauto_Settings::get();
 		return array(
 			'ok' => true,
 			'message' => '模型已切换：' . $s2['model'] . '（Key 保留，后续对话使用新模型）',
@@ -186,11 +186,11 @@ class Tianma_Tools_Tianma {
 
 	public static function delete_skill( $args ) {
 		$id = (int) ( isset( $args['skill_id'] ) ? $args['skill_id'] : 0 );
-		$s  = Tianma_Skill::get( $id );
+		$s  = Bokeauto_Skill::get( $id );
 		if ( ! $s ) {
 			return array( 'ok' => false, 'message' => '技能不存在' );
 		}
-		Tianma_Skill::delete( $id );
+		Bokeauto_Skill::delete( $id );
 		return array( 'ok' => true, 'message' => '技能「' . $s->name . '」已从能力库删除' );
 	}
 
@@ -221,7 +221,7 @@ class Tianma_Tools_Tianma {
 		if ( '' === $code ) {
 			return array( 'ok' => false, 'message' => '请提供 php_code 实现（一个 PHP 函数体，接收 $args 返回 array(ok,message,data)）' );
 		}
-		if ( Tianma_Tools::names() && in_array( $name, Tianma_Tools::names(), true ) ) {
+		if ( Bokeauto_Tools::names() && in_array( $name, Bokeauto_Tools::names(), true ) ) {
 			return array( 'ok' => false, 'message' => '工具名「' . $name . '」已存在，请换一个名字' );
 		}
 
@@ -241,7 +241,7 @@ class Tianma_Tools_Tianma {
 
 		$params['_required'] = $required;
 		$wpdb->insert(
-			$wpdb->prefix . 'tianma_custom_tools',
+			$wpdb->prefix . 'bokeauto_custom_tools',
 			array(
 				'name'        => $name,
 				'description' => mb_substr( $desc, 0, 500 ),
@@ -255,7 +255,7 @@ class Tianma_Tools_Tianma {
 			array( '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s' )
 		);
 
-		Tianma_Tools::reset(); // 强制下次加载新工具
+		Bokeauto_Tools::reset(); // 强制下次加载新工具
 		return array(
 			'ok' => true,
 			'message' => '✅ 新能力「' . $name . '」已创建并立即可用！' . $desc . '（风险等级：' . $risk . '）。下一轮对话起，你就能直接调用它。',
@@ -265,7 +265,7 @@ class Tianma_Tools_Tianma {
 
 	public static function list_tools( $args ) {
 		global $wpdb;
-		$rows = $wpdb->get_results( "SELECT name, description, risk, status, created_at FROM {$wpdb->prefix}tianma_custom_tools ORDER BY id ASC" );
+		$rows = $wpdb->get_results( "SELECT name, description, risk, status, created_at FROM {$wpdb->prefix}bokeauto_custom_tools ORDER BY id ASC" );
 		if ( ! $rows ) {
 			return array( 'ok' => true, 'message' => '当前没有 AI 自建的自定义工具', 'data' => array() );
 		}
@@ -288,11 +288,11 @@ class Tianma_Tools_Tianma {
 		if ( '' === $name ) {
 			return array( 'ok' => false, 'message' => '请提供要删除的工具 name' );
 		}
-		$del = $wpdb->delete( $wpdb->prefix . 'tianma_custom_tools', array( 'name' => $name ), array( '%s' ) );
+		$del = $wpdb->delete( $wpdb->prefix . 'bokeauto_custom_tools', array( 'name' => $name ), array( '%s' ) );
 		if ( ! $del ) {
 			return array( 'ok' => false, 'message' => '自定义工具「' . $name . '」不存在' );
 		}
-		Tianma_Tools::reset();
+		Bokeauto_Tools::reset();
 		return array( 'ok' => true, 'message' => '自定义工具「' . $name . '」已删除' );
 	}
 }

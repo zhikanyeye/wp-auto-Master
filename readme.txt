@@ -38,7 +38,7 @@ License: GPLv2 or later
 
 == Installation ==
 
-1. 上传插件目录 tianma 到 /wp-content/plugins/ 并启用
+1. 上传插件目录 bokeauto 到 /wp-content/plugins/ 并启用
 2. 进入「波克wpAI → 模型设置」，选择服务商并填写 API Key
 3. 没有 Key 可先启用「本地演示模式」体验完整流程
 4. 保存后进入「波克wpAI → 对话」开始使用
