@@ -385,16 +385,34 @@ class Bokeauto_Core {
 	 * ------------------------------------------------------------------- */
 
 	public function enqueue_assets( $hook ) {
-		if ( false === strpos( $hook, 'bokeauto' ) ) {
+		$screen      = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		$screen_id   = $screen ? (string) $screen->id : '';
+		$known_pages = array( 'bokeauto-chat', 'bokeauto-settings', 'bokeauto-roles', 'bokeauto-schedules' );
+		$page        = '';
+
+		if ( isset( $_GET['page'] ) ) {
+			$requested_page = sanitize_key( wp_unslash( $_GET['page'] ) );
+			if ( in_array( $requested_page, $known_pages, true ) ) {
+				$page = $requested_page;
+			}
+		}
+
+		if ( '' === $page ) {
+			if ( preg_match( '/bokeauto-(chat|settings|roles|schedules)/', $screen_id, $matches ) ) {
+				$page = 'bokeauto-' . $matches[1];
+			} elseif ( preg_match( '/bokeauto-(chat|settings|roles|schedules)/', (string) $hook, $matches ) ) {
+				$page = 'bokeauto-' . $matches[1];
+			}
+		}
+
+		if ( '' === $page ) {
 			return;
 		}
-		$screen = get_current_screen();
-		$page   = $screen ? $screen->id : '';
 
 		// 界面图标依赖 dashicons，显式声明依赖避免图标缺失。
 		wp_enqueue_style( 'bokeauto-chat', BOKEAUTO_URL . 'admin/css/chat.css', array( 'dashicons' ), BOKEAUTO_VERSION );
 
-		if ( false !== strpos( $page, 'bokeauto-roles' ) ) {
+		if ( 'bokeauto-roles' === $page ) {
 			wp_enqueue_script( 'bokeauto-roles', BOKEAUTO_URL . 'admin/js/roles.js', array(), BOKEAUTO_VERSION, true );
 			wp_localize_script( 'bokeauto-roles', 'BOKEAUTO', array(
 				'api'        => esc_url_raw( rest_url( 'bokeauto/v1/' ) ),
@@ -409,7 +427,7 @@ class Bokeauto_Core {
 			) );
 		}
 
-		if ( false !== strpos( $page, 'bokeauto-schedules' ) ) {
+		if ( 'bokeauto-schedules' === $page ) {
 			wp_enqueue_script( 'bokeauto-schedules', BOKEAUTO_URL . 'admin/js/schedules.js', array(), BOKEAUTO_VERSION, true );
 			wp_localize_script( 'bokeauto-schedules', 'BOKEAUTO', array(
 				'api'   => esc_url_raw( rest_url( 'bokeauto/v1/' ) ),
@@ -423,7 +441,7 @@ class Bokeauto_Core {
 			) );
 		}
 
-		if ( false !== strpos( $page, 'bokeauto-settings' ) ) {
+		if ( 'bokeauto-settings' === $page ) {
 			wp_enqueue_script( 'bokeauto-settings', BOKEAUTO_URL . 'admin/js/settings.js', array(), BOKEAUTO_VERSION, true );
 			wp_localize_script( 'bokeauto-settings', 'BOKEAUTO', array(
 				'api'   => esc_url_raw( rest_url( 'bokeauto/v1/' ) ),
@@ -439,7 +457,7 @@ class Bokeauto_Core {
 			) );
 		}
 
-		if ( false !== strpos( $page, 'bokeauto-chat' ) ) {
+		if ( 'bokeauto-chat' === $page ) {
 			wp_enqueue_script( 'bokeauto-chat', BOKEAUTO_URL . 'admin/js/chat.js', array(), BOKEAUTO_VERSION, true );
 			wp_localize_script( 'bokeauto-chat', 'BOKEAUTO', array(
 				'api'        => esc_url_raw( rest_url( 'bokeauto/v1/' ) ),
